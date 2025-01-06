@@ -8,11 +8,14 @@ import Results from "./pages/Results";
 
 const queryClient = new QueryClient();
 
+// Get the base URL from the environment or default to '/'
+const baseUrl = import.meta.env.BASE_URL || "/";
+
 function App() {
   return (
     <ChakraProvider>
       <QueryClientProvider client={queryClient}>
-        <Router>
+        <Router basename={baseUrl}>
           <Routes>
             <Route path="/" element={<CompetitionList />} />
             <Route path="/competition/:id" element={<CompetitionDetail />} />
