@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   Box,
   Heading,
@@ -30,7 +30,9 @@ import { getEventResults } from "../api/client";
 import { EventResults, Element, Component, Deduction } from "../types";
 
 export default function Results() {
-  const { id, resultsUrl } = useParams();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const resultsUrl = searchParams.get("resultsUrl");
 
   const { data, isLoading } = useQuery<EventResults>({
     queryKey: ["results", id, resultsUrl],

@@ -20,10 +20,7 @@ function App() {
               path="/competition/:id/event/:eventId"
               element={<EventDetail />}
             />
-            <Route
-              path="/competition/:id/results/:resultsUrl"
-              element={<Results />}
-            />
+            <Route path="/competition/:id/results" element={<Results />} />
           </Routes>
         </Router>
       </QueryClientProvider>

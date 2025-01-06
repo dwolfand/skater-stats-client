@@ -48,7 +48,7 @@ export default function CompetitionDetail() {
                 {event.resultsUrl ? (
                   <ChakraLink
                     as={RouterLink}
-                    to={`/competition/${id}/results/${encodeURIComponent(
+                    to={`/competition/${id}/results?resultsUrl=${encodeURIComponent(
                       event.resultsUrl
                     )}`}
                     color="blue.500"
@@ -84,7 +84,7 @@ export default function CompetitionDetail() {
                   <Td>
                     <ChakraLink
                       as={RouterLink}
-                      to={`/competition/${id}/results/${encodeURIComponent(
+                      to={`/competition/${id}/results?resultsUrl=${encodeURIComponent(
                         event.resultsUrl
                       )}`}
                       color="blue.500"

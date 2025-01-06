@@ -21,8 +21,8 @@ export const getEventResults = async (
   competitionId: string,
   resultsUrl: string
 ) => {
-  const { data } = await api.get(
-    `/competitions/${competitionId}/results/${encodeURIComponent(resultsUrl)}`
-  );
+  const { data } = await api.get(`/competitions/${competitionId}/results`, {
+    params: { resultsUrl },
+  });
   return data;
 };
