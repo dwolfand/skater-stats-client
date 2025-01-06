@@ -14,15 +14,17 @@ import {
   Link as ChakraLink,
 } from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
+import { CompetitionData } from "../types";
 
 export default function CompetitionDetail() {
   const { id } = useParams();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<CompetitionData>({
     queryKey: ["competition", id],
     queryFn: () => getCompetitionData(id!),
   });
 
   if (isLoading) return <Spinner />;
+  if (!data) return null;
 
   return (
     <VStack p={8} spacing={8} align="stretch">
@@ -37,7 +39,7 @@ export default function CompetitionDetail() {
           </Tr>
         </Thead>
         <Tbody>
-          {data?.events.map((event, index) => (
+          {data.events.map((event, index) => (
             <Tr key={index}>
               <Td>{event.date}</Td>
               <Td>{event.time}</Td>
@@ -63,7 +65,7 @@ export default function CompetitionDetail() {
         </Tbody>
       </Table>
 
-      {data?.sixEvents && data.sixEvents.length > 0 && (
+      {data.sixEvents && data.sixEvents.length > 0 && (
         <>
           <Heading size="lg" mt={8}>
             6.0 System Events

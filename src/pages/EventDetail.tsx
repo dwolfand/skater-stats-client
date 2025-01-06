@@ -12,19 +12,21 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { getEventResults } from "../api/client";
+import { EventResults } from "../types";
 
 export default function EventDetail() {
   const { id, eventId } = useParams();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<EventResults>({
     queryKey: ["event", id, eventId],
     queryFn: () => getEventResults(id!, eventId!),
   });
 
   if (isLoading) return <Spinner />;
+  if (!data) return null;
 
   return (
     <Box p={8}>
-      <Heading mb={6}>{data?.eventName}</Heading>
+      <Heading mb={6}>{data.eventName}</Heading>
       <Table variant="simple">
         <Thead>
           <Tr>
@@ -35,7 +37,7 @@ export default function EventDetail() {
           </Tr>
         </Thead>
         <Tbody>
-          {data?.results.map((result, index) => (
+          {data.results.map((result, index: number) => (
             <Tr key={index}>
               <Td>{result.place}</Td>
               <Td>{result.name}</Td>

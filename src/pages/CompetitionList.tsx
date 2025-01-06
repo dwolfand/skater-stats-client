@@ -2,9 +2,10 @@ import { Box, Heading, VStack, Text, Link } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getCompetitions } from "../api/client";
+import { Competition } from "../types";
 
 export default function CompetitionList() {
-  const { data: competitions = [], isLoading } = useQuery({
+  const { data: competitions = [], isLoading } = useQuery<Competition[]>({
     queryKey: ["competitions"],
     queryFn: getCompetitions,
   });

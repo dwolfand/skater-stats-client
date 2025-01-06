@@ -27,11 +27,12 @@ import {
   Badge,
 } from "@chakra-ui/react";
 import { getEventResults } from "../api/client";
+import { EventResults, Element, Component, Deduction } from "../types";
 
 export default function Results() {
   const { id, resultsUrl } = useParams();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<EventResults>({
     queryKey: ["results", id, resultsUrl],
     queryFn: () => getEventResults(id!, resultsUrl!),
     enabled: !!(id && resultsUrl),
@@ -46,7 +47,7 @@ export default function Results() {
         {data.eventName}
       </Heading>
       <VStack spacing={4} align="stretch">
-        {data.results.map((result, index) => (
+        {data.results.map((result, index: number) => (
           <Card key={index}>
             <CardBody>
               <VStack spacing={4} align="stretch">
@@ -94,7 +95,7 @@ export default function Results() {
                       <List spacing={2}>
                         {result.details.elements
                           .slice(0, -1)
-                          .map((element, i) => (
+                          .map((element: Element, i: number) => (
                             <ListItem key={i}>
                               <Grid templateColumns="repeat(12, 1fr)" gap={2}>
                                 <GridItem colSpan={{ base: 8, md: 6 }}>
@@ -151,7 +152,7 @@ export default function Results() {
                       <List spacing={2}>
                         {result.details.components
                           .slice(0, -1)
-                          .map((component, i) => (
+                          .map((component: Component, i: number) => (
                             <ListItem key={i}>
                               <Grid templateColumns="repeat(12, 1fr)" gap={2}>
                                 <GridItem colSpan={6}>
@@ -191,7 +192,7 @@ export default function Results() {
                       <List spacing={2}>
                         {result.details.deductionDetails
                           .slice(0, -1)
-                          .map((deduction, i) => (
+                          .map((deduction: Deduction, i: number) => (
                             <ListItem key={i}>
                               <Grid templateColumns="repeat(12, 1fr)" gap={2}>
                                 <GridItem colSpan={8}>
