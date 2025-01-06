@@ -14,4 +14,12 @@ export default defineConfig(({ mode }) => ({
     open: true,
     cors: true,
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: "index.html",
+        404: "404.html",
+      },
+    },
+  },
 }));
