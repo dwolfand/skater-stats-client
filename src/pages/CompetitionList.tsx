@@ -1,40 +1,89 @@
-import { Box, Heading, VStack, Text, Link } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getCompetitions } from "../api/client";
-import { Competition } from "../types";
+import { Box, Heading, VStack, Text, Link } from "@chakra-ui/react";
+import { getCompetitions } from "../api/competitions";
+
+interface Competition {
+  ijsId: string;
+  year: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  timezone: string;
+  venue: string;
+  city: string;
+  state: string;
+}
 
 export default function CompetitionList() {
-  const { data: competitions = [], isLoading } = useQuery<Competition[]>({
-    queryKey: ["competitions"],
-    queryFn: getCompetitions,
-  });
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchCompetitions() {
+      try {
+        const data = await getCompetitions();
+        setCompetitions(data);
+      } catch (err) {
+        setError("Failed to load competitions");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCompetitions();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box p={8}>
+        <Text>Loading competitions...</Text>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box p={8}>
+        <Text color="red.500">Error: {error}</Text>
+      </Box>
+    );
+  }
 
   return (
     <Box p={8}>
       <Heading mb={6}>Figure Skating Competitions</Heading>
-      {isLoading ? (
-        <Text>Loading competitions...</Text>
-      ) : (
-        <VStack align="stretch" spacing={4}>
-          {competitions.map((competition) => (
-            <Link
-              key={competition.id}
-              as={RouterLink}
-              to={`/competition/${competition.id}`}
-              p={4}
+      <VStack align="stretch" spacing={4}>
+        {competitions.map((competition) => (
+          <Link
+            key={`${competition.year}-${competition.ijsId}`}
+            as={RouterLink}
+            to={`/competition/${competition.year}/${competition.ijsId}`}
+            _hover={{ textDecoration: "none" }}
+          >
+            <Box
+              p={6}
               borderWidth={1}
-              borderRadius="md"
+              borderRadius="lg"
               _hover={{ bg: "gray.50" }}
             >
-              <Text fontSize="lg" fontWeight="bold">
+              <Heading size="md" mb={2}>
                 {competition.name}
+              </Heading>
+              <Text color="gray.600">
+                {new Date(competition.startDate).toLocaleDateString()} -{" "}
+                {new Date(competition.endDate).toLocaleDateString()} (
+                {competition.timezone})
               </Text>
-              <Text color="gray.600">{competition.date}</Text>
-            </Link>
-          ))}
-        </VStack>
-      )}
+              <Text color="gray.600">
+                {competition.venue}, {competition.city}, {competition.state}
+              </Text>
+            </Box>
+          </Link>
+        ))}
+      </VStack>
     </Box>
   );
 }

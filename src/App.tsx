@@ -1,30 +1,29 @@
 import { ChakraProvider } from "@chakra-ui/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CompetitionList from "./pages/CompetitionList";
-import CompetitionDetail from "./pages/CompetitionDetail";
-import EventDetail from "./pages/EventDetail";
+import Competition from "./pages/Competition";
 import Results from "./pages/Results";
 
+// Create a client
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    <ChakraProvider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider>
         <Router>
           <Routes>
             <Route path="/" element={<CompetitionList />} />
-            <Route path="/competition/:id" element={<CompetitionDetail />} />
+            <Route path="/competition/:year/:ijsId" element={<Competition />} />
             <Route
-              path="/competition/:id/event/:eventId"
-              element={<EventDetail />}
+              path="/competition/:year/:ijsId/event/:eventId"
+              element={<Results />}
             />
-            <Route path="/competition/:id/results" element={<Results />} />
           </Routes>
         </Router>
-      </QueryClientProvider>
-    </ChakraProvider>
+      </ChakraProvider>
+    </QueryClientProvider>
   );
 }
 

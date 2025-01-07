@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   Box,
   Heading,
@@ -30,14 +30,12 @@ import { getEventResults } from "../api/client";
 import { EventResults, Element, Component, Deduction } from "../types";
 
 export default function Results() {
-  const { id } = useParams();
-  const [searchParams] = useSearchParams();
-  const resultsUrl = searchParams.get("resultsUrl");
+  const { year, ijsId, eventId } = useParams();
 
   const { data, isLoading } = useQuery<EventResults>({
-    queryKey: ["results", id, resultsUrl],
-    queryFn: () => getEventResults(id!, resultsUrl!),
-    enabled: !!(id && resultsUrl),
+    queryKey: ["results", year, ijsId, eventId],
+    queryFn: () => getEventResults(year!, ijsId!, eventId!),
+    enabled: !!(year && ijsId && eventId),
   });
 
   if (isLoading) return <Spinner />;

@@ -5,6 +5,7 @@
   "type": "module",
   "homepage": "https://davidlam.github.io/skater-stats/",
   "scripts": {
+    "start": "vite",
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",

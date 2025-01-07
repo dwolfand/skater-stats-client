@@ -17,12 +17,19 @@ export const getCompetitionData = async (competitionId: string) => {
   return data;
 };
 
-export const getEventResults = async (
-  competitionId: string,
-  resultsUrl: string
-) => {
-  const { data } = await api.get(`/competitions/${competitionId}/results`, {
-    params: { resultsUrl },
-  });
-  return data;
-};
+export async function getEventResults(
+  year: string,
+  ijsId: string,
+  eventUrl: string
+) {
+  console.log("Fetching results for:", { year, ijsId, eventUrl });
+  const response = await fetch(
+    `${API_BASE_URL}/competitions/${year}/${ijsId}/results?url=${encodeURIComponent(
+      eventUrl
+    )}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch event results");
+  }
+  return response.json();
+}
