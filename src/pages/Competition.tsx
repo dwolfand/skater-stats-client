@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { Box, Heading, Text, Grid, VStack, Link } from "@chakra-ui/react";
-import { getCompetition } from "../api/competitions";
+import { getCompetitionData } from "../api/client";
 
 interface Event {
   name: string;
@@ -44,7 +44,7 @@ export default function Competition() {
       if (!year || !ijsId) return;
 
       try {
-        const data = await getCompetition(year, ijsId);
+        const data = await getCompetitionData(year, ijsId);
         setCompetition(data);
       } catch (err) {
         setError("Failed to load competition");
@@ -100,7 +100,7 @@ export default function Competition() {
                   as={RouterLink}
                   to={`/competition/${competition.year}/${
                     competition.ijsId
-                  }/event/${event.resultsUrl || ""}`}
+                  }/event/${encodeURIComponent(event.resultsUrl || "")}`}
                   _hover={{ textDecoration: "none" }}
                 >
                   <Box
@@ -134,7 +134,9 @@ export default function Competition() {
                 <Link
                   key={index}
                   as={RouterLink}
-                  to={`/competition/${competition.year}/${competition.ijsId}/event/${event.resultsUrl}`}
+                  to={`/competition/${competition.year}/${
+                    competition.ijsId
+                  }/event/${encodeURIComponent(event.resultsUrl)}`}
                   _hover={{ textDecoration: "none" }}
                 >
                   <Box

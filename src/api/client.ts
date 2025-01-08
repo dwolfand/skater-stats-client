@@ -12,8 +12,8 @@ export const getCompetitions = async () => {
   return data;
 };
 
-export const getCompetitionData = async (competitionId: string) => {
-  const { data } = await api.get(`/competitions/${competitionId}`);
+export const getCompetitionData = async (year: string, ijsId: string) => {
+  const { data } = await api.get(`/competition/${year}/${ijsId}`);
   return data;
 };
 
@@ -24,7 +24,7 @@ export async function getEventResults(
 ) {
   console.log("Fetching results for:", { year, ijsId, eventUrl });
   const response = await fetch(
-    `${API_BASE_URL}/competitions/${year}/${ijsId}/results?url=${encodeURIComponent(
+    `${API_BASE_URL}/competition/${year}/${ijsId}/results?url=${encodeURIComponent(
       eventUrl
     )}`
   );
