@@ -93,9 +93,8 @@ export default function Results() {
                     </AccordionButton>
                     <AccordionPanel>
                       <List spacing={2}>
-                        {result.details.elements
-                          .slice(0, -1)
-                          .map((element: Element, i: number) => (
+                        {result.details.elements.map(
+                          (element: Element, i: number) => (
                             <ListItem key={i}>
                               <Grid templateColumns="repeat(12, 1fr)" gap={2}>
                                 <GridItem colSpan={{ base: 8, md: 6 }}>
@@ -132,7 +131,8 @@ export default function Results() {
                                 </GridItem>
                               </Grid>
                             </ListItem>
-                          ))}
+                          )
+                        )}
                       </List>
                     </AccordionPanel>
                   </AccordionItem>
@@ -150,9 +150,8 @@ export default function Results() {
                     </AccordionButton>
                     <AccordionPanel>
                       <List spacing={2}>
-                        {result.details.components
-                          .slice(0, -1)
-                          .map((component: Component, i: number) => (
+                        {result.details.components.map(
+                          (component: Component, i: number) => (
                             <ListItem key={i}>
                               <Grid templateColumns="repeat(12, 1fr)" gap={2}>
                                 <GridItem colSpan={6}>
@@ -172,7 +171,8 @@ export default function Results() {
                                 </GridItem>
                               </Grid>
                             </ListItem>
-                          ))}
+                          )
+                        )}
                       </List>
                     </AccordionPanel>
                   </AccordionItem>
@@ -190,9 +190,8 @@ export default function Results() {
                     </AccordionButton>
                     <AccordionPanel>
                       <List spacing={2}>
-                        {result.details.deductionDetails
-                          .slice(0, -1)
-                          .map((deduction: Deduction, i: number) => (
+                        {result.details.deductionDetails.map(
+                          (deduction: Deduction, i: number) => (
                             <ListItem key={i}>
                               <Grid templateColumns="repeat(12, 1fr)" gap={2}>
                                 <GridItem colSpan={8}>
@@ -211,7 +210,8 @@ export default function Results() {
                                 </GridItem>
                               </Grid>
                             </ListItem>
-                          ))}
+                          )
+                        )}
                       </List>
                     </AccordionPanel>
                   </AccordionItem>
