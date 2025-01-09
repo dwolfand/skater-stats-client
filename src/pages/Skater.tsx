@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import dayjs from "dayjs";
+import { SkaterStats } from "../api/client";
+import dayjs from "../utils/date";
+import math from "../utils/math";
 import {
   Box,
   Container,
   Heading,
   Text,
-  Grid,
-  GridItem,
   Stat,
   StatLabel,
   StatNumber,
@@ -28,11 +28,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   Legend,
-  ScatterChart,
-  Scatter,
 } from "recharts";
 import { getSkaterStats } from "../api/client";
 
@@ -43,6 +39,46 @@ export default function Skater() {
     queryFn: () => getSkaterStats(name!),
     enabled: !!name,
   });
+
+  const getMostFrequentEventTypeAndBest = (history: SkaterStats["history"]) => {
+    // Count occurrences of each event type
+    const eventTypeCounts = history.reduce<Record<string, number>>(
+      (acc: Record<string, number>, curr: SkaterStats["history"][0]) => {
+        acc[curr.eventType] = (acc[curr.eventType] || 0) + 1;
+        return acc;
+      },
+      {}
+    );
+
+    // Find the event type with most occurrences
+    const mostFrequentEventType = Object.entries(eventTypeCounts).reduce<
+      [string, number]
+    >(
+      (max, [eventType, count]) => (count > max[1] ? [eventType, count] : max),
+      ["", 0]
+    )[0];
+
+    // Get all scores for the most frequent event type
+    const scores = history
+      .filter(
+        (h: SkaterStats["history"][0]) => h.eventType === mostFrequentEventType
+      )
+      .map((h: SkaterStats["history"][0]) => h.score);
+
+    // Find the highest score and its corresponding event
+    const maxScore = scores.length > 0 ? math.max(scores) : null;
+    const bestEvent = history.find(
+      (h: SkaterStats["history"][0]) =>
+        h.eventType === mostFrequentEventType && h.score === maxScore
+    );
+
+    return {
+      eventType: mostFrequentEventType,
+      score: maxScore,
+      event: bestEvent?.event,
+      date: bestEvent?.date,
+    };
+  };
 
   if (isLoading) {
     return (
@@ -60,6 +96,8 @@ export default function Skater() {
     );
   }
 
+  const personalBest = getMostFrequentEventTypeAndBest(stats?.history || []);
+
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={8} align="stretch">
@@ -68,11 +106,6 @@ export default function Skater() {
           <Heading size="xl" mb={2}>
             Results for {decodeURIComponent(name!)}
           </Heading>
-          {stats.name !== decodeURIComponent(name!) && (
-            <Text color="gray.600" mb={2}>
-              Showing results for "{stats.name}"
-            </Text>
-          )}
         </Box>
 
         {/* Key Statistics */}
@@ -86,16 +119,16 @@ export default function Skater() {
             <StatNumber>{Number(stats.totalCompetitions)}</StatNumber>
           </Stat>
           <Stat>
-            <StatLabel>Average Score</StatLabel>
-            <StatNumber>{Number(stats.averageScore).toFixed(2)}</StatNumber>
-          </Stat>
-          <Stat>
             <StatLabel>Personal Best</StatLabel>
-            <StatNumber>{Number(stats.personalBest).toFixed(2)}</StatNumber>
-            {stats.personalBestEvent && (
+            <StatNumber>
+              {personalBest.score
+                ? Number(personalBest.score).toFixed(2)
+                : "N/A"}
+            </StatNumber>
+            {personalBest.event && personalBest.date && (
               <Text fontSize="sm" color="gray.600">
-                {stats.personalBestEvent.competition} (
-                {dayjs(stats.personalBestEvent.date).format("MMM D, YYYY")})
+                {personalBest.eventType} (
+                {dayjs(personalBest.date).format("MMM D, YYYY")})
               </Text>
             )}
           </Stat>
@@ -157,24 +190,6 @@ export default function Skater() {
                   }
                 )}
               </LineChart>
-            </ResponsiveContainer>
-          </Box>
-        </Box>
-
-        {/* Placement Distribution Chart */}
-        <Box>
-          <Heading size="md" mb={4}>
-            Placement Distribution
-          </Heading>
-          <Box h="300px">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.placementDistribution}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="range" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#8884d8" name="Number of Times" />
-              </BarChart>
             </ResponsiveContainer>
           </Box>
         </Box>

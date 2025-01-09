@@ -90,17 +90,12 @@ export interface SkaterStats {
   totalEvents: number;
   totalCompetitions: number;
   averageScore: number | null;
-  personalBest: number | null;
-  personalBestEvent: {
-    competition: string;
-    date: string;
-    score: number;
-  } | null;
   history: {
     date: string;
     competition: string;
     event: string;
     eventType: string;
+    eventCategory: string;
     score: number;
     placement: string;
     totalSkaters: number;
