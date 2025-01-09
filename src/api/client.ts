@@ -99,6 +99,34 @@ export interface SkaterStats {
     score: number;
     placement: string;
     totalSkaters: number;
+    judgeDetails?: {
+      baseElementsScore: number;
+      totalElementScore: number;
+      totalComponentScore: number;
+      totalDeductions: number;
+      elements: {
+        number: number;
+        elementCode: string;
+        info?: string;
+        baseValue: number;
+        credit: boolean;
+        goe: number;
+        judgesGoe: number[];
+        value: number;
+        plannedElement: string;
+        executedElement: string;
+      }[];
+      components: {
+        name: string;
+        factor: number;
+        judgesScores: number[];
+        value: number;
+      }[];
+      deductions: {
+        name: string;
+        value: number;
+      }[];
+    };
   }[];
   placementDistribution: {
     range: string;

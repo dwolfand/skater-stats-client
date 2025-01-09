@@ -19,7 +19,11 @@ import {
   Th,
   Td,
   VStack,
+  Collapse,
+  IconButton,
+  useDisclosure,
 } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
   LineChart,
   Line,
@@ -31,6 +35,60 @@ import {
   Legend,
 } from "recharts";
 import { getSkaterStats } from "../api/client";
+import JudgeCard from "../components/JudgeCard";
+
+interface ExpandableRowProps {
+  result: SkaterStats["history"][0];
+}
+
+function ExpandableRow({ result }: ExpandableRowProps) {
+  const { isOpen, onToggle } = useDisclosure();
+
+  return (
+    <>
+      <Tr cursor="pointer" onClick={onToggle} _hover={{ bg: "gray.50" }}>
+        <Td>
+          <IconButton
+            aria-label="Expand row"
+            icon={isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            size="sm"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+          />
+        </Td>
+        <Td>{dayjs(result.date).format("MMM D, YYYY")}</Td>
+        <Td>
+          <VStack align="start" spacing={0}>
+            <Text fontWeight="medium">{result.event}</Text>
+            <Text fontSize="sm" color="gray.600">
+              {result.competition}
+            </Text>
+          </VStack>
+        </Td>
+        <Td isNumeric>{Number(result.score).toFixed(2)}</Td>
+        <Td isNumeric>{result.placement}</Td>
+      </Tr>
+      <Tr>
+        <Td colSpan={5} p={0}>
+          <Collapse in={isOpen} animateOpacity>
+            {result.judgeDetails ? (
+              <JudgeCard details={result.judgeDetails} />
+            ) : (
+              <Box p={4} bg="gray.50">
+                <Text>
+                  No detailed judging information available for this event.
+                </Text>
+              </Box>
+            )}
+          </Collapse>
+        </Td>
+      </Tr>
+    </>
+  );
+}
 
 export default function Skater() {
   const { name } = useParams<{ name: string }>();
@@ -202,6 +260,7 @@ export default function Skater() {
           <Table variant="simple">
             <Thead>
               <Tr>
+                <Th width="40px"></Th>
                 <Th>Date</Th>
                 <Th>Event</Th>
                 <Th isNumeric>Score</Th>
@@ -210,19 +269,7 @@ export default function Skater() {
             </Thead>
             <Tbody>
               {stats.history.map((result, index) => (
-                <Tr key={index}>
-                  <Td>{dayjs(result.date).format("MMM D, YYYY")}</Td>
-                  <Td>
-                    <VStack align="start" spacing={0}>
-                      <Text fontWeight="medium">{result.event}</Text>
-                      <Text fontSize="sm" color="gray.600">
-                        {result.competition}
-                      </Text>
-                    </VStack>
-                  </Td>
-                  <Td isNumeric>{Number(result.score).toFixed(2)}</Td>
-                  <Td isNumeric>{result.placement}</Td>
-                </Tr>
+                <ExpandableRow key={index} result={result} />
               ))}
             </Tbody>
           </Table>
