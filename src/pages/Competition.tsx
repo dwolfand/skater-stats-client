@@ -124,7 +124,7 @@ export default function Competition() {
           </Box>
         )}
 
-        {competition.sixEvents.length > 0 && (
+        {/* {competition.sixEvents.length > 0 && (
           <Box>
             <Heading size="lg" mb={4}>
               IJS Events
@@ -154,7 +154,7 @@ export default function Competition() {
               ))}
             </VStack>
           </Box>
-        )}
+        )} */}
       </Grid>
     </Box>
   );
