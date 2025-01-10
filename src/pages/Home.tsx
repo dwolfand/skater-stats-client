@@ -1,43 +1,36 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Container,
   Heading,
+  Text,
   Input,
   InputGroup,
   InputLeftElement,
   VStack,
-  Text,
-  Link,
   Grid,
   GridItem,
+  Link,
   Badge,
   Tabs,
   TabList,
   TabPanels,
-  Tab,
   TabPanel,
-  Flex,
+  Tab,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
-import {
-  searchEvents,
-  getDefaultEvents,
-  SearchResult,
-  DefaultEvents,
-  CompetitionSummary,
-} from "../api/client";
+import { useQuery } from "@tanstack/react-query";
+import { searchEvents, getDefaultEvents } from "../api/client";
+import type { SearchResult, CompetitionSummary } from "../api/client";
 
 type EventFilter = "all" | "upcoming" | "recent";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [searchType, setSearchType] = useState<
-    "all" | "competition" | "skater"
-  >("all");
   const [eventFilter, setEventFilter] = useState<EventFilter>("all");
 
   // Add debouncing effect
@@ -50,18 +43,12 @@ export default function Home() {
   }, [searchQuery]);
 
   const { data: searchResults, isLoading: isSearching } = useQuery({
-    queryKey: ["search", debouncedQuery, searchType],
-    queryFn: async () => {
-      if (!debouncedQuery) return [];
-      return searchEvents(
-        debouncedQuery,
-        searchType === "all" ? undefined : searchType
-      );
-    },
+    queryKey: ["search", debouncedQuery],
+    queryFn: () => searchEvents(debouncedQuery),
     enabled: debouncedQuery.length > 2,
   });
 
-  const { data: defaultEvents } = useQuery({
+  const { data: defaultEvents, isLoading: isLoadingEvents } = useQuery({
     queryKey: ["defaultEvents"],
     queryFn: getDefaultEvents,
   });
@@ -115,7 +102,7 @@ export default function Home() {
       _hover={{ textDecoration: "none" }}
     >
       <Box p={4} borderWidth={1} borderRadius="lg" _hover={{ bg: "gray.50" }}>
-        <Flex justify="space-between" align="center">
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
             <Heading size="sm">{result.name}</Heading>
             {result.type === "competition" ? (
@@ -172,7 +159,7 @@ export default function Home() {
           >
             {result.type}
           </Badge>
-        </Flex>
+        </Box>
       </Box>
     </Link>
   );
@@ -200,34 +187,11 @@ export default function Home() {
               <Search2Icon color="gray.300" />
             </InputLeftElement>
             <Input
-              placeholder="Search for competitions or skaters..."
+              placeholder="Search for competitions, skaters, or officials..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </InputGroup>
-          <Flex mt={2} gap={2}>
-            <Badge
-              cursor="pointer"
-              colorScheme={searchType === "all" ? "blue" : "gray"}
-              onClick={() => setSearchType("all")}
-            >
-              All
-            </Badge>
-            <Badge
-              cursor="pointer"
-              colorScheme={searchType === "competition" ? "blue" : "gray"}
-              onClick={() => setSearchType("competition")}
-            >
-              Competitions
-            </Badge>
-            <Badge
-              cursor="pointer"
-              colorScheme={searchType === "skater" ? "blue" : "gray"}
-              onClick={() => setSearchType("skater")}
-            >
-              Skaters
-            </Badge>
-          </Flex>
         </Box>
 
         {/* Search Results */}
@@ -238,7 +202,9 @@ export default function Home() {
             </Heading>
             <VStack align="stretch" spacing={4}>
               {isSearching ? (
-                <Text>Searching...</Text>
+                <Center p={8}>
+                  <Spinner />
+                </Center>
               ) : !searchResults || searchResults.length === 0 ? (
                 <Text>No results found</Text>
               ) : (
@@ -251,56 +217,73 @@ export default function Home() {
         )}
 
         {/* Competitions Section */}
-        {!searchQuery && defaultEvents && (
+        {!searchQuery && (
           <Box>
-            <Tabs
-              onChange={(index) =>
-                setEventFilter(
-                  ["all", "upcoming", "recent"][index] as EventFilter
-                )
-              }
-            >
-              <TabList>
-                <Tab>All Competitions</Tab>
-                <Tab>Upcoming</Tab>
-                <Tab>Recent</Tab>
-              </TabList>
+            {isLoadingEvents ? (
+              <Center p={8}>
+                <Spinner size="xl" />
+              </Center>
+            ) : defaultEvents ? (
+              <Tabs
+                onChange={(index) =>
+                  setEventFilter(
+                    ["all", "upcoming", "recent"][index] as EventFilter
+                  )
+                }
+              >
+                <TabList>
+                  <Tab>All Competitions</Tab>
+                  <Tab>Upcoming</Tab>
+                  <Tab>Recent</Tab>
+                </TabList>
 
-              <TabPanels>
-                <TabPanel>
-                  <Grid
-                    templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                    gap={4}
-                  >
-                    {filteredCompetitions.map((competition, index) => (
-                      <CompetitionCard key={index} competition={competition} />
-                    ))}
-                  </Grid>
-                </TabPanel>
+                <TabPanels>
+                  <TabPanel>
+                    <Grid
+                      templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                      gap={4}
+                    >
+                      {filteredCompetitions.map((competition, index) => (
+                        <CompetitionCard
+                          key={index}
+                          competition={competition}
+                        />
+                      ))}
+                    </Grid>
+                  </TabPanel>
 
-                <TabPanel>
-                  <Grid
-                    templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                    gap={4}
-                  >
-                    {defaultEvents.upcoming.map((competition, index) => (
-                      <CompetitionCard key={index} competition={competition} />
-                    ))}
-                  </Grid>
-                </TabPanel>
+                  <TabPanel>
+                    <Grid
+                      templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                      gap={4}
+                    >
+                      {defaultEvents.upcoming.map((competition, index) => (
+                        <CompetitionCard
+                          key={index}
+                          competition={competition}
+                        />
+                      ))}
+                    </Grid>
+                  </TabPanel>
 
-                <TabPanel>
-                  <Grid
-                    templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                    gap={4}
-                  >
-                    {defaultEvents.recent.map((competition, index) => (
-                      <CompetitionCard key={index} competition={competition} />
-                    ))}
-                  </Grid>
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
+                  <TabPanel>
+                    <Grid
+                      templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                      gap={4}
+                    >
+                      {defaultEvents.recent.map((competition, index) => (
+                        <CompetitionCard
+                          key={index}
+                          competition={competition}
+                        />
+                      ))}
+                    </Grid>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
+            ) : (
+              <Text>No competitions available</Text>
+            )}
           </Box>
         )}
 

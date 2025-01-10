@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { Box, Heading, Text, Grid, VStack, Link } from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface Event {
   name: string;
@@ -33,31 +34,18 @@ interface CompetitionDetails {
 
 export default function Competition() {
   const { year, ijsId } = useParams<{ year: string; ijsId: string }>();
-  const [competition, setCompetition] = useState<CompetitionDetails | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchCompetition() {
-      if (!year || !ijsId) return;
+  const {
+    data: competition,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["competition", year, ijsId],
+    queryFn: () => getCompetitionData(year!, ijsId!),
+    enabled: !!(year && ijsId),
+  });
 
-      try {
-        const data = await getCompetitionData(year, ijsId);
-        setCompetition(data);
-      } catch (err) {
-        setError("Failed to load competition");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchCompetition();
-  }, [year, ijsId]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Box p={8}>
         <Text>Loading...</Text>
@@ -68,7 +56,9 @@ export default function Competition() {
   if (error || !competition) {
     return (
       <Box p={8}>
-        <Text color="red.500">Error: {error || "Competition not found"}</Text>
+        <Text color="red.500">
+          Error: {error ? String(error) : "Competition not found"}
+        </Text>
       </Box>
     );
   }
@@ -94,7 +84,7 @@ export default function Competition() {
               Events
             </Heading>
             <VStack align="stretch" spacing={4}>
-              {competition.events.map((event, index) => (
+              {competition.events.map((event: Event, index: number) => (
                 <Link
                   key={index}
                   as={RouterLink}
