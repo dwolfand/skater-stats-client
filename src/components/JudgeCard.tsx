@@ -123,6 +123,7 @@ function ElementTooltip({ element }: { element: JudgeDetails["elements"][0] }) {
 export default function JudgeCard({ details }: JudgeCardProps) {
   const hasElements = details.elements.length > 0;
   const hasElementScore = details.totalElementScore > 0;
+  const hasInfoContent = details.elements.some((element) => element.info);
 
   return (
     <Box p={4} bg="gray.50" borderRadius="md" fontSize="sm">
@@ -186,7 +187,7 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                 <Tr bg="gray.100">
                   <Th>#</Th>
                   <Th>Element</Th>
-                  <Th>Info</Th>
+                  {hasInfoContent && <Th>Info</Th>}
                   <Th isNumeric>Base</Th>
                   <Th isNumeric>GOE</Th>
                   {[...Array(details.elements[0]?.judgesGoe.length || 0)].map(
@@ -204,7 +205,7 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                     <Td>
                       <ElementTooltip element={element} />
                     </Td>
-                    <Td>{element.info || ""}</Td>
+                    {hasInfoContent && <Td>{element.info || ""}</Td>}
                     <Td isNumeric>{element.baseValue.toFixed(2)}</Td>
                     <Td
                       isNumeric
