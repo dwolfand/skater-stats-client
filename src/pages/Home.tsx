@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as RouterLink } from "react-router-dom";
 import {
@@ -34,21 +34,31 @@ type EventFilter = "all" | "upcoming" | "recent";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchType, setSearchType] = useState<
     "all" | "competition" | "skater"
   >("all");
   const [eventFilter, setEventFilter] = useState<EventFilter>("all");
 
+  // Add debouncing effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const { data: searchResults, isLoading: isSearching } = useQuery({
-    queryKey: ["search", searchQuery, searchType],
+    queryKey: ["search", debouncedQuery, searchType],
     queryFn: async () => {
-      if (!searchQuery) return [];
+      if (!debouncedQuery) return [];
       return searchEvents(
-        searchQuery,
+        debouncedQuery,
         searchType === "all" ? undefined : searchType
       );
     },
-    enabled: searchQuery.length > 2,
+    enabled: debouncedQuery.length > 2,
   });
 
   const { data: defaultEvents } = useQuery({
