@@ -108,7 +108,9 @@ export default function Home() {
       to={
         result.type === "competition"
           ? `/competition/${result.year}/${result.ijsId}`
-          : `/skater/${encodeURIComponent(result.name)}`
+          : result.type === "skater"
+          ? `/skater/${encodeURIComponent(result.name)}`
+          : `/official/${encodeURIComponent(result.name)}`
       }
       _hover={{ textDecoration: "none" }}
     >
@@ -126,8 +128,26 @@ export default function Home() {
                   {result.venue}, {result.city}, {result.state}
                 </Text>
               </>
+            ) : result.type === "skater" ? (
+              <>
+                {result.competition && (
+                  <Text color="gray.600" fontSize="sm">
+                    {result.competition}
+                  </Text>
+                )}
+                {result.date && (
+                  <Text color="gray.500" fontSize="sm">
+                    {new Date(result.date).toLocaleDateString()}
+                  </Text>
+                )}
+              </>
             ) : (
               <>
+                {result.function && (
+                  <Text color="gray.600" fontSize="sm">
+                    {result.function}
+                  </Text>
+                )}
                 {result.competition && (
                   <Text color="gray.600" fontSize="sm">
                     {result.competition}
@@ -141,7 +161,15 @@ export default function Home() {
               </>
             )}
           </Box>
-          <Badge colorScheme={result.type === "competition" ? "blue" : "green"}>
+          <Badge
+            colorScheme={
+              result.type === "competition"
+                ? "blue"
+                : result.type === "skater"
+                ? "green"
+                : "purple"
+            }
+          >
             {result.type}
           </Badge>
         </Flex>

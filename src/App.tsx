@@ -7,6 +7,7 @@ import Competition from "./pages/Competition";
 import Results from "./pages/Results";
 import Skater from "./pages/Skater";
 import Header from "./components/Header";
+import Official from "./pages/Official";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ function App() {
               element={<Results />}
             />
             <Route path="/skater/:name" element={<Skater />} />
+            <Route path="/official/:name" element={<Official />} />
           </Routes>
         </Router>
       </ChakraProvider>

@@ -35,7 +35,7 @@ export async function getEventResults(
 }
 
 export interface SearchResult {
-  type: "competition" | "skater";
+  type: "competition" | "skater" | "official";
   name: string;
   // Competition fields
   startDate?: string;
@@ -46,10 +46,11 @@ export interface SearchResult {
   timezone?: string;
   year?: string;
   ijsId?: string;
-  // Skater fields
+  // Skater/Official fields
   competition?: string;
   date?: string;
   url?: string;
+  function?: string;
 }
 
 export interface CompetitionSummary {
@@ -143,3 +144,59 @@ export const getSkaterStats = async (name: string) => {
   });
   return data;
 };
+
+export interface OfficialHistoryEntry {
+  date: string;
+  competition: string;
+  function: string;
+}
+
+export async function getOfficialHistory(
+  name: string
+): Promise<OfficialHistoryEntry[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/official/${encodeURIComponent(name)}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch official history");
+  }
+  return response.json();
+}
+
+export interface OfficialStats {
+  name: string;
+  totalEvents: number;
+  totalCompetitions: number;
+  mostRecentLocation: string;
+  averageGOE: number;
+  componentAverages: {
+    name: string;
+    average: number;
+    count: number;
+  }[];
+  elementStats: {
+    totalElements: number;
+    averageGOE: number;
+    goeDistribution: {
+      range: string;
+      count: number;
+    }[];
+  };
+  history: {
+    date: string;
+    competition: string;
+    function: string;
+    location: string;
+    year: string;
+    ijsId: string;
+    eventName: string;
+    resultsUrl: string;
+  }[];
+}
+
+export async function getOfficialStats(name: string): Promise<OfficialStats> {
+  const { data } = await api.get<OfficialStats>("/official/stats", {
+    params: { name },
+  });
+  return data;
+}
