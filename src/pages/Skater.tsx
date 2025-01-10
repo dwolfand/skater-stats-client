@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, Link as RouterLink } from "react-router-dom";
 import { SkaterStats } from "../api/client";
 import dayjs from "../utils/date";
 import math from "../utils/math";
@@ -22,6 +22,7 @@ import {
   Collapse,
   IconButton,
   useDisclosure,
+  Link,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
@@ -82,10 +83,27 @@ function ExpandableRow({ result }: ExpandableRowProps) {
         </Td>
         <Td>
           <VStack align="start" spacing={0}>
-            <Text fontWeight="medium">{result.event}</Text>
-            <Text fontSize="sm" color="gray.600">
-              {result.competition}
-            </Text>
+            <Link
+              as={RouterLink}
+              to={`/competition/${result.year}/${
+                result.ijsId
+              }/event/${encodeURIComponent(result.resultsUrl)}`}
+              onClick={(e) => e.stopPropagation()}
+              color="blue.600"
+              _hover={{ textDecoration: "none", color: "blue.700" }}
+            >
+              <Text fontWeight="medium">{result.event}</Text>
+            </Link>
+            <Link
+              as={RouterLink}
+              to={`/competition/${result.year}/${result.ijsId}`}
+              onClick={(e) => e.stopPropagation()}
+              _hover={{ textDecoration: "none", color: "gray.700" }}
+            >
+              <Text fontSize="sm" color="gray.600">
+                {result.competition}
+              </Text>
+            </Link>
             <Text
               display={{ base: "block", md: "none" }}
               fontSize="sm"
@@ -110,21 +128,13 @@ function ExpandableRow({ result }: ExpandableRowProps) {
           {result.placement}
         </Td>
       </Tr>
-      <Tr>
-        <Td colSpan={5} p={0}>
-          <Collapse in={isOpen} animateOpacity>
-            {result.judgeDetails ? (
-              <JudgeCard details={result.judgeDetails} />
-            ) : (
-              <Box p={4} bg="gray.50">
-                <Text>
-                  No detailed judging information available for this event.
-                </Text>
-              </Box>
-            )}
-          </Collapse>
-        </Td>
-      </Tr>
+      {isOpen && result.judgeDetails && (
+        <Tr>
+          <Td colSpan={5} p={0}>
+            <JudgeCard details={result.judgeDetails} />
+          </Td>
+        </Tr>
+      )}
     </>
   );
 }

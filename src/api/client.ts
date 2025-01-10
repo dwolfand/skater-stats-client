@@ -99,6 +99,9 @@ export interface SkaterStats {
     score: number;
     placement: string;
     totalSkaters: number;
+    year: string;
+    ijsId: string;
+    resultsUrl: string;
     judgeDetails?: {
       baseElementsScore: number;
       totalElementScore: number;
