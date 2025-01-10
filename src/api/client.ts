@@ -168,12 +168,8 @@ export interface OfficialStats {
   totalEvents: number;
   totalCompetitions: number;
   mostRecentLocation: string;
+  firstEventDate: string;
   averageGOE: number;
-  componentAverages: {
-    name: string;
-    average: number;
-    count: number;
-  }[];
   elementStats: {
     totalElements: number;
     averageGOE: number;
@@ -182,6 +178,11 @@ export interface OfficialStats {
       count: number;
     }[];
   };
+  componentAverages: {
+    name: string;
+    average: number;
+    count: number;
+  }[];
   history: {
     date: string;
     competition: string;

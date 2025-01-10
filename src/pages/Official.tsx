@@ -20,12 +20,31 @@ import {
   Divider,
   Link,
   HStack,
-  Select,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import dayjs from "dayjs";
+import {
+  PaginationRoot,
+  PaginationPrevTrigger,
+  PaginationNextTrigger,
+  PaginationItems,
+} from "../components/ui/pagination";
 import { getOfficialStats } from "../api/client";
 
 const ITEMS_PER_PAGE = 20;
+
+function calculateExperienceText(firstEventDate: string): string {
+  const firstEvent = dayjs(firstEventDate);
+  const now = dayjs();
+  const years = now.diff(firstEvent, "year");
+
+  if (years > 0) {
+    return `${years} ${years === 1 ? "year" : "years"} experience`;
+  }
+
+  const months = now.diff(firstEvent, "month");
+  return `${months} ${months === 1 ? "month" : "months"} experience`;
+}
 
 export default function Official() {
   const { name } = useParams<{ name: string }>();
@@ -70,9 +89,14 @@ export default function Official() {
           <Heading size="lg" mb={2}>
             {stats.name}
           </Heading>
-          <Badge colorScheme="purple" fontSize="md">
-            Judge
-          </Badge>
+          <HStack spacing={2}>
+            <Badge colorScheme="purple" fontSize="md">
+              Judge
+            </Badge>
+            <Badge colorScheme="blue" fontSize="md">
+              {calculateExperienceText(stats.firstEventDate)}
+            </Badge>
+          </HStack>
           <Text mt={2} color="gray.600">
             From {stats.mostRecentLocation}
           </Text>
@@ -141,41 +165,37 @@ export default function Official() {
         <Box>
           <HStack justify="space-between" mb={4}>
             <Heading size="md">Competition History</Heading>
-            <HStack>
-              <Select
-                size="sm"
-                value={currentPage}
-                onChange={(e) => setCurrentPage(Number(e.target.value))}
-                maxW="100px"
-              >
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <option key={page} value={page}>
-                      {page}
-                    </option>
-                  )
-                )}
-              </Select>
-              <Text fontSize="sm" color="gray.600">
-                of {totalPages}
-              </Text>
-            </HStack>
+            <PaginationRoot
+              count={sortedHistory.length}
+              pageSize={ITEMS_PER_PAGE}
+              page={currentPage}
+              onPageChange={(e) => setCurrentPage(e.page)}
+              size="sm"
+            >
+              <HStack>
+                <PaginationPrevTrigger />
+                <PaginationItems />
+                <PaginationNextTrigger />
+              </HStack>
+            </PaginationRoot>
           </HStack>
-          <Table variant="simple">
+          <Table variant="simple" size="sm">
             <Thead>
               <Tr>
                 <Th>Date</Th>
-                <Th>Competition</Th>
+                <Th display={{ base: "none", md: "table-cell" }}>
+                  Competition
+                </Th>
                 <Th>Event</Th>
-                <Th>Role</Th>
-                <Th>Location</Th>
+                <Th display={{ base: "none", md: "table-cell" }}>Role</Th>
+                <Th display={{ base: "none", lg: "table-cell" }}>Location</Th>
               </Tr>
             </Thead>
             <Tbody>
               {currentHistory.map((entry, index) => (
                 <Tr key={index}>
                   <Td>{new Date(entry.date).toLocaleDateString()}</Td>
-                  <Td>
+                  <Td display={{ base: "none", md: "table-cell" }}>
                     <Link
                       as={RouterLink}
                       to={`/competition/${entry.year}/${entry.ijsId}`}
@@ -185,7 +205,7 @@ export default function Official() {
                     </Link>
                   </Td>
                   <Td>
-                    {entry.resultsUrl && (
+                    {entry.resultsUrl ? (
                       <Link
                         as={RouterLink}
                         to={`/competition/${entry.year}/${
@@ -195,10 +215,24 @@ export default function Official() {
                       >
                         {entry.eventName}
                       </Link>
+                    ) : (
+                      <Text>{entry.eventName}</Text>
                     )}
+                    <Text
+                      display={{ base: "block", md: "none" }}
+                      fontSize="sm"
+                      color="gray.600"
+                      mt={1}
+                    >
+                      {entry.competition}
+                    </Text>
                   </Td>
-                  <Td>{entry.function}</Td>
-                  <Td>{entry.location}</Td>
+                  <Td display={{ base: "none", md: "table-cell" }}>
+                    {entry.function}
+                  </Td>
+                  <Td display={{ base: "none", lg: "table-cell" }}>
+                    {entry.location}
+                  </Td>
                 </Tr>
               ))}
             </Tbody>
