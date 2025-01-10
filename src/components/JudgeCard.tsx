@@ -121,10 +121,17 @@ function ElementTooltip({ element }: { element: JudgeDetails["elements"][0] }) {
 }
 
 export default function JudgeCard({ details }: JudgeCardProps) {
+  const hasElements = details.elements.length > 0;
+  const hasElementScore = details.totalElementScore > 0;
+
   return (
     <Box p={4} bg="gray.50" borderRadius="md" fontSize="sm">
       {/* Total Scores Summary */}
-      <Grid templateColumns="repeat(4, 1fr)" gap={4} mb={4}>
+      <Grid
+        templateColumns={`repeat(${hasElementScore ? 4 : 3}, 1fr)`}
+        gap={4}
+        mb={4}
+      >
         <GridItem>
           <Text fontWeight="bold" fontSize="sm" color="gray.600">
             Total Segment Score
@@ -137,14 +144,16 @@ export default function JudgeCard({ details }: JudgeCardProps) {
             ).toFixed(2)}
           </Text>
         </GridItem>
-        <GridItem>
-          <Text fontWeight="bold" fontSize="sm" color="gray.600">
-            Total Element Score
-          </Text>
-          <Text fontSize="xl" fontWeight="bold">
-            {details.totalElementScore.toFixed(2)}
-          </Text>
-        </GridItem>
+        {hasElementScore && (
+          <GridItem>
+            <Text fontWeight="bold" fontSize="sm" color="gray.600">
+              Total Element Score
+            </Text>
+            <Text fontSize="xl" fontWeight="bold">
+              {details.totalElementScore.toFixed(2)}
+            </Text>
+          </GridItem>
+        )}
         <GridItem>
           <Text fontWeight="bold" fontSize="sm" color="gray.600">
             Total Component Score
@@ -166,67 +175,75 @@ export default function JudgeCard({ details }: JudgeCardProps) {
       <Divider my={4} />
 
       {/* Elements Table */}
-      <Text fontWeight="bold" mb={2} color="gray.700">
-        Elements
-      </Text>
-      <Box overflowX="auto">
-        <Table size="sm" mb={4} variant="simple" colorScheme="gray">
-          <Thead>
-            <Tr bg="gray.100">
-              <Th>#</Th>
-              <Th>Element</Th>
-              <Th>Info</Th>
-              <Th isNumeric>Base</Th>
-              <Th isNumeric>GOE</Th>
-              {[...Array(details.elements[0]?.judgesGoe.length || 0)].map(
-                (_, i) => (
-                  <Th key={i}>J{i + 1}</Th>
-                )
-              )}
-              <Th isNumeric>Score</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {details.elements.map((element, index) => (
-              <Tr key={index}>
-                <Td>{element.number}</Td>
-                <Td>
-                  <ElementTooltip element={element} />
-                </Td>
-                <Td>{element.info || ""}</Td>
-                <Td isNumeric>{element.baseValue.toFixed(2)}</Td>
-                <Td
-                  isNumeric
-                  color={
-                    element.goe < 0
-                      ? "red.500"
-                      : element.goe > 0
-                      ? "green.500"
-                      : undefined
-                  }
-                >
-                  {element.goe > 0 ? "+" : ""}
-                  {element.goe.toFixed(2)}
-                </Td>
-                {element.judgesGoe.map((goe, j) => (
-                  <Td
-                    key={j}
-                    color={
-                      goe < 0 ? "red.500" : goe > 0 ? "green.500" : undefined
-                    }
-                  >
-                    {goe > 0 ? "+" : ""}
-                    {goe}
-                  </Td>
+      {hasElements && (
+        <>
+          <Text fontWeight="bold" mb={2} color="gray.700">
+            Elements
+          </Text>
+          <Box overflowX="auto">
+            <Table size="sm" mb={4} variant="simple" colorScheme="gray">
+              <Thead>
+                <Tr bg="gray.100">
+                  <Th>#</Th>
+                  <Th>Element</Th>
+                  <Th>Info</Th>
+                  <Th isNumeric>Base</Th>
+                  <Th isNumeric>GOE</Th>
+                  {[...Array(details.elements[0]?.judgesGoe.length || 0)].map(
+                    (_, i) => (
+                      <Th key={i}>J{i + 1}</Th>
+                    )
+                  )}
+                  <Th isNumeric>Score</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {details.elements.map((element, index) => (
+                  <Tr key={index}>
+                    <Td>{element.number}</Td>
+                    <Td>
+                      <ElementTooltip element={element} />
+                    </Td>
+                    <Td>{element.info || ""}</Td>
+                    <Td isNumeric>{element.baseValue.toFixed(2)}</Td>
+                    <Td
+                      isNumeric
+                      color={
+                        element.goe < 0
+                          ? "red.500"
+                          : element.goe > 0
+                          ? "green.500"
+                          : undefined
+                      }
+                    >
+                      {element.goe > 0 ? "+" : ""}
+                      {element.goe.toFixed(2)}
+                    </Td>
+                    {element.judgesGoe.map((goe, j) => (
+                      <Td
+                        key={j}
+                        color={
+                          goe < 0
+                            ? "red.500"
+                            : goe > 0
+                            ? "green.500"
+                            : undefined
+                        }
+                      >
+                        {goe > 0 ? "+" : ""}
+                        {goe}
+                      </Td>
+                    ))}
+                    <Td isNumeric fontWeight="medium">
+                      {element.value.toFixed(2)}
+                    </Td>
+                  </Tr>
                 ))}
-                <Td isNumeric fontWeight="medium">
-                  {element.value.toFixed(2)}
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+              </Tbody>
+            </Table>
+          </Box>
+        </>
+      )}
 
       {/* Components Table */}
       <Text fontWeight="bold" mb={2} color="gray.700">

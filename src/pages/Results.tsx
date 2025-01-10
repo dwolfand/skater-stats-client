@@ -1,33 +1,125 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Heading,
   Spinner,
   VStack,
   Text,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Card,
-  CardBody,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  Grid,
-  GridItem,
-  Divider,
-  List,
-  ListItem,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  IconButton,
+  useDisclosure,
   HStack,
   Badge,
+  Link,
 } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { getEventResults } from "../api/client";
-import { EventResults, Element, Component, Deduction } from "../types";
+import { EventResults } from "../types";
+import JudgeCard from "../components/JudgeCard";
+
+interface ExpandableRowProps {
+  result: EventResults["results"][0];
+}
+
+function ExpandableRow({ result }: ExpandableRowProps) {
+  const { isOpen, onToggle } = useDisclosure();
+
+  return (
+    <>
+      <Tr cursor="pointer" onClick={onToggle} _hover={{ bg: "gray.50" }}>
+        <Td padding={0} textAlign="center">
+          <IconButton
+            aria-label="Expand row"
+            icon={isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            size="sm"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+          />
+        </Td>
+        <Td
+          width={{ base: "40px", md: "60px" }}
+          padding={{ base: 1, md: 3 }}
+          isNumeric
+        >
+          {result.place}
+        </Td>
+        <Td padding={{ base: 1, md: 3 }}>
+          <VStack align="start" spacing={0}>
+            <Link
+              as={RouterLink}
+              to={`/skater/${encodeURIComponent(result.name)}`}
+              onClick={(e) => e.stopPropagation()}
+              color="blue.600"
+              _hover={{ textDecoration: "none", color: "blue.700" }}
+            >
+              <Text fontWeight="medium">{result.name}</Text>
+            </Link>
+            <Text fontSize="sm" color="gray.600">
+              {result.club}
+            </Text>
+          </VStack>
+        </Td>
+        <Td
+          width={{ base: "80px", md: "120px" }}
+          padding={{ base: 1, md: 3 }}
+          isNumeric
+        >
+          <Text fontWeight="medium">{Number(result.score).toFixed(2)}</Text>
+          <Text fontSize="sm" color="gray.600">
+            Start: {result.start}
+          </Text>
+        </Td>
+      </Tr>
+      {isOpen && result.details && (
+        <Tr>
+          <Td colSpan={4} p={0}>
+            <JudgeCard
+              details={{
+                baseElementsScore: 0,
+                totalElementScore: Number(result.details.executedElements),
+                totalComponentScore: Number(result.details.programComponents),
+                totalDeductions: Number(result.details.deductions),
+                elements: result.details.elements.map((element, index) => ({
+                  number: index + 1,
+                  elementCode: element.executed || element.planned,
+                  baseValue: Number(element.baseValue),
+                  credit: true,
+                  goe: Number(element.goe),
+                  judgesGoe: [],
+                  value: Number(element.score),
+                  plannedElement: element.planned,
+                  executedElement: element.executed,
+                })),
+                components: result.details.components.map((component) => ({
+                  name: component.name,
+                  factor: Number(component.factor) || 1,
+                  judgesScores: [],
+                  value: Number(component.score),
+                })),
+                deductions: result.details.deductionDetails.map(
+                  (deduction) => ({
+                    name: deduction.name,
+                    value: Number(deduction.value),
+                  })
+                ),
+              }}
+            />
+          </Td>
+        </Tr>
+      )}
+    </>
+  );
+}
 
 export default function Results() {
   const { year, ijsId, eventId } = useParams();
@@ -46,181 +138,33 @@ export default function Results() {
       <Heading size={{ base: "md", md: "lg" }} mb={6}>
         {data.eventName}
       </Heading>
-      <VStack spacing={4} align="stretch">
-        {data.results.map((result, index: number) => (
-          <Card key={index}>
-            <CardBody>
-              <VStack spacing={4} align="stretch">
-                {/* Summary Section */}
-                <Grid templateColumns="repeat(12, 1fr)" gap={4}>
-                  <GridItem colSpan={{ base: 12, md: 3 }}>
-                    <Stat>
-                      <StatLabel>Place</StatLabel>
-                      <StatNumber fontSize="3xl">{result.place}</StatNumber>
-                      <StatHelpText>Start: {result.start}</StatHelpText>
-                    </Stat>
-                  </GridItem>
-                  <GridItem colSpan={{ base: 12, md: 6 }}>
-                    <VStack align="start" spacing={1}>
-                      <Text fontSize="xl" fontWeight="bold">
-                        {result.name}
-                      </Text>
-                      <Text color="gray.600">{result.club}</Text>
-                    </VStack>
-                  </GridItem>
-                  <GridItem colSpan={{ base: 12, md: 3 }}>
-                    <Stat>
-                      <StatLabel>Total Score</StatLabel>
-                      <StatNumber color="blue.500">{result.score}</StatNumber>
-                    </Stat>
-                  </GridItem>
-                </Grid>
-
-                <Divider />
-
-                {/* Details Accordion */}
-                <Accordion allowMultiple>
-                  {/* Elements Section */}
-                  <AccordionItem>
-                    <AccordionButton>
-                      <Box flex="1" textAlign="left">
-                        <Text fontWeight="bold">Elements</Text>
-                        <Text fontSize="sm" color="gray.600">
-                          Total: {result.details.executedElements}
-                        </Text>
-                      </Box>
-                      <AccordionIcon />
-                    </AccordionButton>
-                    <AccordionPanel>
-                      <List spacing={2}>
-                        {result.details.elements.map(
-                          (element: Element, i: number) => (
-                            <ListItem key={i}>
-                              <Grid templateColumns="repeat(12, 1fr)" gap={2}>
-                                <GridItem colSpan={{ base: 8, md: 6 }}>
-                                  <Text fontWeight="medium">
-                                    {element.executed || element.planned}
-                                  </Text>
-                                  {element.executed !== element.planned && (
-                                    <Text fontSize="sm" color="gray.500">
-                                      Planned: {element.planned}
-                                    </Text>
-                                  )}
-                                </GridItem>
-                                <GridItem colSpan={{ base: 4, md: 6 }}>
-                                  <HStack justify="flex-end" spacing={4}>
-                                    <Text fontSize="sm" color="gray.600">
-                                      Base: {element.baseValue}
-                                    </Text>
-                                    {element.goe && (
-                                      <Badge
-                                        colorScheme={
-                                          Number(element.goe) >= 0
-                                            ? "green"
-                                            : "red"
-                                        }
-                                      >
-                                        {Number(element.goe) >= 0 ? "+" : ""}
-                                        {element.goe}
-                                      </Badge>
-                                    )}
-                                    <Text fontWeight="bold">
-                                      {element.score}
-                                    </Text>
-                                  </HStack>
-                                </GridItem>
-                              </Grid>
-                            </ListItem>
-                          )
-                        )}
-                      </List>
-                    </AccordionPanel>
-                  </AccordionItem>
-
-                  {/* Components Section */}
-                  <AccordionItem>
-                    <AccordionButton>
-                      <Box flex="1" textAlign="left">
-                        <Text fontWeight="bold">Components</Text>
-                        <Text fontSize="sm" color="gray.600">
-                          Total: {result.details.programComponents}
-                        </Text>
-                      </Box>
-                      <AccordionIcon />
-                    </AccordionButton>
-                    <AccordionPanel>
-                      <List spacing={2}>
-                        {result.details.components.map(
-                          (component: Component, i: number) => (
-                            <ListItem key={i}>
-                              <Grid templateColumns="repeat(12, 1fr)" gap={2}>
-                                <GridItem colSpan={6}>
-                                  <Text>{component.name}</Text>
-                                </GridItem>
-                                <GridItem colSpan={6}>
-                                  <HStack justify="flex-end" spacing={4}>
-                                    {component.factor && (
-                                      <Text fontSize="sm" color="gray.600">
-                                        Factor: {component.factor}
-                                      </Text>
-                                    )}
-                                    <Text fontWeight="bold">
-                                      {component.score}
-                                    </Text>
-                                  </HStack>
-                                </GridItem>
-                              </Grid>
-                            </ListItem>
-                          )
-                        )}
-                      </List>
-                    </AccordionPanel>
-                  </AccordionItem>
-
-                  {/* Deductions Section */}
-                  <AccordionItem>
-                    <AccordionButton>
-                      <Box flex="1" textAlign="left">
-                        <Text fontWeight="bold">Deductions</Text>
-                        <Text fontSize="sm" color="gray.600">
-                          Total: -{result.details.deductions}
-                        </Text>
-                      </Box>
-                      <AccordionIcon />
-                    </AccordionButton>
-                    <AccordionPanel>
-                      <List spacing={2}>
-                        {result.details.deductionDetails.map(
-                          (deduction: Deduction, i: number) => (
-                            <ListItem key={i}>
-                              <Grid templateColumns="repeat(12, 1fr)" gap={2}>
-                                <GridItem colSpan={8}>
-                                  <Text>{deduction.name}</Text>
-                                </GridItem>
-                                <GridItem colSpan={4}>
-                                  {Number(deduction.value) > 0 && (
-                                    <Text
-                                      fontWeight="bold"
-                                      textAlign="right"
-                                      color="red.500"
-                                    >
-                                      -{deduction.value}
-                                    </Text>
-                                  )}
-                                </GridItem>
-                              </Grid>
-                            </ListItem>
-                          )
-                        )}
-                      </List>
-                    </AccordionPanel>
-                  </AccordionItem>
-                </Accordion>
-              </VStack>
-            </CardBody>
-          </Card>
-        ))}
-      </VStack>
+      <Table variant="simple" size="sm">
+        <Thead>
+          <Tr>
+            <Th width="40px" padding={0}></Th>
+            <Th
+              width={{ base: "40px", md: "60px" }}
+              padding={{ base: 1, md: 3 }}
+              isNumeric
+            >
+              Place
+            </Th>
+            <Th padding={{ base: 1, md: 3 }}>Skater</Th>
+            <Th
+              width={{ base: "80px", md: "120px" }}
+              padding={{ base: 1, md: 3 }}
+              isNumeric
+            >
+              Score
+            </Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {data.results.map((result, index) => (
+            <ExpandableRow key={index} result={result} />
+          ))}
+        </Tbody>
+      </Table>
     </Box>
   );
 }
