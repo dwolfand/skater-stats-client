@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link as RouterLink } from "react-router-dom";
-import { SkaterStats } from "../api/client";
+import {
+  SkaterStats,
+  getSkaterStats,
+  getSkaterAIAnalysis,
+} from "../api/client";
 import dayjs from "../utils/date";
 import math from "../utils/math";
 import {
@@ -23,6 +27,13 @@ import {
   IconButton,
   useDisclosure,
   Link,
+  Button,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Spinner,
+  HStack,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
@@ -35,8 +46,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { getSkaterStats } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
+import { useEffect, useState } from "react";
 
 interface ExpandableRowProps {
   result: SkaterStats["history"][0];
@@ -139,13 +150,50 @@ function ExpandableRow({ result }: ExpandableRowProps) {
   );
 }
 
+const LOADING_MESSAGES = [
+  "Analyzing competition history...",
+  "Evaluating technical elements...",
+  "Reviewing program components...",
+  "Identifying performance patterns...",
+  "Assessing scoring trends...",
+  "Comparing results across competitions...",
+  "Analyzing progression over time...",
+  "Evaluating consistency metrics...",
+  "Identifying strengths and areas for improvement...",
+  "Compiling comprehensive analysis...",
+];
+
 export default function Skater() {
   const { name } = useParams<{ name: string }>();
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+
   const { data: stats, isLoading } = useQuery({
     queryKey: ["skater", name],
     queryFn: () => getSkaterStats(name!),
     enabled: !!name,
   });
+
+  const {
+    data: aiAnalysis,
+    isLoading: isLoadingAnalysis,
+    isError: isAnalysisError,
+    error: analysisError,
+    refetch: refetchAnalysis,
+  } = useQuery({
+    queryKey: ["skaterAnalysis", name],
+    queryFn: () => getSkaterAIAnalysis(name!),
+    enabled: false, // Don't fetch automatically
+  });
+
+  // Rotate loading messages
+  useEffect(() => {
+    if (isLoadingAnalysis) {
+      const interval = setInterval(() => {
+        setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [isLoadingAnalysis]);
 
   const getMostFrequentEventTypeAndBest = (history: SkaterStats["history"]) => {
     // Count occurrences of each event type
@@ -214,6 +262,50 @@ export default function Skater() {
           <Heading size="xl" mb={2}>
             Results for {decodeURIComponent(name!)}
           </Heading>
+          {!aiAnalysis && (
+            <Button
+              colorScheme="blue"
+              isLoading={isLoadingAnalysis}
+              onClick={() => refetchAnalysis()}
+              mb={4}
+              leftIcon={isLoadingAnalysis ? <Spinner size="sm" /> : undefined}
+            >
+              Get AI Analysis
+            </Button>
+          )}
+          {isLoadingAnalysis && (
+            <Alert status="info" mb={4}>
+              <AlertIcon />
+              <Box>
+                <AlertTitle>Analyzing Data</AlertTitle>
+                <AlertDescription>
+                  {LOADING_MESSAGES[loadingMessageIndex]}
+                </AlertDescription>
+              </Box>
+            </Alert>
+          )}
+          {aiAnalysis && (
+            <Alert
+              status="info"
+              variant="left-accent"
+              flexDirection="column"
+              alignItems="flex-start"
+              mb={4}
+            >
+              <AlertTitle mb={2}>AI Analysis</AlertTitle>
+              <AlertDescription whiteSpace="pre-wrap">
+                {aiAnalysis.analysis}
+              </AlertDescription>
+            </Alert>
+          )}
+          {isAnalysisError && (
+            <Alert status="error" mb={4}>
+              <AlertIcon />
+              <AlertDescription>
+                Failed to get AI analysis. Please try again.
+              </AlertDescription>
+            </Alert>
+          )}
         </Box>
 
         {/* Key Statistics */}

@@ -251,3 +251,14 @@ export interface EventResults {
     status: string;
   }[];
 }
+
+export interface SkaterAIAnalysis {
+  analysis: string;
+}
+
+export const getSkaterAIAnalysis = async (name: string) => {
+  const { data } = await api.get<SkaterAIAnalysis>("/skater/analysis", {
+    params: { name },
+  });
+  return data;
+};
