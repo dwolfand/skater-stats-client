@@ -168,7 +168,8 @@ export default function Skater() {
     // Get all scores for the most frequent event type
     const scores = history
       .filter(
-        (h: SkaterStats["history"][0]) => h.eventType === mostFrequentEventType
+        (h: SkaterStats["history"][0]) =>
+          h.eventType === mostFrequentEventType && h.score != null
       )
       .map((h: SkaterStats["history"][0]) => h.score);
 
