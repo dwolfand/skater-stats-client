@@ -6,6 +6,7 @@ import CompetitionList from "./pages/CompetitionList";
 import Competition from "./pages/Competition";
 import Results from "./pages/Results";
 import Skater from "./pages/Skater";
+import Header from "./components/Header";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -15,6 +16,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ChakraProvider>
         <Router>
+          <Header />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/competitions" element={<CompetitionList />} />
