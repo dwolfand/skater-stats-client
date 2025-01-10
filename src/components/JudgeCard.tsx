@@ -94,8 +94,6 @@ function ElementTooltip({ element }: { element: JudgeDetails["elements"][0] }) {
       >
         <Text
           cursor="pointer"
-          color={hasChange ? "orange.500" : undefined}
-          fontWeight={hasChange ? "medium" : undefined}
           onClick={onOpen}
           onMouseEnter={onOpen}
           onMouseLeave={onClose}
@@ -109,11 +107,6 @@ function ElementTooltip({ element }: { element: JudgeDetails["elements"][0] }) {
           }}
         >
           {element.elementCode}
-          {element.info && (
-            <Text as="span" color="red.500" ml={1}>
-              {element.info}
-            </Text>
-          )}
         </Text>
       </Tooltip>
     </Box>
@@ -298,7 +291,11 @@ export default function JudgeCard({ details }: JudgeCardProps) {
               {details.deductions.map((deduction, index) => (
                 <Tr key={index}>
                   <Td>{deduction.name}</Td>
-                  <Td isNumeric color="red.500" fontWeight="medium">
+                  <Td
+                    isNumeric
+                    color={deduction.value !== 0 ? "red.500" : undefined}
+                    fontWeight="medium"
+                  >
                     -{deduction.value.toFixed(2)}
                   </Td>
                 </Tr>

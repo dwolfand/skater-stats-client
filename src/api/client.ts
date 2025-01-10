@@ -200,3 +200,53 @@ export async function getOfficialStats(name: string): Promise<OfficialStats> {
   });
   return data;
 }
+
+export interface Result {
+  place: string;
+  start?: string;
+  name: string;
+  club: string;
+  score: string;
+  judgeDetailsUrl?: string;
+  details?: {
+    totalScore: string;
+    executedElements: string;
+    programComponents: string;
+    deductions: string;
+    bonus?: string;
+    elements: {
+      planned: string;
+      executed: string;
+      baseValue: string;
+      goe: string;
+      score: string;
+    }[];
+    components: {
+      name: string;
+      factor: string;
+      score: string;
+    }[];
+    deductionDetails: {
+      name: string;
+      value: string;
+    }[];
+  };
+}
+
+export interface EventResults {
+  eventName: string;
+  results: Result[];
+  competitionId: string;
+  judgeDetailsUrl: string | null;
+  officials: {
+    function: string;
+    name: string;
+    location: string;
+  }[];
+  segments: {
+    title: string;
+    isActive: boolean;
+    url: string;
+    status: string;
+  }[];
+}

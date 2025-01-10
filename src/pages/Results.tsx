@@ -5,7 +5,6 @@ import {
   Box,
   Heading,
   Spinner,
-  VStack,
   Text,
   Table,
   Thead,
@@ -16,16 +15,22 @@ import {
   IconButton,
   useDisclosure,
   HStack,
+  VStack,
   Badge,
   Link,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { getEventResults } from "../api/client";
-import { EventResults } from "../types";
+import { getEventResults, EventResults } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
 
 interface ExpandableRowProps {
   result: EventResults["results"][0];
+}
+
+interface Official {
+  function: string;
+  name: string;
+  location: string;
 }
 
 function ExpandableRow({ result }: ExpandableRowProps) {
@@ -135,6 +140,15 @@ export default function Results() {
 
   return (
     <Box p={4}>
+      <Link
+        as={RouterLink}
+        to={`/competition/${year}/${ijsId}`}
+        color="blue.500"
+        display="inline-block"
+        mb={2}
+      >
+        See all events
+      </Link>
       <Heading size={{ base: "md", md: "lg" }} mb={6}>
         {data.eventName}
       </Heading>
@@ -165,6 +179,41 @@ export default function Results() {
           ))}
         </Tbody>
       </Table>
+
+      {/* Officials Section */}
+      {data.officials && data.officials.length > 0 && (
+        <Box mt={8}>
+          <Heading size="md" mb={4}>
+            Officials
+          </Heading>
+          <Table variant="simple" size="sm">
+            <Thead>
+              <Tr>
+                <Th>Function</Th>
+                <Th>Name</Th>
+                <Th>Location</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {data.officials.map((official) => (
+                <Tr key={`${official.function}-${official.name}`}>
+                  <Td>{official.function}</Td>
+                  <Td>
+                    <Link
+                      as={RouterLink}
+                      to={`/official/${encodeURIComponent(official.name)}`}
+                      color="blue.500"
+                    >
+                      {official.name}
+                    </Link>
+                  </Td>
+                  <Td>{official.location}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      )}
     </Box>
   );
 }
