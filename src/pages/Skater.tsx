@@ -41,6 +41,24 @@ interface ExpandableRowProps {
   result: SkaterStats["history"][0];
 }
 
+function getOrdinalSuffix(placement: string): string {
+  const num = parseInt(placement, 10);
+  if (isNaN(num)) return "";
+  const lastDigit = num % 10;
+  const lastTwoDigits = num % 100;
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 13) return "th";
+  switch (lastDigit) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
 function ExpandableRow({ result }: ExpandableRowProps) {
   const { isOpen, onToggle } = useDisclosure();
 
@@ -59,17 +77,38 @@ function ExpandableRow({ result }: ExpandableRowProps) {
             }}
           />
         </Td>
-        <Td>{dayjs(result.date).format("MMM D, YYYY")}</Td>
+        <Td display={{ base: "none", md: "table-cell" }}>
+          {dayjs(result.date).format("MMM D, YYYY")}
+        </Td>
         <Td>
           <VStack align="start" spacing={0}>
             <Text fontWeight="medium">{result.event}</Text>
             <Text fontSize="sm" color="gray.600">
               {result.competition}
             </Text>
+            <Text
+              display={{ base: "block", md: "none" }}
+              fontSize="sm"
+              color="gray.500"
+            >
+              {dayjs(result.date).format("MMM D, YYYY")}
+            </Text>
           </VStack>
         </Td>
-        <Td isNumeric>{Number(result.score).toFixed(2)}</Td>
-        <Td isNumeric>{result.placement}</Td>
+        <Td isNumeric>
+          <Text>{Number(result.score).toFixed(2)}</Text>
+          <Text
+            fontSize="sm"
+            color="gray.600"
+            display={{ base: "block", md: "none" }}
+          >
+            {result.placement}
+            {getOrdinalSuffix(result.placement)} Place
+          </Text>
+        </Td>
+        <Td isNumeric display={{ base: "none", md: "table-cell" }}>
+          {result.placement}
+        </Td>
       </Tr>
       <Tr>
         <Td colSpan={5} p={0}>
@@ -261,10 +300,12 @@ export default function Skater() {
             <Thead>
               <Tr>
                 <Th width="40px"></Th>
-                <Th>Date</Th>
+                <Th display={{ base: "none", md: "table-cell" }}>Date</Th>
                 <Th>Event</Th>
                 <Th isNumeric>Score</Th>
-                <Th isNumeric>Placement</Th>
+                <Th isNumeric display={{ base: "none", md: "table-cell" }}>
+                  Place
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
