@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import {
@@ -18,10 +18,28 @@ import {
   VStack,
   Badge,
   Link,
+  Button,
 } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { keyframes } from "@emotion/react";
+import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
 import { getEventResults, EventResults } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
+
+// Define the pulse animation
+const pulse = keyframes`
+  0% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+`;
 
 interface ExpandableRowProps {
   result: EventResults["results"][0];
@@ -128,12 +146,37 @@ function ExpandableRow({ result }: ExpandableRowProps) {
 
 export default function Results() {
   const { year, ijsId, eventId } = useParams();
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
-  const { data, isLoading } = useQuery<EventResults>({
+  const { data, isLoading, refetch } = useQuery<EventResults>({
     queryKey: ["results", year, ijsId, eventId],
     queryFn: () => getEventResults(year!, ijsId!, eventId!),
     enabled: !!(year && ijsId && eventId),
   });
+
+  const segmentStatus = data?.segments.find((s) => s.isActive)?.status || "";
+  const isUnofficialStatus =
+    segmentStatus === "Live unofficial" || segmentStatus === "Unofficial";
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (autoRefresh && isUnofficialStatus) {
+      interval = setInterval(() => {
+        refetch();
+      }, 10000);
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [autoRefresh, isUnofficialStatus, refetch]);
+
+  useEffect(() => {
+    if (segmentStatus === "Final") {
+      setAutoRefresh(false);
+    }
+  }, [segmentStatus]);
 
   if (isLoading) return <Spinner />;
   if (!data) return null;
@@ -149,9 +192,43 @@ export default function Results() {
       >
         See all events
       </Link>
-      <Heading size={{ base: "md", md: "lg" }} mb={6}>
-        {data.eventName}
-      </Heading>
+      <HStack justify="space-between" mb={6}>
+        <Heading size={{ base: "md", md: "lg" }}>{data.eventName}</Heading>
+        <VStack align="end" spacing={1}>
+          <HStack spacing={2}>
+            {autoRefresh && (
+              <Box
+                w="8px"
+                h="8px"
+                borderRadius="full"
+                bg="red.500"
+                animation={`${pulse} 2s ease-in-out infinite`}
+              />
+            )}
+            <Badge
+              colorScheme={
+                segmentStatus === "Final"
+                  ? "green"
+                  : isUnofficialStatus
+                  ? "orange"
+                  : "gray"
+              }
+            >
+              {segmentStatus}
+            </Badge>
+          </HStack>
+          {isUnofficialStatus && (
+            <Button
+              size="sm"
+              leftIcon={<RepeatIcon />}
+              colorScheme={autoRefresh ? "red" : "blue"}
+              onClick={() => setAutoRefresh(!autoRefresh)}
+            >
+              {autoRefresh ? "Stop Auto-refresh" : "Start Auto-refresh"}
+            </Button>
+          )}
+        </VStack>
+      </HStack>
       <Table variant="simple" size="sm">
         <Thead>
           <Tr>
