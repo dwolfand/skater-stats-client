@@ -204,17 +204,17 @@ export async function getOfficialStats(name: string): Promise<OfficialStats> {
 
 export interface Result {
   place: string;
-  start?: string;
+  start: string;
   name: string;
   club: string;
   score: string;
-  judgeDetailsUrl?: string;
-  details?: {
+  details: {
     totalScore: string;
     executedElements: string;
     programComponents: string;
     deductions: string;
-    bonus?: string;
+    baseElements: string;
+    bonus?: string | null;
     elements: {
       planned: string;
       executed: string;
@@ -232,24 +232,23 @@ export interface Result {
       value: string;
     }[];
   };
+  judgeDetailsUrl?: string;
+  judgeDetails?: JudgeDetails;
 }
 
 export interface EventResults {
   eventName: string;
+  competitionTitle: string;
   results: Result[];
   competitionId: string;
-  judgeDetailsUrl: string | null;
-  officials: {
-    function: string;
-    name: string;
-    location: string;
-  }[];
-  segments: {
+  judgeDetailsUrl?: string | null;
+  officials: Official[];
+  segments: Array<{
     title: string;
     isActive: boolean;
     url: string;
     status: string;
-  }[];
+  }>;
 }
 
 export interface SkaterAIAnalysis {
@@ -262,3 +261,56 @@ export const getSkaterAIAnalysis = async (name: string) => {
   });
   return data;
 };
+
+export interface JudgeDetails {
+  event: {
+    name: string;
+    date: string;
+    category: string;
+    segment: string;
+  };
+  skater: {
+    place: number;
+    name: string;
+    club: string;
+    totalScore: number;
+    elementScore: number;
+    componentScore: number;
+    deductions: number;
+    baseElements: number;
+    totalBonus: number;
+  };
+  elements: JudgeElement[];
+  components: JudgeComponent[];
+  deductionDetails: JudgeDeduction[];
+}
+
+export interface JudgeElement {
+  number: number;
+  name: string;
+  info: string;
+  baseValue: number;
+  goe: number;
+  judges: number[];
+  score: number;
+  secondHalfBonus: boolean;
+  refValue: string | null;
+}
+
+export interface JudgeComponent {
+  name: string;
+  factor: number;
+  judges: number[];
+  score: number;
+}
+
+export interface JudgeDeduction {
+  name: string;
+  value: number;
+}
+
+export interface Official {
+  function: string;
+  name: string;
+  location: string;
+}

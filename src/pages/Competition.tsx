@@ -3,6 +3,7 @@ import { useParams, Link as RouterLink } from "react-router-dom";
 import { Box, Heading, Text, Grid, VStack, Link } from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
 import { useQuery } from "@tanstack/react-query";
+import dayjs, { DATE_FORMATS } from "../utils/date";
 
 interface Event {
   name: string;
@@ -68,8 +69,8 @@ export default function Competition() {
       <Heading mb={4}>{competition.name}</Heading>
       <Box mb={8}>
         <Text color="gray.600">
-          {new Date(competition.startDate).toLocaleDateString()} -{" "}
-          {new Date(competition.endDate).toLocaleDateString()} (
+          {dayjs(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
+          {dayjs(competition.endDate).format(DATE_FORMATS.DISPLAY)} (
           {competition.timezone})
         </Text>
         <Text color="gray.600">
@@ -103,8 +104,8 @@ export default function Competition() {
                       {event.name}
                     </Heading>
                     <Text color="gray.600">
-                      {new Date(event.date).toLocaleDateString()} at{" "}
-                      {event.time}
+                      {dayjs(event.date).format(DATE_FORMATS.DISPLAY)} at{" "}
+                      {dayjs(`2000-01-01 ${event.time}`).format("h:mm A")}
                     </Text>
                     <Text color="gray.600">Status: {event.status}</Text>
                   </Box>

@@ -25,6 +25,25 @@ import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
 import { getEventResults, EventResults } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
 
+// Add WakeLock types
+declare global {
+  interface WakeLockSentinel extends EventTarget {
+    released: boolean;
+    type: "screen";
+    release(): Promise<void>;
+    addEventListener(type: "release", listener: () => void): void;
+    removeEventListener(type: "release", listener: () => void): void;
+  }
+
+  interface WakeLock {
+    request(type: "screen"): Promise<WakeLockSentinel>;
+  }
+
+  interface Navigator {
+    wakeLock?: WakeLock;
+  }
+}
+
 // Define the pulse animation
 const pulse = keyframes`
   0% {
@@ -147,6 +166,7 @@ function ExpandableRow({ result }: ExpandableRowProps) {
 export default function Results() {
   const { year, ijsId, eventId } = useParams();
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [wakeLock, setWakeLock] = useState<any>(null);
 
   const { data, isLoading, refetch } = useQuery<EventResults>({
     queryKey: ["results", year, ijsId, eventId],
@@ -157,6 +177,37 @@ export default function Results() {
   const segmentStatus = data?.segments.find((s) => s.isActive)?.status || "";
   const isUnofficialStatus =
     segmentStatus === "Live unofficial" || segmentStatus === "Unofficial";
+
+  // Request wake lock when auto-refresh is enabled
+  useEffect(() => {
+    async function requestWakeLock() {
+      if (autoRefresh && isUnofficialStatus) {
+        try {
+          // @ts-ignore
+          if ("wakeLock" in navigator && navigator.wakeLock) {
+            // @ts-ignore
+            const lock = await navigator.wakeLock.request("screen");
+            setWakeLock(lock);
+          }
+        } catch (err) {
+          console.log("Wake Lock error:", err);
+        }
+      } else if (wakeLock) {
+        await wakeLock.release();
+        setWakeLock(null);
+      }
+    }
+    requestWakeLock();
+  }, [autoRefresh, isUnofficialStatus, wakeLock]);
+
+  // Release wake lock when component unmounts
+  useEffect(() => {
+    return () => {
+      if (wakeLock) {
+        wakeLock.release().catch(console.error);
+      }
+    };
+  }, [wakeLock]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -182,53 +233,43 @@ export default function Results() {
   if (!data) return null;
 
   return (
-    <Box p={4}>
-      <Link
-        as={RouterLink}
-        to={`/competition/${year}/${ijsId}`}
-        color="blue.500"
-        display="inline-block"
-        mb={2}
-      >
-        See all events
-      </Link>
-      <HStack justify="space-between" mb={6}>
-        <Heading size={{ base: "md", md: "lg" }}>{data.eventName}</Heading>
-        <VStack align="end" spacing={1}>
-          <HStack spacing={2}>
-            {autoRefresh && (
-              <Box
-                w="8px"
-                h="8px"
-                borderRadius="full"
-                bg="red.500"
-                animation={`${pulse} 2s ease-in-out infinite`}
-              />
-            )}
-            <Badge
-              colorScheme={
-                segmentStatus === "Final"
-                  ? "green"
-                  : isUnofficialStatus
-                  ? "orange"
-                  : "gray"
-              }
-            >
-              {segmentStatus}
-            </Badge>
-          </HStack>
+    <Box p={8}>
+      <VStack align="stretch" spacing={4}>
+        <Heading>{data.eventName}</Heading>
+        <Link
+          as={RouterLink}
+          to={`/competition/${year}/${ijsId}`}
+          color="blue.500"
+          fontSize="lg"
+        >
+          {data.competitionTitle}
+        </Link>
+        <HStack spacing={4}>
+          <Badge colorScheme={segmentStatus === "Final" ? "green" : "orange"}>
+            {segmentStatus}
+          </Badge>
           {isUnofficialStatus && (
-            <Button
-              size="sm"
-              leftIcon={<RepeatIcon />}
-              colorScheme={autoRefresh ? "red" : "blue"}
-              onClick={() => setAutoRefresh(!autoRefresh)}
-            >
-              {autoRefresh ? "Stop Auto-refresh" : "Start Auto-refresh"}
-            </Button>
+            <HStack spacing={2}>
+              <Button
+                size="sm"
+                colorScheme={autoRefresh ? "red" : "blue"}
+                onClick={() => setAutoRefresh(!autoRefresh)}
+              >
+                {autoRefresh ? "Stop Auto-Refresh" : "Start Auto-Refresh"}
+              </Button>
+              {autoRefresh && (
+                <Box
+                  w="8px"
+                  h="8px"
+                  borderRadius="full"
+                  bg="red.500"
+                  animation={`${pulse} 2s infinite`}
+                />
+              )}
+            </HStack>
           )}
-        </VStack>
-      </HStack>
+        </HStack>
+      </VStack>
       <Table variant="simple" size="sm">
         <Thead>
           <Tr>
