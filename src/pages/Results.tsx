@@ -27,20 +27,21 @@ import JudgeCard from "../components/JudgeCard";
 
 // Add WakeLock types
 declare global {
-  interface WakeLockSentinel extends EventTarget {
-    released: boolean;
-    type: "screen";
+  interface WakeLockSentinel {
+    readonly released: boolean;
+    readonly type: "screen";
     release(): Promise<void>;
     addEventListener(type: "release", listener: () => void): void;
     removeEventListener(type: "release", listener: () => void): void;
   }
 
   interface WakeLock {
+    readonly wakeLock: WakeLock;
     request(type: "screen"): Promise<WakeLockSentinel>;
   }
 
   interface Navigator {
-    wakeLock?: WakeLock;
+    readonly wakeLock: WakeLock;
   }
 }
 
