@@ -24,6 +24,7 @@ import { keyframes } from "@emotion/react";
 import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
 import { getEventResults, EventResults } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
+import FavoriteButton from "../components/FavoriteButton";
 
 // Add WakeLock types
 declare global {
@@ -98,15 +99,22 @@ function ExpandableRow({ result }: ExpandableRowProps) {
         </Td>
         <Td padding={{ base: 1, md: 3 }}>
           <VStack align="start" spacing={0}>
-            <Link
-              as={RouterLink}
-              to={`/skater/${encodeURIComponent(result.name)}`}
-              onClick={(e) => e.stopPropagation()}
-              color="blue.600"
-              _hover={{ textDecoration: "none", color: "blue.700" }}
-            >
-              <Text fontWeight="medium">{result.name}</Text>
-            </Link>
+            <HStack spacing={2}>
+              <Link
+                as={RouterLink}
+                to={`/skater/${encodeURIComponent(result.name)}`}
+                onClick={(e) => e.stopPropagation()}
+                color="blue.600"
+                _hover={{ textDecoration: "none", color: "blue.700" }}
+              >
+                <Text fontWeight="medium">{result.name}</Text>
+              </Link>
+              <FavoriteButton
+                type="skater"
+                name={result.name}
+                params={{ name: result.name }}
+              />
+            </HStack>
             <Text fontSize="sm" color="gray.600">
               {result.club}
             </Text>
@@ -236,7 +244,14 @@ export default function Results() {
   return (
     <Box p={8}>
       <VStack align="stretch" spacing={4}>
-        <Heading>{data.eventName}</Heading>
+        <HStack justify="space-between" align="center">
+          <Heading>{data.eventName}</Heading>
+          <FavoriteButton
+            type="event"
+            name={data.eventName}
+            params={{ year: year!, ijsId: ijsId!, eventId: eventId! }}
+          />
+        </HStack>
         <Link
           as={RouterLink}
           to={`/competition/${year}/${ijsId}`}

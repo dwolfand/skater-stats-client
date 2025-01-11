@@ -1,9 +1,18 @@
 import { useState, useEffect } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
-import { Box, Heading, Text, Grid, VStack, Link } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  Text,
+  Grid,
+  VStack,
+  Link,
+  HStack,
+} from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
 import { useQuery } from "@tanstack/react-query";
 import dayjs, { DATE_FORMATS } from "../utils/date";
+import FavoriteButton from "../components/FavoriteButton";
 
 interface Event {
   name: string;
@@ -66,7 +75,14 @@ export default function Competition() {
 
   return (
     <Box p={8}>
-      <Heading mb={4}>{competition.name}</Heading>
+      <HStack justify="space-between" align="center" mb={4}>
+        <Heading>{competition.name}</Heading>
+        <FavoriteButton
+          type="competition"
+          name={competition.name}
+          params={{ year: year!, ijsId: ijsId! }}
+        />
+      </HStack>
       <Box mb={8}>
         <Text color="gray.600">
           {dayjs(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}

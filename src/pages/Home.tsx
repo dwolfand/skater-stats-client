@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
@@ -20,11 +20,13 @@ import {
   Tab,
   Spinner,
   Center,
+  HStack,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { searchEvents, getDefaultEvents } from "../api/client";
 import type { SearchResult, CompetitionSummary } from "../api/client";
+import FavoriteButton from "../components/FavoriteButton";
 
 type EventFilter = "all" | "upcoming" | "recent";
 
@@ -60,108 +62,132 @@ export default function Home() {
     competition: CompetitionSummary;
   }) => (
     <GridItem>
-      <Link
-        as={RouterLink}
-        to={`/competition/${competition.year}/${competition.ijsId}`}
-        _hover={{ textDecoration: "none" }}
-      >
-        <Box p={4} borderWidth={1} borderRadius="lg" _hover={{ bg: "gray.50" }}>
-          <Heading size="sm" mb={2}>
-            {competition.name}
-          </Heading>
-          <Text color="gray.600" fontSize="sm">
-            {new Date(competition.startDate).toLocaleDateString()} -{" "}
-            {new Date(competition.endDate).toLocaleDateString()}
-            {competition.timezone && ` (${competition.timezone})`}
-          </Text>
-          <Text color="gray.600" fontSize="sm">
-            {competition.venue}, {competition.city}, {competition.state}
-          </Text>
-          <Badge
-            mt={2}
-            colorScheme={competition.type === "upcoming" ? "blue" : "green"}
-          >
-            {competition.type}
-          </Badge>
-        </Box>
-      </Link>
+      <Box p={4} borderWidth={1} borderRadius="lg" _hover={{ bg: "gray.50" }}>
+        <HStack justify="space-between" align="start">
+          <Box>
+            <Link
+              as={RouterLink}
+              to={`/competition/${competition.year}/${competition.ijsId}`}
+              _hover={{ textDecoration: "none" }}
+            >
+              <Heading size="sm" mb={2}>
+                {competition.name}
+              </Heading>
+            </Link>
+            <Text color="gray.600" fontSize="sm">
+              {new Date(competition.startDate).toLocaleDateString()} -{" "}
+              {new Date(competition.endDate).toLocaleDateString()}
+              {competition.timezone && ` (${competition.timezone})`}
+            </Text>
+            <Text color="gray.600" fontSize="sm">
+              {competition.venue}, {competition.city}, {competition.state}
+            </Text>
+            <Badge
+              mt={2}
+              colorScheme={competition.type === "upcoming" ? "blue" : "green"}
+            >
+              {competition.type}
+            </Badge>
+          </Box>
+          <FavoriteButton
+            type="competition"
+            name={competition.name}
+            params={{ year: competition.year, ijsId: competition.ijsId }}
+          />
+        </HStack>
+      </Box>
     </GridItem>
   );
 
   // Function to render a search result
   const SearchResultCard = ({ result }: { result: SearchResult }) => (
-    <Link
-      as={RouterLink}
-      to={
-        result.type === "competition"
-          ? `/competition/${result.year}/${result.ijsId}`
-          : result.type === "skater"
-          ? `/skater/${encodeURIComponent(result.name)}`
-          : `/official/${encodeURIComponent(result.name)}`
-      }
-      _hover={{ textDecoration: "none" }}
-    >
-      <Box p={4} borderWidth={1} borderRadius="lg" _hover={{ bg: "gray.50" }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Heading size="sm">{result.name}</Heading>
+    <Box p={4} borderWidth={1} borderRadius="lg" _hover={{ bg: "gray.50" }}>
+      <Box display="flex" justifyContent="space-between" alignItems="start">
+        <Box>
+          <HStack spacing={2}>
+            <Link
+              as={RouterLink}
+              to={
+                result.type === "competition"
+                  ? `/competition/${result.year}/${result.ijsId}`
+                  : result.type === "skater"
+                  ? `/skater/${encodeURIComponent(result.name)}`
+                  : `/official/${encodeURIComponent(result.name)}`
+              }
+              _hover={{ textDecoration: "none" }}
+            >
+              <Heading size="sm">{result.name}</Heading>
+            </Link>
             {result.type === "competition" ? (
-              <>
-                <Text color="gray.600" fontSize="sm">
-                  {new Date(result.startDate!).toLocaleDateString()} -{" "}
-                  {new Date(result.endDate!).toLocaleDateString()}
-                </Text>
-                <Text color="gray.600" fontSize="sm">
-                  {result.venue}, {result.city}, {result.state}
-                </Text>
-              </>
+              <FavoriteButton
+                type="competition"
+                name={result.name}
+                params={{ year: result.year!, ijsId: result.ijsId! }}
+              />
             ) : result.type === "skater" ? (
-              <>
-                {result.competition && (
-                  <Text color="gray.600" fontSize="sm">
-                    {result.competition}
-                  </Text>
-                )}
-                {result.date && (
-                  <Text color="gray.500" fontSize="sm">
-                    {new Date(result.date).toLocaleDateString()}
-                  </Text>
-                )}
-              </>
-            ) : (
-              <>
-                {result.function && (
-                  <Text color="gray.600" fontSize="sm">
-                    {result.function}
-                  </Text>
-                )}
-                {result.competition && (
-                  <Text color="gray.600" fontSize="sm">
-                    {result.competition}
-                  </Text>
-                )}
-                {result.date && (
-                  <Text color="gray.500" fontSize="sm">
-                    {new Date(result.date).toLocaleDateString()}
-                  </Text>
-                )}
-              </>
-            )}
-          </Box>
-          <Badge
-            colorScheme={
-              result.type === "competition"
-                ? "blue"
-                : result.type === "skater"
-                ? "green"
-                : "purple"
-            }
-          >
-            {result.type}
-          </Badge>
+              <FavoriteButton
+                type="skater"
+                name={result.name}
+                params={{ name: result.name }}
+              />
+            ) : null}
+          </HStack>
+          {result.type === "competition" ? (
+            <>
+              <Text color="gray.600" fontSize="sm">
+                {new Date(result.startDate!).toLocaleDateString()} -{" "}
+                {new Date(result.endDate!).toLocaleDateString()}
+              </Text>
+              <Text color="gray.600" fontSize="sm">
+                {result.venue}, {result.city}, {result.state}
+              </Text>
+            </>
+          ) : result.type === "skater" ? (
+            <>
+              {result.competition && (
+                <Text color="gray.600" fontSize="sm">
+                  {result.competition}
+                </Text>
+              )}
+              {result.date && (
+                <Text color="gray.500" fontSize="sm">
+                  {new Date(result.date).toLocaleDateString()}
+                </Text>
+              )}
+            </>
+          ) : (
+            <>
+              {result.function && (
+                <Text color="gray.600" fontSize="sm">
+                  {result.function}
+                </Text>
+              )}
+              {result.competition && (
+                <Text color="gray.600" fontSize="sm">
+                  {result.competition}
+                </Text>
+              )}
+              {result.date && (
+                <Text color="gray.500" fontSize="sm">
+                  {new Date(result.date).toLocaleDateString()}
+                </Text>
+              )}
+            </>
+          )}
         </Box>
+        <Badge
+          colorScheme={
+            result.type === "competition"
+              ? "blue"
+              : result.type === "skater"
+              ? "green"
+              : "purple"
+          }
+        >
+          {result.type}
+        </Badge>
       </Box>
-    </Link>
+    </Box>
   );
 
   // Filter competitions based on selected tab

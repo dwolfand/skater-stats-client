@@ -48,6 +48,7 @@ import {
 } from "recharts";
 import JudgeCard from "../components/JudgeCard";
 import { useEffect, useState } from "react";
+import FavoriteButton from "../components/FavoriteButton";
 
 interface ExpandableRowProps {
   result: SkaterStats["history"][0];
@@ -259,9 +260,14 @@ export default function Skater() {
       <VStack spacing={8} align="stretch">
         {/* Header */}
         <Box>
-          <Heading size="xl" mb={2}>
-            Results for {decodeURIComponent(name!)}
-          </Heading>
+          <HStack justify="space-between" align="center" mb={2}>
+            <Heading size="xl">Results for {decodeURIComponent(name!)}</Heading>
+            <FavoriteButton
+              type="skater"
+              name={decodeURIComponent(name!)}
+              params={{ name: name! }}
+            />
+          </HStack>
           {!aiAnalysis && (
             <Button
               colorScheme="blue"
