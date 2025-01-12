@@ -140,6 +140,7 @@ function ExpandableRow({ result }: ExpandableRowProps) {
                 totalElementScore: Number(result.details.executedElements),
                 totalComponentScore: Number(result.details.programComponents),
                 totalDeductions: Number(result.details.deductions),
+                totalScore: Number(result.details.totalScore),
                 elements: result.details.elements.map((element, index) => ({
                   number: index + 1,
                   elementCode: element.executed || element.planned,

@@ -39,7 +39,8 @@ import {
   Badge,
   ButtonGroup,
 } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon, SettingsIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { FiFilter } from "react-icons/fi";
 import {
   LineChart,
   Line,
@@ -117,6 +118,13 @@ function getMostFrequentEventTypeAndBest(history: SkaterStats["history"]) {
   };
 }
 
+// Helper function to get the effective score
+const getEffectiveScore = (result: SkaterStats["history"][0]) => {
+  return result.segmentScore && result.segmentScore > 0
+    ? result.segmentScore
+    : result.score;
+};
+
 function ExpandableRow({ result }: ExpandableRowProps) {
   const { isOpen, onToggle } = useDisclosure();
 
@@ -171,7 +179,14 @@ function ExpandableRow({ result }: ExpandableRowProps) {
           </VStack>
         </Td>
         <Td isNumeric>
-          <Text>{Number(result.score).toFixed(2)}</Text>
+          <Text>{Number(getEffectiveScore(result)).toFixed(2)}</Text>
+          {result.segmentScore &&
+            result.segmentScore > 0 &&
+            result.score !== result.segmentScore && (
+              <Text fontSize="sm" color="gray.600">
+                ({Number(result.score).toFixed(2)} total)
+              </Text>
+            )}
           <Text
             fontSize="sm"
             color="gray.600"
@@ -259,7 +274,7 @@ export default function Skater() {
         .filter((h) => h.eventType === eventType)
         .map((h) => ({
           date: new Date(h.date).getTime(),
-          [eventType]: h.score,
+          [eventType]: getEffectiveScore(h),
         }));
       return {
         eventType,
@@ -269,10 +284,48 @@ export default function Skater() {
   }, [filteredHistory]);
 
   // Memoize personal best calculation
-  const personalBest = useMemo(
-    () => getMostFrequentEventTypeAndBest(stats?.history || []),
-    [stats?.history]
-  );
+  const personalBest = useMemo(() => {
+    if (!stats?.history)
+      return { eventType: "", score: null, event: null, date: null };
+
+    // Count occurrences of each event type
+    const eventTypeCounts = stats.history.reduce<Record<string, number>>(
+      (acc, curr) => {
+        acc[curr.eventType] = (acc[curr.eventType] || 0) + 1;
+        return acc;
+      },
+      {}
+    );
+
+    // Find the event type with most occurrences
+    const mostFrequentEventType = Object.entries(eventTypeCounts).reduce<
+      [string, number]
+    >(
+      (max, [eventType, count]) => (count > max[1] ? [eventType, count] : max),
+      ["", 0]
+    )[0];
+
+    // Get all scores for the most frequent event type
+    const scores = stats.history
+      .filter((h) => h.eventType === mostFrequentEventType)
+      .map(getEffectiveScore)
+      .filter((score): score is number => score != null);
+
+    // Find the highest score and its corresponding event
+    const maxScore = scores.length > 0 ? Math.max(...scores) : null;
+    const bestEvent = stats.history.find(
+      (h) =>
+        h.eventType === mostFrequentEventType &&
+        getEffectiveScore(h) === maxScore
+    );
+
+    return {
+      eventType: mostFrequentEventType,
+      score: maxScore,
+      event: bestEvent?.event,
+      date: bestEvent?.date,
+    };
+  }, [stats?.history]);
 
   const {
     data: aiAnalysis,
@@ -321,8 +374,8 @@ export default function Skater() {
             <Heading size="xl">Results for {decodeURIComponent(name!)}</Heading>
             <ButtonGroup>
               <IconButton
-                aria-label="More options"
-                icon={<SettingsIcon />}
+                aria-label="Filter options"
+                icon={<FiFilter />}
                 onClick={onOptionsToggle}
                 variant="ghost"
               />
@@ -521,9 +574,9 @@ export default function Skater() {
             </StatLabel>
             <StatNumber>
               {(() => {
-                const filteredBest = Math.max(
-                  ...filteredHistory.map((h) => h.score || 0)
-                );
+                const scores = filteredHistory.map(getEffectiveScore);
+                const filteredBest =
+                  scores.length > 0 ? Math.max(...scores) : 0;
                 return filteredBest > 0 ? filteredBest.toFixed(2) : "N/A";
               })()}
             </StatNumber>
@@ -534,10 +587,10 @@ export default function Skater() {
                 </Text>
               )}
             {(() => {
+              const scores = filteredHistory.map(getEffectiveScore);
+              const maxScore = Math.max(...scores);
               const bestResult = filteredHistory.find(
-                (h) =>
-                  h.score ===
-                  Math.max(...filteredHistory.map((h) => h.score || 0))
+                (h) => getEffectiveScore(h) === maxScore
               );
               if (bestResult) {
                 return (

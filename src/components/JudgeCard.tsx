@@ -22,6 +22,7 @@ type JudgeDetails = {
   totalElementScore: number;
   totalComponentScore: number;
   totalDeductions: number;
+  totalScore: number;
   elements: {
     number: number;
     elementCode: string;
@@ -131,11 +132,7 @@ export default function JudgeCard({ details }: JudgeCardProps) {
             Total Segment Score
           </Text>
           <Text fontSize="xl" fontWeight="bold">
-            {(
-              details.totalElementScore +
-              details.totalComponentScore -
-              details.totalDeductions
-            ).toFixed(2)}
+            {details.totalScore && details.totalScore.toFixed(2)}
           </Text>
         </GridItem>
         {hasElementScore && (

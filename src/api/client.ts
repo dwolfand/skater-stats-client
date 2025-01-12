@@ -98,6 +98,7 @@ export interface SkaterStats {
     eventType: string;
     eventLevel: string;
     score: number;
+    segmentScore?: number;
     placement: string;
     totalSkaters: number;
     year: string;
@@ -108,6 +109,7 @@ export interface SkaterStats {
       totalElementScore: number;
       totalComponentScore: number;
       totalDeductions: number;
+      totalScore: number;
       elements: {
         number: number;
         elementCode: string;
