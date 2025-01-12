@@ -19,6 +19,7 @@ import {
   Badge,
   Link,
   Button,
+  Center,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
@@ -209,7 +210,12 @@ export default function Results() {
     }
   }, [segmentStatus]);
 
-  if (isLoading) return <Spinner />;
+  if (isLoading)
+    return (
+      <Center h="100vh">
+        <Spinner size="xl" />
+      </Center>
+    );
 
   if (!data) return null;
 
