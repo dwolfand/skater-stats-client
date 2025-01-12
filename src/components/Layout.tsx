@@ -46,18 +46,29 @@ export default function Layout({ children }: LayoutProps) {
         py={{ base: 3, md: 4 }}
         px={6}
       >
-        <HStack justify="space-between" align="center">
+        <HStack justify="space-between" align="center" spacing={4}>
           <Text fontSize={{ base: "sm", md: "md" }}>
             Made with ⛸️ in Washington, DC
           </Text>
-          <Link
-            onClick={onOpen}
-            color="blue.500"
-            _hover={{ textDecoration: "underline", cursor: "pointer" }}
-            fontSize={{ base: "sm", md: "md" }}
-          >
-            Report an Issue
-          </Link>
+          <HStack spacing={4}>
+            <Link
+              href="https://ko-fi.com/david1466"
+              isExternal
+              color="blue.500"
+              _hover={{ textDecoration: "underline", cursor: "pointer" }}
+              fontSize={{ base: "sm", md: "md" }}
+            >
+              Support ☕
+            </Link>
+            <Link
+              onClick={onOpen}
+              color="blue.500"
+              _hover={{ textDecoration: "underline", cursor: "pointer" }}
+              fontSize={{ base: "sm", md: "md" }}
+            >
+              Report an Issue
+            </Link>
+          </HStack>
         </HStack>
       </Box>
       <FeedbackModal isOpen={isOpen} onClose={onClose} />

@@ -229,7 +229,6 @@ export default function Home() {
       <VStack spacing={8} align="stretch">
         {/* Search Section */}
         <Box>
-          <Heading mb={6}>Figure Skating Stats</Heading>
           <InputGroup size="lg">
             <InputLeftElement pointerEvents="none">
               <Search2Icon color="gray.300" />
