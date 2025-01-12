@@ -124,8 +124,8 @@ export const searchEvents = async (
   return data;
 };
 
-export const getDefaultEvents = async () => {
-  const { data } = await api.get<DefaultEvents>("/defaultEvents");
+export const getOverallStats = async () => {
+  const { data } = await api.get<OverallStats>("/overallStats");
   return data;
 };
 
@@ -359,8 +359,3 @@ export interface Official {
   name: string;
   location: string;
 }
-
-export const getOverallStats = async () => {
-  const { data } = await api.get<OverallStats>("/overallStats");
-  return data;
-};
