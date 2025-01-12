@@ -96,7 +96,7 @@ export interface SkaterStats {
     competition: string;
     event: string;
     eventType: string;
-    eventCategory: string;
+    eventLevel: string;
     score: number;
     placement: string;
     totalSkaters: number;

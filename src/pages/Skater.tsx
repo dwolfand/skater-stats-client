@@ -34,6 +34,9 @@ import {
   AlertDescription,
   Spinner,
   HStack,
+  Select,
+  Flex,
+  Badge,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
@@ -47,7 +50,7 @@ import {
   Legend,
 } from "recharts";
 import JudgeCard from "../components/JudgeCard";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import FavoriteButton from "../components/FavoriteButton";
 
 interface ExpandableRowProps {
@@ -70,6 +73,47 @@ function getOrdinalSuffix(placement: string): string {
     default:
       return "th";
   }
+}
+
+function getMostFrequentEventTypeAndBest(history: SkaterStats["history"]) {
+  // Count occurrences of each event type
+  const eventTypeCounts = history.reduce<Record<string, number>>(
+    (acc: Record<string, number>, curr: SkaterStats["history"][0]) => {
+      acc[curr.eventType] = (acc[curr.eventType] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
+
+  // Find the event type with most occurrences
+  const mostFrequentEventType = Object.entries(eventTypeCounts).reduce<
+    [string, number]
+  >(
+    (max, [eventType, count]) => (count > max[1] ? [eventType, count] : max),
+    ["", 0]
+  )[0];
+
+  // Get all scores for the most frequent event type
+  const scores = history
+    .filter(
+      (h: SkaterStats["history"][0]) =>
+        h.eventType === mostFrequentEventType && h.score != null
+    )
+    .map((h: SkaterStats["history"][0]) => h.score);
+
+  // Find the highest score and its corresponding event
+  const maxScore = scores.length > 0 ? math.max(scores) : null;
+  const bestEvent = history.find(
+    (h: SkaterStats["history"][0]) =>
+      h.eventType === mostFrequentEventType && h.score === maxScore
+  );
+
+  return {
+    eventType: mostFrequentEventType,
+    score: maxScore,
+    event: bestEvent?.event,
+    date: bestEvent?.date,
+  };
 }
 
 function ExpandableRow({ result }: ExpandableRowProps) {
@@ -167,12 +211,66 @@ const LOADING_MESSAGES = [
 export default function Skater() {
   const { name } = useParams<{ name: string }>();
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
+  const [selectedEventLevels, setSelectedEventLevels] = useState<string[]>([]);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["skater", name],
     queryFn: () => getSkaterStats(name!),
     enabled: !!name,
   });
+
+  // Memoize filtered history
+  const filteredHistory = useMemo(() => {
+    if (!stats?.history) return [];
+    return stats.history.filter((h) => {
+      const matchesType =
+        selectedEventTypes.length === 0 ||
+        selectedEventTypes.includes(h.eventType);
+      const matchesLevel =
+        selectedEventLevels.length === 0 ||
+        selectedEventLevels.includes(h.eventLevel);
+      return matchesType && matchesLevel;
+    });
+  }, [stats?.history, selectedEventTypes, selectedEventLevels]);
+
+  // Memoize unique values for filters
+  const uniqueValues = useMemo(() => {
+    if (!stats?.history) return { eventTypes: [], eventLevels: [] };
+    return {
+      eventTypes: Array.from(
+        new Set(stats.history.map((h) => h.eventType))
+      ).sort(),
+      eventLevels: Array.from(
+        new Set(stats.history.map((h) => h.eventLevel))
+      ).sort(),
+    };
+  }, [stats?.history]);
+
+  // Memoize chart data
+  const chartData = useMemo(() => {
+    const eventTypes = Array.from(
+      new Set(filteredHistory.map((h) => h.eventType))
+    );
+    return eventTypes.map((eventType) => {
+      const eventData = filteredHistory
+        .filter((h) => h.eventType === eventType)
+        .map((h) => ({
+          date: new Date(h.date).getTime(),
+          [eventType]: h.score,
+        }));
+      return {
+        eventType,
+        data: eventData,
+      };
+    });
+  }, [filteredHistory]);
+
+  // Memoize personal best calculation
+  const personalBest = useMemo(
+    () => getMostFrequentEventTypeAndBest(stats?.history || []),
+    [stats?.history]
+  );
 
   const {
     data: aiAnalysis,
@@ -196,47 +294,6 @@ export default function Skater() {
     }
   }, [isLoadingAnalysis]);
 
-  const getMostFrequentEventTypeAndBest = (history: SkaterStats["history"]) => {
-    // Count occurrences of each event type
-    const eventTypeCounts = history.reduce<Record<string, number>>(
-      (acc: Record<string, number>, curr: SkaterStats["history"][0]) => {
-        acc[curr.eventType] = (acc[curr.eventType] || 0) + 1;
-        return acc;
-      },
-      {}
-    );
-
-    // Find the event type with most occurrences
-    const mostFrequentEventType = Object.entries(eventTypeCounts).reduce<
-      [string, number]
-    >(
-      (max, [eventType, count]) => (count > max[1] ? [eventType, count] : max),
-      ["", 0]
-    )[0];
-
-    // Get all scores for the most frequent event type
-    const scores = history
-      .filter(
-        (h: SkaterStats["history"][0]) =>
-          h.eventType === mostFrequentEventType && h.score != null
-      )
-      .map((h: SkaterStats["history"][0]) => h.score);
-
-    // Find the highest score and its corresponding event
-    const maxScore = scores.length > 0 ? math.max(scores) : null;
-    const bestEvent = history.find(
-      (h: SkaterStats["history"][0]) =>
-        h.eventType === mostFrequentEventType && h.score === maxScore
-    );
-
-    return {
-      eventType: mostFrequentEventType,
-      score: maxScore,
-      event: bestEvent?.event,
-      date: bestEvent?.date,
-    };
-  };
-
   if (isLoading) {
     return (
       <Container maxW="container.xl" py={8}>
@@ -252,8 +309,6 @@ export default function Skater() {
       </Container>
     );
   }
-
-  const personalBest = getMostFrequentEventTypeAndBest(stats?.history || []);
 
   return (
     <Container maxW="container.xl" py={8}>
@@ -340,6 +395,107 @@ export default function Skater() {
           </Stat>
         </StatGroup>
 
+        {/* Filter Controls */}
+        <Box>
+          <Heading size="md" mb={4}>
+            Filters
+          </Heading>
+          <Flex gap={4} direction={{ base: "column", md: "row" }}>
+            <Box flex={1}>
+              <Text mb={2}>Event Types</Text>
+              <Select
+                placeholder="All Event Types"
+                value=""
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    setSelectedEventTypes([]);
+                  } else if (!selectedEventTypes.includes(value)) {
+                    setSelectedEventTypes([...selectedEventTypes, value]);
+                  }
+                }}
+              >
+                {uniqueValues.eventTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </Select>
+              <Flex gap={2} mt={2} flexWrap="wrap">
+                {selectedEventTypes.map((type) => (
+                  <Badge
+                    key={type}
+                    colorScheme="blue"
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    p={1}
+                  >
+                    {type}
+                    <IconButton
+                      aria-label="Remove filter"
+                      icon={<ChevronUpIcon />}
+                      size="xs"
+                      variant="ghost"
+                      onClick={() =>
+                        setSelectedEventTypes(
+                          selectedEventTypes.filter((t) => t !== type)
+                        )
+                      }
+                    />
+                  </Badge>
+                ))}
+              </Flex>
+            </Box>
+            <Box flex={1}>
+              <Text mb={2}>Event Levels</Text>
+              <Select
+                placeholder="All Event Levels"
+                value=""
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    setSelectedEventLevels([]);
+                  } else if (!selectedEventLevels.includes(value)) {
+                    setSelectedEventLevels([...selectedEventLevels, value]);
+                  }
+                }}
+              >
+                {uniqueValues.eventLevels.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </Select>
+              <Flex gap={2} mt={2} flexWrap="wrap">
+                {selectedEventLevels.map((level) => (
+                  <Badge
+                    key={level}
+                    colorScheme="green"
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    p={1}
+                  >
+                    {level}
+                    <IconButton
+                      aria-label="Remove filter"
+                      icon={<ChevronUpIcon />}
+                      size="xs"
+                      variant="ghost"
+                      onClick={() =>
+                        setSelectedEventLevels(
+                          selectedEventLevels.filter((l) => l !== level)
+                        )
+                      }
+                    />
+                  </Badge>
+                ))}
+              </Flex>
+            </Box>
+          </Flex>
+        </Box>
+
         {/* Score History Chart */}
         <Box>
           <Heading size="md" mb={4}>
@@ -370,31 +526,20 @@ export default function Skater() {
                   itemSorter={(item: any) => -item.value}
                 />
                 <Legend />
-                {Array.from(new Set(stats.history.map((h) => h.eventType))).map(
-                  (eventType, index) => {
-                    const eventData = stats.history
-                      .filter((h) => h.eventType === eventType)
-                      .map((h) => ({
-                        date: new Date(h.date).getTime(),
-                        [eventType]: h.score,
-                      }));
-
-                    return (
-                      <Line
-                        key={eventType}
-                        type="monotone"
-                        data={eventData}
-                        dataKey={eventType}
-                        name={eventType}
-                        stroke={`hsl(${index * 60}, 70%, 50%)`}
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
-                        activeDot={{ r: 6 }}
-                        connectNulls
-                      />
-                    );
-                  }
-                )}
+                {chartData.map(({ eventType, data }, index) => (
+                  <Line
+                    key={eventType}
+                    type="monotone"
+                    data={data}
+                    dataKey={eventType}
+                    name={eventType}
+                    stroke={`hsl(${index * 60}, 70%, 50%)`}
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 6 }}
+                    connectNulls
+                  />
+                ))}
               </LineChart>
             </ResponsiveContainer>
           </Box>
@@ -403,7 +548,9 @@ export default function Skater() {
         {/* All Results */}
         <Box>
           <Heading size="md" mb={4}>
-            All Results
+            All Results{" "}
+            {filteredHistory.length !== stats?.history.length &&
+              `(Showing ${filteredHistory.length} of ${stats?.history.length})`}
           </Heading>
           <Table variant="simple">
             <Thead>
@@ -418,7 +565,7 @@ export default function Skater() {
               </Tr>
             </Thead>
             <Tbody>
-              {stats.history.map((result, index) => (
+              {filteredHistory.map((result, index) => (
                 <ExpandableRow key={index} result={result} />
               ))}
             </Tbody>
