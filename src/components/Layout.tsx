@@ -46,10 +46,12 @@ export default function Layout({ children }: LayoutProps) {
         py={{ base: 3, md: 4 }}
         px={6}
       >
-        <HStack justify="space-between" align="center" spacing={4}>
-          <Text fontSize={{ base: "sm", md: "md" }}>
-            Made with ⛸️ in Washington, DC
-          </Text>
+        <HStack
+          justify={{ base: "center", md: "space-between" }}
+          align="center"
+          spacing={4}
+        >
+          <Text fontSize={{ base: "sm", md: "md" }}>⛸️ Made in DC</Text>
           <HStack spacing={4}>
             <Link
               href="https://ko-fi.com/david1466"
@@ -58,7 +60,7 @@ export default function Layout({ children }: LayoutProps) {
               _hover={{ textDecoration: "underline", cursor: "pointer" }}
               fontSize={{ base: "sm", md: "md" }}
             >
-              Support ☕
+              ☕ Support
             </Link>
             <Link
               onClick={onOpen}
@@ -66,7 +68,7 @@ export default function Layout({ children }: LayoutProps) {
               _hover={{ textDecoration: "underline", cursor: "pointer" }}
               fontSize={{ base: "sm", md: "md" }}
             >
-              Report an Issue
+              🐛 Report an Issue
             </Link>
           </HStack>
         </HStack>
