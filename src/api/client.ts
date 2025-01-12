@@ -289,18 +289,73 @@ export interface Result {
   judgeDetails?: JudgeDetails;
 }
 
+export interface ScoreHistory {
+  date: string;
+  competition: string;
+  event: string;
+  eventType: string;
+  eventLevel: string;
+  eventCategory?: string;
+  score: number;
+  segmentScore?: number;
+  placement: string;
+  totalSkaters: number;
+  year: string;
+  ijsId: string;
+  resultsUrl: string;
+  status?: string;
+  eventId: number;
+  competitionId: number;
+  name?: string;
+  club?: string;
+  start?: string;
+  skaterId?: number;
+  judgeDetails?: {
+    baseElementsScore: number;
+    totalElementScore: number;
+    totalComponentScore: number;
+    totalDeductions: number;
+    totalScore: number;
+    elements: {
+      number: number;
+      elementCode: string;
+      info?: string;
+      baseValue: number;
+      credit: boolean;
+      goe: number;
+      judgesGoe: number[];
+      value: number;
+      plannedElement: string;
+      executedElement: string;
+    }[];
+    components: {
+      name: string;
+      factor: number;
+      judgesScores: number[];
+      value: number;
+    }[];
+    deductions: {
+      name: string;
+      value: number;
+    }[];
+  };
+}
+
 export interface EventResults {
-  eventName: string;
-  competitionTitle: string;
-  results: Result[];
-  competitionId: string;
-  judgeDetailsUrl?: string | null;
-  officials: Official[];
+  results: ScoreHistory[];
   segments: Array<{
     title: string;
     isActive: boolean;
     url: string;
     status: string;
+  }>;
+  status: string;
+  eventName: string;
+  competitionTitle: string;
+  officials: Array<{
+    function: string;
+    name: string;
+    location: string;
   }>;
 }
 

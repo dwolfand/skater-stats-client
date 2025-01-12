@@ -22,7 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
-import { getEventResults, EventResults } from "../api/client";
+import { getEventResults, EventResults, ScoreHistory } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
 import FavoriteButton from "../components/FavoriteButton";
 
@@ -63,13 +63,7 @@ const pulse = keyframes`
 `;
 
 interface ExpandableRowProps {
-  result: EventResults["results"][0];
-}
-
-interface Official {
-  function: string;
-  name: string;
-  location: string;
+  result: ScoreHistory;
 }
 
 function ExpandableRow({ result }: ExpandableRowProps) {
@@ -95,7 +89,7 @@ function ExpandableRow({ result }: ExpandableRowProps) {
           padding={{ base: 1, md: 3 }}
           isNumeric
         >
-          {result.place}
+          {result.placement}
         </Td>
         <Td padding={{ base: 1, md: 3 }}>
           <VStack align="start" spacing={0}>
@@ -105,17 +99,16 @@ function ExpandableRow({ result }: ExpandableRowProps) {
                 to={
                   result.skaterId
                     ? `/skater/id/${result.skaterId}`
-                    : `/skater/${encodeURIComponent(result.name)}`
+                    : `/skater/${encodeURIComponent(result.name || "")}`
                 }
                 onClick={(e) => e.stopPropagation()}
-                color="blue.600"
-                _hover={{ textDecoration: "none", color: "blue.700" }}
+                color="blue.500"
               >
                 <Text fontWeight="medium">{result.name}</Text>
               </Link>
               <FavoriteButton
                 type="skater"
-                name={result.name}
+                name={result.name || ""}
                 params={
                   result.skaterId
                     ? { skaterId: result.skaterId }
@@ -139,41 +132,10 @@ function ExpandableRow({ result }: ExpandableRowProps) {
           </Text>
         </Td>
       </Tr>
-      {isOpen && result.details && (
+      {isOpen && result.judgeDetails && (
         <Tr>
           <Td colSpan={4} p={0}>
-            <JudgeCard
-              details={{
-                baseElementsScore: 0,
-                totalElementScore: Number(result.details.executedElements),
-                totalComponentScore: Number(result.details.programComponents),
-                totalDeductions: Number(result.details.deductions),
-                totalScore: Number(result.details.totalScore),
-                elements: result.details.elements.map((element, index) => ({
-                  number: index + 1,
-                  elementCode: element.executed || element.planned,
-                  baseValue: Number(element.baseValue),
-                  credit: true,
-                  goe: Number(element.goe),
-                  judgesGoe: [],
-                  value: Number(element.score),
-                  plannedElement: element.planned,
-                  executedElement: element.executed,
-                })),
-                components: result.details.components.map((component) => ({
-                  name: component.name,
-                  factor: Number(component.factor) || 1,
-                  judgesScores: [],
-                  value: Number(component.score),
-                })),
-                deductions: result.details.deductionDetails.map(
-                  (deduction) => ({
-                    name: deduction.name,
-                    value: Number(deduction.value),
-                  })
-                ),
-              }}
-            />
+            <JudgeCard details={result.judgeDetails} />
           </Td>
         </Tr>
       )}
@@ -248,6 +210,7 @@ export default function Results() {
   }, [segmentStatus]);
 
   if (isLoading) return <Spinner />;
+
   if (!data) return null;
 
   return (

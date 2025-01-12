@@ -38,6 +38,10 @@ function calculateExperienceText(firstEventDate: string): string {
   const now = dayjs();
   const years = now.diff(firstEvent, "year");
 
+  if (years > 6) {
+    return "Over 6 years experience";
+  }
+
   if (years > 0) {
     return `${years} ${years === 1 ? "year" : "years"} experience`;
   }
