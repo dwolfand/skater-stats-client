@@ -225,16 +225,20 @@ const LOADING_MESSAGES = [
 ];
 
 export default function Skater() {
-  const { name } = useParams<{ name: string }>();
+  const { name, skaterId } = useParams<{ name?: string; skaterId?: string }>();
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [selectedEventLevels, setSelectedEventLevels] = useState<string[]>([]);
   const { isOpen: isOptionsOpen, onToggle: onOptionsToggle } = useDisclosure();
 
   const { data: stats, isLoading } = useQuery({
-    queryKey: ["skater", name],
-    queryFn: () => getSkaterStats(name!),
-    enabled: !!name,
+    queryKey: ["skater", name, skaterId],
+    queryFn: () =>
+      getSkaterStats({
+        name: name,
+        skaterId: skaterId ? parseInt(skaterId, 10) : undefined,
+      }),
+    enabled: !!(name || skaterId),
   });
 
   // Memoize filtered history
@@ -371,7 +375,7 @@ export default function Skater() {
         {/* Header */}
         <Box>
           <HStack justify="space-between" align="center" mb={2}>
-            <Heading size="xl">Results for {decodeURIComponent(name!)}</Heading>
+            <Heading size="xl">Results for {stats.name}</Heading>
             <ButtonGroup>
               <IconButton
                 aria-label="Filter options"
@@ -381,8 +385,12 @@ export default function Skater() {
               />
               <FavoriteButton
                 type="skater"
-                name={decodeURIComponent(name!)}
-                params={{ name: name! }}
+                name={stats.name}
+                params={
+                  skaterId
+                    ? { skaterId: parseInt(skaterId, 10) }
+                    : { name: stats.name }
+                }
               />
             </ButtonGroup>
           </HStack>

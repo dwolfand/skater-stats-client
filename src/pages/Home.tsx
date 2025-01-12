@@ -129,7 +129,9 @@ export default function Home() {
                 result.type === "competition"
                   ? `/competition/${result.year}/${result.ijsId}`
                   : result.type === "skater"
-                  ? `/skater/${encodeURIComponent(result.name)}`
+                  ? result.id
+                    ? `/skater/id/${result.id}`
+                    : `/skater/${encodeURIComponent(result.name)}`
                   : `/official/${encodeURIComponent(result.name)}`
               }
               _hover={{ textDecoration: "none" }}
@@ -146,7 +148,9 @@ export default function Home() {
               <FavoriteButton
                 type="skater"
                 name={result.name}
-                params={{ name: result.name }}
+                params={
+                  result.id ? { skaterId: result.id } : { name: result.name }
+                }
               />
             ) : null}
           </HStack>
@@ -300,9 +304,13 @@ export default function Home() {
                                 <Td>
                                   <Link
                                     as={RouterLink}
-                                    to={`/skater/${encodeURIComponent(
-                                      score.skaterName
-                                    )}`}
+                                    to={
+                                      score.skaterId
+                                        ? `/skater/id/${score.skaterId}`
+                                        : `/skater/${encodeURIComponent(
+                                            score.skaterName
+                                          )}`
+                                    }
                                     color="blue.500"
                                   >
                                     {score.skaterName}
@@ -362,9 +370,13 @@ export default function Home() {
                                     <Td>
                                       <Link
                                         as={RouterLink}
-                                        to={`/skater/${encodeURIComponent(
-                                          element.skaterName
-                                        )}`}
+                                        to={
+                                          element.skaterId
+                                            ? `/skater/id/${element.skaterId}`
+                                            : `/skater/${encodeURIComponent(
+                                                element.skaterName
+                                              )}`
+                                        }
                                         color="blue.500"
                                       >
                                         {element.skaterName}
@@ -424,9 +436,13 @@ export default function Home() {
                                     <Td>
                                       <Link
                                         as={RouterLink}
-                                        to={`/skater/${encodeURIComponent(
-                                          component.skaterName
-                                        )}`}
+                                        to={
+                                          component.skaterId
+                                            ? `/skater/id/${component.skaterId}`
+                                            : `/skater/${encodeURIComponent(
+                                                component.skaterName
+                                              )}`
+                                        }
                                         color="blue.500"
                                       >
                                         {component.skaterName}

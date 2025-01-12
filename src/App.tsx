@@ -30,6 +30,7 @@ function App() {
                 element={<Results />}
               />
               <Route path="/skater/:name" element={<Skater />} />
+              <Route path="/skater/id/:skaterId" element={<Skater />} />
               <Route path="/official/:name" element={<Official />} />
             </Routes>
           </Layout>

@@ -34,7 +34,8 @@ interface EventButtonProps extends BaseFavoriteButtonProps {
 interface SkaterButtonProps extends BaseFavoriteButtonProps {
   type: "skater";
   params: {
-    name: string;
+    name?: string;
+    skaterId?: number;
   };
 }
 

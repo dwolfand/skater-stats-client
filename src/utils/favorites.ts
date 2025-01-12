@@ -30,7 +30,8 @@ interface EventFavorite extends BaseFavoriteItem {
 interface SkaterFavorite extends BaseFavoriteItem {
   type: "skater";
   params: {
-    name: string;
+    name?: string;
+    skaterId?: number;
   };
 }
 
@@ -62,7 +63,8 @@ interface EventInput extends BaseInput {
 interface SkaterInput extends BaseInput {
   type: "skater";
   params: {
-    name: string;
+    name?: string;
+    skaterId?: number;
   };
 }
 
@@ -86,7 +88,10 @@ function generateId<T extends FavoriteInput>(
         (params as EventInput["params"]).ijsId
       }-${(params as EventInput["params"]).eventId}`;
     case "skater":
-      return (params as SkaterInput["params"]).name;
+      const skaterParams = params as SkaterInput["params"];
+      return skaterParams.skaterId
+        ? `skater-${skaterParams.skaterId}`
+        : skaterParams.name!;
     default:
       const _exhaustiveCheck: never = type;
       throw new Error(`Unknown favorite type: ${type}`);
@@ -101,7 +106,10 @@ function buildUrl(item: FavoriteItem | FavoriteInput): string {
     case "event":
       return `/competition/${item.params.year}/${item.params.ijsId}/event/${item.params.eventId}`;
     case "skater":
-      return `/skater/${encodeURIComponent(item.params.name)}`;
+      const skaterParams = item.params as SkaterInput["params"];
+      return skaterParams.skaterId
+        ? `/skater/id/${skaterParams.skaterId}`
+        : `/skater/${encodeURIComponent(skaterParams.name!)}`;
   }
 }
 
@@ -130,6 +138,14 @@ function convertOldFormat(item: any): FavoriteItem {
       } as EventFavorite;
     }
     case "skater": {
+      const idParts = item.id.split("-");
+      if (idParts[0] === "skater") {
+        return {
+          ...base,
+          type: "skater",
+          params: { skaterId: parseInt(idParts[1], 10) },
+        } as SkaterFavorite;
+      }
       return {
         ...base,
         type: "skater",

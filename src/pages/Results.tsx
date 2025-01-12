@@ -102,7 +102,11 @@ function ExpandableRow({ result }: ExpandableRowProps) {
             <HStack spacing={2}>
               <Link
                 as={RouterLink}
-                to={`/skater/${encodeURIComponent(result.name)}`}
+                to={
+                  result.skaterId
+                    ? `/skater/id/${result.skaterId}`
+                    : `/skater/${encodeURIComponent(result.name)}`
+                }
                 onClick={(e) => e.stopPropagation()}
                 color="blue.600"
                 _hover={{ textDecoration: "none", color: "blue.700" }}
@@ -112,7 +116,11 @@ function ExpandableRow({ result }: ExpandableRowProps) {
               <FavoriteButton
                 type="skater"
                 name={result.name}
-                params={{ name: result.name }}
+                params={
+                  result.skaterId
+                    ? { skaterId: result.skaterId }
+                    : { name: result.name }
+                }
               />
             </HStack>
             <Text fontSize="sm" color="gray.600">

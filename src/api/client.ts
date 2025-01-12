@@ -37,6 +37,7 @@ export async function getEventResults(
 export interface SearchResult {
   type: "competition" | "skater" | "official";
   name: string;
+  id?: number; // skater ID for skater results
   // Competition fields
   startDate?: string;
   endDate?: string;
@@ -68,6 +69,7 @@ export interface CompetitionSummary {
 
 export interface TopScore {
   skaterName: string;
+  skaterId?: number;
   score: number;
   competition: string;
   date: string;
@@ -78,6 +80,7 @@ export interface TopScore {
 
 export interface TopElement {
   skaterName: string;
+  skaterId?: number;
   elementName: string;
   goe: number;
   competition: string;
@@ -89,6 +92,7 @@ export interface TopElement {
 
 export interface TopComponent {
   skaterName: string;
+  skaterId?: number;
   componentName: string;
   score: number;
   competition: string;
@@ -183,9 +187,12 @@ export interface SkaterStats {
   }[];
 }
 
-export const getSkaterStats = async (name: string) => {
+export const getSkaterStats = async (params: {
+  name?: string;
+  skaterId?: number;
+}) => {
   const { data } = await api.get<SkaterStats>("/skater", {
-    params: { name },
+    params,
   });
   return data;
 };
@@ -253,6 +260,7 @@ export interface Result {
   name: string;
   club: string;
   score: string;
+  skaterId?: number;
   details: {
     totalScore: string;
     executedElements: string;
