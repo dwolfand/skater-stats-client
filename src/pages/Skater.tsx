@@ -338,8 +338,11 @@ export default function Skater() {
     error: analysisError,
     refetch: refetchAnalysis,
   } = useQuery({
-    queryKey: ["skaterAnalysis", name],
-    queryFn: () => getSkaterAIAnalysis(name!),
+    queryKey: ["skaterAnalysis", skaterId || stats?.name],
+    queryFn: () =>
+      getSkaterAIAnalysis(
+        skaterId ? { skaterId: parseInt(skaterId, 10) } : { name: stats!.name }
+      ),
     enabled: false, // Don't fetch automatically
   });
 

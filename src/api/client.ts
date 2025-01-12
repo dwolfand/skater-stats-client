@@ -363,9 +363,12 @@ export interface SkaterAIAnalysis {
   analysis: string;
 }
 
-export const getSkaterAIAnalysis = async (name: string) => {
+export const getSkaterAIAnalysis = async (params: {
+  name?: string;
+  skaterId?: number;
+}) => {
   const { data } = await api.get<SkaterAIAnalysis>("/skater/analysis", {
-    params: { name },
+    params,
   });
   return data;
 };
@@ -422,3 +425,13 @@ export interface Official {
   name: string;
   location: string;
 }
+
+export interface FeedbackRequest {
+  message: string;
+  email?: string;
+}
+
+export const submitFeedback = async (feedback: FeedbackRequest) => {
+  const { data } = await api.post("/feedback", feedback);
+  return data;
+};
