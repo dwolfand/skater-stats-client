@@ -66,9 +66,52 @@ export interface CompetitionSummary {
   ijsId: string;
 }
 
-export interface DefaultEvents {
+export interface TopScore {
+  skaterName: string;
+  score: number;
+  competition: string;
+  date: string;
+  year: string;
+  ijsId: string;
+  eventName: string;
+}
+
+export interface TopElement {
+  skaterName: string;
+  elementName: string;
+  goe: number;
+  competition: string;
+  date: string;
+  year: string;
+  ijsId: string;
+  eventName: string;
+}
+
+export interface TopComponent {
+  skaterName: string;
+  componentName: string;
+  score: number;
+  competition: string;
+  date: string;
+  year: string;
+  ijsId: string;
+  eventName: string;
+}
+
+export interface TopStats {
+  bestScores: TopScore[];
+  bestGOEs: {
+    [elementType: string]: TopElement[];
+  };
+  bestComponents: {
+    [componentName: string]: TopComponent[];
+  };
+}
+
+export interface OverallStats {
   upcoming: CompetitionSummary[];
   recent: CompetitionSummary[];
+  topStats: TopStats;
 }
 
 export const searchEvents = async (
@@ -316,3 +359,8 @@ export interface Official {
   name: string;
   location: string;
 }
+
+export const getOverallStats = async () => {
+  const { data } = await api.get<OverallStats>("/overallStats");
+  return data;
+};

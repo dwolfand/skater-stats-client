@@ -21,12 +21,30 @@ import {
   Spinner,
   Center,
   HStack,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { searchEvents, getDefaultEvents } from "../api/client";
-import type { SearchResult, CompetitionSummary } from "../api/client";
+import { searchEvents, getOverallStats } from "../api/client";
+import type {
+  SearchResult,
+  CompetitionSummary,
+  TopScore,
+  TopElement,
+  TopComponent,
+} from "../api/client";
 import FavoriteButton from "../components/FavoriteButton";
+import { formatNumber } from "../utils/math";
 
 type EventFilter = "all" | "upcoming" | "recent";
 
@@ -50,9 +68,9 @@ export default function Home() {
     enabled: debouncedQuery.length > 2,
   });
 
-  const { data: defaultEvents, isLoading: isLoadingEvents } = useQuery({
-    queryKey: ["defaultEvents"],
-    queryFn: getDefaultEvents,
+  const { data: overallStats, isLoading: isLoadingStats } = useQuery({
+    queryKey: ["overallStats"],
+    queryFn: getOverallStats,
   });
 
   // Function to render a single competition card
@@ -191,13 +209,13 @@ export default function Home() {
   );
 
   // Filter competitions based on selected tab
-  const filteredCompetitions = defaultEvents
+  const filteredCompetitions = overallStats
     ? [
         ...(eventFilter === "all" || eventFilter === "upcoming"
-          ? defaultEvents.upcoming
+          ? overallStats.upcoming
           : []),
         ...(eventFilter === "all" || eventFilter === "recent"
-          ? defaultEvents.recent
+          ? overallStats.recent
           : []),
       ]
     : [];
@@ -242,14 +260,212 @@ export default function Home() {
           </Box>
         )}
 
-        {/* Competitions Section */}
-        {!searchQuery && (
-          <Box>
-            {isLoadingEvents ? (
-              <Center p={8}>
-                <Spinner size="xl" />
-              </Center>
-            ) : defaultEvents ? (
+        {/* Main Content */}
+        {!searchQuery && isLoadingStats ? (
+          <Center p={8}>
+            <Spinner size="xl" />
+          </Center>
+        ) : !searchQuery && overallStats ? (
+          <>
+            {/* Top Stats Section */}
+            <Box>
+              <Heading size="md" mb={4}>
+                Top Stats
+              </Heading>
+              {overallStats.topStats ? (
+                <Accordion allowMultiple defaultIndex={[]}>
+                  <AccordionItem>
+                    <h2>
+                      <AccordionButton>
+                        <Box flex="1" textAlign="left">
+                          <Heading size="sm">Best Overall Scores</Heading>
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel pb={4}>
+                      <Table variant="simple" size="sm">
+                        <Thead>
+                          <Tr>
+                            <Th>Skater</Th>
+                            <Th isNumeric>Score</Th>
+                            <Th>Competition</Th>
+                            <Th>Date</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {overallStats.topStats.bestScores.map(
+                            (score, index) => (
+                              <Tr key={index}>
+                                <Td>
+                                  <Link
+                                    as={RouterLink}
+                                    to={`/skater/${encodeURIComponent(
+                                      score.skaterName
+                                    )}`}
+                                    color="blue.500"
+                                  >
+                                    {score.skaterName}
+                                  </Link>
+                                </Td>
+                                <Td isNumeric>{formatNumber(score.score)}</Td>
+                                <Td>
+                                  <Link
+                                    as={RouterLink}
+                                    to={`/competition/${score.year}/${score.ijsId}`}
+                                    color="blue.500"
+                                  >
+                                    {score.competition}
+                                  </Link>
+                                </Td>
+                                <Td>
+                                  {new Date(score.date).toLocaleDateString()}
+                                </Td>
+                              </Tr>
+                            )
+                          )}
+                        </Tbody>
+                      </Table>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  <AccordionItem>
+                    <h2>
+                      <AccordionButton>
+                        <Box flex="1" textAlign="left">
+                          <Heading size="sm">
+                            Best Grade of Execution (GOE)
+                          </Heading>
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel pb={4}>
+                      {Object.entries(overallStats.topStats.bestGOEs).map(
+                        ([elementType, elements]) => (
+                          <Box key={elementType} mb={4}>
+                            <Heading size="xs" mb={2}>
+                              {elementType}
+                            </Heading>
+                            <Table variant="simple" size="sm">
+                              <Thead>
+                                <Tr>
+                                  <Th>Skater</Th>
+                                  <Th>Element</Th>
+                                  <Th isNumeric>GOE</Th>
+                                  <Th>Competition</Th>
+                                </Tr>
+                              </Thead>
+                              <Tbody>
+                                {elements.map((element, index) => (
+                                  <Tr key={index}>
+                                    <Td>
+                                      <Link
+                                        as={RouterLink}
+                                        to={`/skater/${encodeURIComponent(
+                                          element.skaterName
+                                        )}`}
+                                        color="blue.500"
+                                      >
+                                        {element.skaterName}
+                                      </Link>
+                                    </Td>
+                                    <Td>{element.elementName}</Td>
+                                    <Td isNumeric>
+                                      {formatNumber(element.goe)}
+                                    </Td>
+                                    <Td>
+                                      <Link
+                                        as={RouterLink}
+                                        to={`/competition/${element.year}/${element.ijsId}`}
+                                        color="blue.500"
+                                      >
+                                        {element.competition}
+                                      </Link>
+                                    </Td>
+                                  </Tr>
+                                ))}
+                              </Tbody>
+                            </Table>
+                          </Box>
+                        )
+                      )}
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  <AccordionItem>
+                    <h2>
+                      <AccordionButton>
+                        <Box flex="1" textAlign="left">
+                          <Heading size="sm">Best Program Components</Heading>
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel pb={4}>
+                      {Object.entries(overallStats.topStats.bestComponents).map(
+                        ([componentName, components]) => (
+                          <Box key={componentName} mb={4}>
+                            <Heading size="xs" mb={2}>
+                              {componentName}
+                            </Heading>
+                            <Table variant="simple" size="sm">
+                              <Thead>
+                                <Tr>
+                                  <Th>Skater</Th>
+                                  <Th isNumeric>Score</Th>
+                                  <Th>Competition</Th>
+                                  <Th>Date</Th>
+                                </Tr>
+                              </Thead>
+                              <Tbody>
+                                {components.map((component, index) => (
+                                  <Tr key={index}>
+                                    <Td>
+                                      <Link
+                                        as={RouterLink}
+                                        to={`/skater/${encodeURIComponent(
+                                          component.skaterName
+                                        )}`}
+                                        color="blue.500"
+                                      >
+                                        {component.skaterName}
+                                      </Link>
+                                    </Td>
+                                    <Td isNumeric>
+                                      {formatNumber(component.score)}
+                                    </Td>
+                                    <Td>
+                                      <Link
+                                        as={RouterLink}
+                                        to={`/competition/${component.year}/${component.ijsId}`}
+                                        color="blue.500"
+                                      >
+                                        {component.competition}
+                                      </Link>
+                                    </Td>
+                                    <Td>
+                                      {new Date(
+                                        component.date
+                                      ).toLocaleDateString()}
+                                    </Td>
+                                  </Tr>
+                                ))}
+                              </Tbody>
+                            </Table>
+                          </Box>
+                        )
+                      )}
+                    </AccordionPanel>
+                  </AccordionItem>
+                </Accordion>
+              ) : (
+                <Text>No top stats available</Text>
+              )}
+            </Box>
+
+            {/* Competitions Section */}
+            <Box mt={8}>
               <Tabs
                 onChange={(index) =>
                   setEventFilter(
@@ -269,7 +485,14 @@ export default function Home() {
                       templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                       gap={4}
                     >
-                      {filteredCompetitions.map((competition, index) => (
+                      {[
+                        ...(eventFilter === "all" || eventFilter === "upcoming"
+                          ? overallStats.upcoming
+                          : []),
+                        ...(eventFilter === "all" || eventFilter === "recent"
+                          ? overallStats.recent
+                          : []),
+                      ].map((competition, index) => (
                         <CompetitionCard
                           key={index}
                           competition={competition}
@@ -283,7 +506,7 @@ export default function Home() {
                       templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                       gap={4}
                     >
-                      {defaultEvents.upcoming.map((competition, index) => (
+                      {overallStats.upcoming.map((competition, index) => (
                         <CompetitionCard
                           key={index}
                           competition={competition}
@@ -297,7 +520,7 @@ export default function Home() {
                       templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                       gap={4}
                     >
-                      {defaultEvents.recent.map((competition, index) => (
+                      {overallStats.recent.map((competition, index) => (
                         <CompetitionCard
                           key={index}
                           competition={competition}
@@ -307,11 +530,9 @@ export default function Home() {
                   </TabPanel>
                 </TabPanels>
               </Tabs>
-            ) : (
-              <Text>No competitions available</Text>
-            )}
-          </Box>
-        )}
+            </Box>
+          </>
+        ) : null}
 
         {/* Link to All Competitions */}
         <Box textAlign="center" py={4}>
