@@ -37,8 +37,9 @@ import {
   Select,
   Flex,
   Badge,
+  ButtonGroup,
 } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon, SettingsIcon } from "@chakra-ui/icons";
 import {
   LineChart,
   Line,
@@ -213,6 +214,7 @@ export default function Skater() {
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [selectedEventLevels, setSelectedEventLevels] = useState<string[]>([]);
+  const { isOpen: isOptionsOpen, onToggle: onOptionsToggle } = useDisclosure();
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["skater", name],
@@ -317,184 +319,238 @@ export default function Skater() {
         <Box>
           <HStack justify="space-between" align="center" mb={2}>
             <Heading size="xl">Results for {decodeURIComponent(name!)}</Heading>
-            <FavoriteButton
-              type="skater"
-              name={decodeURIComponent(name!)}
-              params={{ name: name! }}
-            />
+            <ButtonGroup>
+              <IconButton
+                aria-label="More options"
+                icon={<SettingsIcon />}
+                onClick={onOptionsToggle}
+                variant="ghost"
+              />
+              <FavoriteButton
+                type="skater"
+                name={decodeURIComponent(name!)}
+                params={{ name: name! }}
+              />
+            </ButtonGroup>
           </HStack>
-          {!aiAnalysis && (
-            <Button
-              colorScheme="blue"
-              isLoading={isLoadingAnalysis}
-              onClick={() => refetchAnalysis()}
-              mb={4}
-              leftIcon={isLoadingAnalysis ? <Spinner size="sm" /> : undefined}
-            >
-              Get AI Analysis
-            </Button>
-          )}
-          {isLoadingAnalysis && (
-            <Alert status="info" mb={4}>
-              <AlertIcon />
+          <Collapse in={isOptionsOpen} animateOpacity>
+            <Box mb={4}>
+              {!aiAnalysis && (
+                <Button
+                  colorScheme="blue"
+                  isLoading={isLoadingAnalysis}
+                  onClick={() => refetchAnalysis()}
+                  mb={4}
+                  leftIcon={
+                    isLoadingAnalysis ? <Spinner size="sm" /> : undefined
+                  }
+                >
+                  Get AI Analysis
+                </Button>
+              )}
+              {isLoadingAnalysis && (
+                <Alert status="info" mb={4}>
+                  <AlertIcon />
+                  <Box>
+                    <AlertTitle>Analyzing Data</AlertTitle>
+                    <AlertDescription>
+                      {LOADING_MESSAGES[loadingMessageIndex]}
+                    </AlertDescription>
+                  </Box>
+                </Alert>
+              )}
+              {aiAnalysis && (
+                <Alert
+                  status="info"
+                  variant="left-accent"
+                  flexDirection="column"
+                  alignItems="flex-start"
+                  mb={4}
+                >
+                  <AlertTitle mb={2}>AI Analysis</AlertTitle>
+                  <AlertDescription whiteSpace="pre-wrap">
+                    {aiAnalysis.analysis}
+                  </AlertDescription>
+                </Alert>
+              )}
+              {isAnalysisError && (
+                <Alert status="error" mb={4}>
+                  <AlertIcon />
+                  <AlertDescription>
+                    Failed to get AI analysis. Please try again.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Filter Controls */}
               <Box>
-                <AlertTitle>Analyzing Data</AlertTitle>
-                <AlertDescription>
-                  {LOADING_MESSAGES[loadingMessageIndex]}
-                </AlertDescription>
+                <Flex gap={4} direction={{ base: "column", md: "row" }}>
+                  <Box flex={1}>
+                    <Select
+                      placeholder="Event Types"
+                      value=""
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "") {
+                          setSelectedEventTypes([]);
+                        } else if (!selectedEventTypes.includes(value)) {
+                          setSelectedEventTypes([...selectedEventTypes, value]);
+                        }
+                      }}
+                      mb={2}
+                    >
+                      {uniqueValues.eventTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </Select>
+                    <Flex gap={2} flexWrap="wrap">
+                      {selectedEventTypes.map((type) => (
+                        <Badge
+                          key={type}
+                          colorScheme="blue"
+                          display="flex"
+                          alignItems="center"
+                          gap={1}
+                          p={1}
+                        >
+                          {type}
+                          <IconButton
+                            aria-label="Remove filter"
+                            icon={<ChevronUpIcon />}
+                            size="xs"
+                            variant="ghost"
+                            onClick={() =>
+                              setSelectedEventTypes(
+                                selectedEventTypes.filter((t) => t !== type)
+                              )
+                            }
+                          />
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Box>
+                  <Box flex={1}>
+                    <Select
+                      placeholder="Event Levels"
+                      value=""
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "") {
+                          setSelectedEventLevels([]);
+                        } else if (!selectedEventLevels.includes(value)) {
+                          setSelectedEventLevels([
+                            ...selectedEventLevels,
+                            value,
+                          ]);
+                        }
+                      }}
+                      mb={2}
+                    >
+                      {uniqueValues.eventLevels.map((level) => (
+                        <option key={level} value={level}>
+                          {level}
+                        </option>
+                      ))}
+                    </Select>
+                    <Flex gap={2} flexWrap="wrap">
+                      {selectedEventLevels.map((level) => (
+                        <Badge
+                          key={level}
+                          colorScheme="green"
+                          display="flex"
+                          alignItems="center"
+                          gap={1}
+                          p={1}
+                        >
+                          {level}
+                          <IconButton
+                            aria-label="Remove filter"
+                            icon={<ChevronUpIcon />}
+                            size="xs"
+                            variant="ghost"
+                            onClick={() =>
+                              setSelectedEventLevels(
+                                selectedEventLevels.filter((l) => l !== level)
+                              )
+                            }
+                          />
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Box>
+                </Flex>
               </Box>
-            </Alert>
-          )}
-          {aiAnalysis && (
-            <Alert
-              status="info"
-              variant="left-accent"
-              flexDirection="column"
-              alignItems="flex-start"
-              mb={4}
-            >
-              <AlertTitle mb={2}>AI Analysis</AlertTitle>
-              <AlertDescription whiteSpace="pre-wrap">
-                {aiAnalysis.analysis}
-              </AlertDescription>
-            </Alert>
-          )}
-          {isAnalysisError && (
-            <Alert status="error" mb={4}>
-              <AlertIcon />
-              <AlertDescription>
-                Failed to get AI analysis. Please try again.
-              </AlertDescription>
-            </Alert>
-          )}
+            </Box>
+          </Collapse>
         </Box>
 
         {/* Key Statistics */}
         <StatGroup>
           <Stat>
-            <StatLabel>Total Events</StatLabel>
-            <StatNumber>{Number(stats.totalEvents)}</StatNumber>
-          </Stat>
-          <Stat>
-            <StatLabel>Total Competitions</StatLabel>
-            <StatNumber>{Number(stats.totalCompetitions)}</StatNumber>
-          </Stat>
-          <Stat>
-            <StatLabel>Personal Best</StatLabel>
-            <StatNumber>
-              {personalBest.score
-                ? Number(personalBest.score).toFixed(2)
-                : "N/A"}
-            </StatNumber>
-            {personalBest.event && personalBest.date && (
+            <StatLabel>
+              Events
+              {filteredHistory.length !== stats.history.length && ` (Filtered)`}
+            </StatLabel>
+            <StatNumber>{filteredHistory.length}</StatNumber>
+            {filteredHistory.length !== stats.history.length && (
               <Text fontSize="sm" color="gray.600">
-                {personalBest.eventType} (
-                {dayjs(personalBest.date).format("MMM D, YYYY")})
+                of {stats.totalEvents} total
               </Text>
             )}
           </Stat>
+          <Stat>
+            <StatLabel>
+              Competitions
+              {filteredHistory.length !== stats.history.length && ` (Filtered)`}
+            </StatLabel>
+            <StatNumber>
+              {new Set(filteredHistory.map((h) => h.competition)).size}
+            </StatNumber>
+            {filteredHistory.length !== stats.history.length && (
+              <Text fontSize="sm" color="gray.600">
+                of {stats.totalCompetitions} total
+              </Text>
+            )}
+          </Stat>
+          <Stat>
+            <StatLabel>
+              Personal Best
+              {filteredHistory.length !== stats.history.length && ` (Filtered)`}
+            </StatLabel>
+            <StatNumber>
+              {(() => {
+                const filteredBest = Math.max(
+                  ...filteredHistory.map((h) => h.score || 0)
+                );
+                return filteredBest > 0 ? filteredBest.toFixed(2) : "N/A";
+              })()}
+            </StatNumber>
+            {filteredHistory.length !== stats.history.length &&
+              personalBest.score && (
+                <Text fontSize="sm" color="gray.600">
+                  Overall: {Number(personalBest.score).toFixed(2)}
+                </Text>
+              )}
+            {(() => {
+              const bestResult = filteredHistory.find(
+                (h) =>
+                  h.score ===
+                  Math.max(...filteredHistory.map((h) => h.score || 0))
+              );
+              if (bestResult) {
+                return (
+                  <Text fontSize="sm" color="gray.600">
+                    {bestResult.eventType} (
+                    {dayjs(bestResult.date).format("MMM D, YYYY")})
+                  </Text>
+                );
+              }
+              return null;
+            })()}
+          </Stat>
         </StatGroup>
-
-        {/* Filter Controls */}
-        <Box>
-          <Heading size="md" mb={4}>
-            Filters
-          </Heading>
-          <Flex gap={4} direction={{ base: "column", md: "row" }}>
-            <Box flex={1}>
-              <Text mb={2}>Event Types</Text>
-              <Select
-                placeholder="All Event Types"
-                value=""
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "") {
-                    setSelectedEventTypes([]);
-                  } else if (!selectedEventTypes.includes(value)) {
-                    setSelectedEventTypes([...selectedEventTypes, value]);
-                  }
-                }}
-              >
-                {uniqueValues.eventTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </Select>
-              <Flex gap={2} mt={2} flexWrap="wrap">
-                {selectedEventTypes.map((type) => (
-                  <Badge
-                    key={type}
-                    colorScheme="blue"
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                    p={1}
-                  >
-                    {type}
-                    <IconButton
-                      aria-label="Remove filter"
-                      icon={<ChevronUpIcon />}
-                      size="xs"
-                      variant="ghost"
-                      onClick={() =>
-                        setSelectedEventTypes(
-                          selectedEventTypes.filter((t) => t !== type)
-                        )
-                      }
-                    />
-                  </Badge>
-                ))}
-              </Flex>
-            </Box>
-            <Box flex={1}>
-              <Text mb={2}>Event Levels</Text>
-              <Select
-                placeholder="All Event Levels"
-                value=""
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "") {
-                    setSelectedEventLevels([]);
-                  } else if (!selectedEventLevels.includes(value)) {
-                    setSelectedEventLevels([...selectedEventLevels, value]);
-                  }
-                }}
-              >
-                {uniqueValues.eventLevels.map((level) => (
-                  <option key={level} value={level}>
-                    {level}
-                  </option>
-                ))}
-              </Select>
-              <Flex gap={2} mt={2} flexWrap="wrap">
-                {selectedEventLevels.map((level) => (
-                  <Badge
-                    key={level}
-                    colorScheme="green"
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                    p={1}
-                  >
-                    {level}
-                    <IconButton
-                      aria-label="Remove filter"
-                      icon={<ChevronUpIcon />}
-                      size="xs"
-                      variant="ghost"
-                      onClick={() =>
-                        setSelectedEventLevels(
-                          selectedEventLevels.filter((l) => l !== level)
-                        )
-                      }
-                    />
-                  </Badge>
-                ))}
-              </Flex>
-            </Box>
-          </Flex>
-        </Box>
 
         {/* Score History Chart */}
         <Box>
