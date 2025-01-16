@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
+import dayjs, { DATE_FORMATS } from "../utils/date";
 import {
   Box,
   Container,
@@ -93,12 +94,14 @@ export default function Home() {
               </Heading>
             </Link>
             <Text color="gray.600" fontSize="sm">
-              {new Date(competition.startDate).toLocaleDateString()} -{" "}
-              {new Date(competition.endDate).toLocaleDateString()}
+              {dayjs.utc(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
+              {dayjs.utc(competition.endDate).format(DATE_FORMATS.DISPLAY)}
               {competition.timezone && ` (${competition.timezone})`}
             </Text>
             <Text color="gray.600" fontSize="sm">
-              {competition.venue}, {competition.city}, {competition.state}
+              {[competition.venue, competition.city, competition.state]
+                .filter(Boolean)
+                .join(", ")}
             </Text>
             <Badge
               mt={2}
@@ -157,11 +160,13 @@ export default function Home() {
           {result.type === "competition" ? (
             <>
               <Text color="gray.600" fontSize="sm">
-                {new Date(result.startDate!).toLocaleDateString()} -{" "}
-                {new Date(result.endDate!).toLocaleDateString()}
+                {dayjs.utc(result.startDate!).format(DATE_FORMATS.DISPLAY)} -{" "}
+                {dayjs.utc(result.endDate!).format(DATE_FORMATS.DISPLAY)}
               </Text>
               <Text color="gray.600" fontSize="sm">
-                {result.venue}, {result.city}, {result.state}
+                {[result.venue, result.city, result.state]
+                  .filter(Boolean)
+                  .join(", ")}
               </Text>
             </>
           ) : result.type === "skater" ? (
@@ -173,7 +178,7 @@ export default function Home() {
               )}
               {result.date && (
                 <Text color="gray.500" fontSize="sm">
-                  {new Date(result.date).toLocaleDateString()}
+                  {dayjs.utc(result.date).format(DATE_FORMATS.DISPLAY)}
                 </Text>
               )}
             </>
@@ -191,7 +196,7 @@ export default function Home() {
               )}
               {result.date && (
                 <Text color="gray.500" fontSize="sm">
-                  {new Date(result.date).toLocaleDateString()}
+                  {dayjs.utc(result.date).format(DATE_FORMATS.DISPLAY)}
                 </Text>
               )}
             </>
@@ -216,7 +221,7 @@ export default function Home() {
   const filteredCompetitions = overallStats
     ? [
         ...(eventFilter === "all" || eventFilter === "upcoming"
-          ? overallStats.upcoming
+          ? [...overallStats.upcoming].reverse()
           : []),
         ...(eventFilter === "all" || eventFilter === "recent"
           ? overallStats.recent
@@ -500,14 +505,7 @@ export default function Home() {
                       templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                       gap={4}
                     >
-                      {[
-                        ...(eventFilter === "all" || eventFilter === "upcoming"
-                          ? overallStats.upcoming
-                          : []),
-                        ...(eventFilter === "all" || eventFilter === "recent"
-                          ? overallStats.recent
-                          : []),
-                      ].map((competition, index) => (
+                      {filteredCompetitions.map((competition, index) => (
                         <CompetitionCard
                           key={index}
                           competition={competition}
@@ -521,7 +519,7 @@ export default function Home() {
                       templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                       gap={4}
                     >
-                      {overallStats.upcoming.map((competition, index) => (
+                      {filteredCompetitions.map((competition, index) => (
                         <CompetitionCard
                           key={index}
                           competition={competition}
@@ -535,7 +533,7 @@ export default function Home() {
                       templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                       gap={4}
                     >
-                      {overallStats.recent.map((competition, index) => (
+                      {filteredCompetitions.map((competition, index) => (
                         <CompetitionCard
                           key={index}
                           competition={competition}

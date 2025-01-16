@@ -86,16 +86,18 @@ export default function Competition() {
       <Box mb={8}>
         <Text color="gray.600">
           {dayjs(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
-          {dayjs(competition.endDate).format(DATE_FORMATS.DISPLAY)} (
-          {competition.timezone})
+          {dayjs(competition.endDate).format(DATE_FORMATS.DISPLAY)}
+          {competition.timezone && ` (${competition.timezone})`}
         </Text>
         <Text color="gray.600">
-          {competition.venue}, {competition.city}, {competition.state}
+          {[competition.venue, competition.city, competition.state]
+            .filter(Boolean)
+            .join(", ")}
         </Text>
       </Box>
 
       <Grid templateColumns={{ md: "repeat(2, 1fr)" }} gap={8}>
-        {competition.events.length > 0 && (
+        {competition.events.length > 0 ? (
           <Box>
             <Heading size="lg" mb={4}>
               Events
@@ -128,6 +130,13 @@ export default function Competition() {
                 </Link>
               ))}
             </VStack>
+          </Box>
+        ) : (
+          <Box>
+            <Heading size="lg" mb={4}>
+              Events
+            </Heading>
+            <Text color="gray.600">No events have been scheduled yet.</Text>
           </Box>
         )}
 
