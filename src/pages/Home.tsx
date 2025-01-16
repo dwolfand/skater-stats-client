@@ -324,7 +324,11 @@ export default function Home() {
                                 <Td>
                                   <Link
                                     as={RouterLink}
-                                    to={`/competition/${score.year}/${score.ijsId}`}
+                                    to={`/competition/${score.year}/${
+                                      score.ijsId
+                                    }/event/${encodeURIComponent(
+                                      score.resultsUrl
+                                    )}`}
                                     color="blue.500"
                                   >
                                     {score.competition}
@@ -393,7 +397,11 @@ export default function Home() {
                                     <Td>
                                       <Link
                                         as={RouterLink}
-                                        to={`/competition/${element.year}/${element.ijsId}`}
+                                        to={`/competition/${element.year}/${
+                                          element.ijsId
+                                        }/event/${encodeURIComponent(
+                                          element.resultsUrl
+                                        )}`}
                                         color="blue.500"
                                       >
                                         {element.competition}
@@ -458,7 +466,11 @@ export default function Home() {
                                     <Td>
                                       <Link
                                         as={RouterLink}
-                                        to={`/competition/${component.year}/${component.ijsId}`}
+                                        to={`/competition/${component.year}/${
+                                          component.ijsId
+                                        }/event/${encodeURIComponent(
+                                          component.resultsUrl
+                                        )}`}
                                         color="blue.500"
                                       >
                                         {component.competition}

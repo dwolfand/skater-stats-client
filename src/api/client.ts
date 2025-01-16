@@ -76,6 +76,7 @@ export interface TopScore {
   year: string;
   ijsId: string;
   eventName: string;
+  resultsUrl: string;
 }
 
 export interface TopElement {
@@ -88,6 +89,7 @@ export interface TopElement {
   year: string;
   ijsId: string;
   eventName: string;
+  resultsUrl: string;
 }
 
 export interface TopComponent {
@@ -100,6 +102,7 @@ export interface TopComponent {
   year: string;
   ijsId: string;
   eventName: string;
+  resultsUrl: string;
 }
 
 export interface TopStats {
