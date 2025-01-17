@@ -55,7 +55,7 @@ export interface SearchResult {
 }
 
 export interface CompetitionSummary {
-  type: "upcoming" | "recent";
+  type: "upcoming" | "recent" | "in progress";
   name: string;
   startDate: string;
   endDate: string;
@@ -118,6 +118,7 @@ export interface TopStats {
 export interface OverallStats {
   upcoming: CompetitionSummary[];
   recent: CompetitionSummary[];
+  inProgress: CompetitionSummary[];
   topStats: TopStats;
 }
 

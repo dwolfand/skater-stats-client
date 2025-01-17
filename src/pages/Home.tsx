@@ -111,7 +111,13 @@ export default function Home() {
             </Text>
             <Badge
               mt={2}
-              colorScheme={competition.type === "upcoming" ? "brand" : "accent"}
+              colorScheme={
+                competition.type === "in progress"
+                  ? "green"
+                  : competition.type === "upcoming"
+                  ? "brand"
+                  : "accent"
+              }
             >
               {competition.type}
             </Badge>
@@ -226,6 +232,7 @@ export default function Home() {
   // Filter competitions based on selected tab
   const filteredCompetitions = overallStats
     ? [
+        ...(eventFilter === "all" ? overallStats.inProgress || [] : []),
         ...(eventFilter === "all" || eventFilter === "upcoming"
           ? [...overallStats.upcoming].reverse()
           : []),
