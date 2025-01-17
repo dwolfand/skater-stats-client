@@ -38,6 +38,7 @@ import {
   Flex,
   Badge,
   ButtonGroup,
+  Card,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { FiFilter } from "react-icons/fi";
@@ -472,6 +473,12 @@ export default function Skater() {
                     <Select
                       placeholder="Event Types"
                       value=""
+                      variant="filled"
+                      focusBorderColor="brand.500"
+                      bg="white"
+                      boxShadow="md"
+                      _hover={{ bg: "white" }}
+                      _focus={{ bg: "white" }}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === "") {
@@ -492,7 +499,7 @@ export default function Skater() {
                       {selectedEventTypes.map((type) => (
                         <Badge
                           key={type}
-                          colorScheme="blue"
+                          colorScheme="brand"
                           display="flex"
                           alignItems="center"
                           gap={1}
@@ -518,6 +525,12 @@ export default function Skater() {
                     <Select
                       placeholder="Event Levels"
                       value=""
+                      variant="filled"
+                      focusBorderColor="brand.500"
+                      bg="white"
+                      boxShadow="md"
+                      _hover={{ bg: "white" }}
+                      _focus={{ bg: "white" }}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === "") {
@@ -541,7 +554,7 @@ export default function Skater() {
                       {selectedEventLevels.map((level) => (
                         <Badge
                           key={level}
-                          colorScheme="green"
+                          colorScheme="brand"
                           display="flex"
                           alignItems="center"
                           gap={1}
@@ -570,118 +583,125 @@ export default function Skater() {
         </Box>
 
         {/* Key Statistics */}
-        <StatGroup>
-          <Stat>
-            <StatLabel>
-              Events
-              {filteredHistory.length !== stats.history.length && ` (Filtered)`}
-            </StatLabel>
-            <StatNumber>{filteredHistory.length}</StatNumber>
-            {filteredHistory.length !== stats.history.length && (
-              <Text fontSize="sm" color="gray.600">
-                of {stats.totalEvents} total
-              </Text>
-            )}
-          </Stat>
-          <Stat>
-            <StatLabel>
-              Competitions
-              {filteredHistory.length !== stats.history.length && ` (Filtered)`}
-            </StatLabel>
-            <StatNumber>
-              {new Set(filteredHistory.map((h) => h.competition)).size}
-            </StatNumber>
-            {filteredHistory.length !== stats.history.length && (
-              <Text fontSize="sm" color="gray.600">
-                of {stats.totalCompetitions} total
-              </Text>
-            )}
-          </Stat>
-          <Stat>
-            <StatLabel>
-              Personal Best
-              {filteredHistory.length !== stats.history.length && ` (Filtered)`}
-            </StatLabel>
-            <StatNumber>
-              {(() => {
-                const scores = filteredHistory.map(getEffectiveScore);
-                const filteredBest =
-                  scores.length > 0 ? Math.max(...scores) : 0;
-                return filteredBest > 0 ? filteredBest.toFixed(2) : "N/A";
-              })()}
-            </StatNumber>
-            {filteredHistory.length !== stats.history.length &&
-              personalBest.score && (
+        <Card p={6} mb={8} border="none">
+          <StatGroup>
+            <Stat>
+              <StatLabel>
+                Events
+                {filteredHistory.length !== stats.history.length &&
+                  ` (Filtered)`}
+              </StatLabel>
+              <StatNumber>{filteredHistory.length}</StatNumber>
+              {filteredHistory.length !== stats.history.length && (
                 <Text fontSize="sm" color="gray.600">
-                  Overall: {Number(personalBest.score).toFixed(2)}
+                  of {stats.totalEvents} total
                 </Text>
               )}
-            {(() => {
-              const scores = filteredHistory.map(getEffectiveScore);
-              const maxScore = Math.max(...scores);
-              const bestResult = filteredHistory.find(
-                (h) => getEffectiveScore(h) === maxScore
-              );
-              if (bestResult) {
-                return (
+            </Stat>
+            <Stat>
+              <StatLabel>
+                Competitions
+                {filteredHistory.length !== stats.history.length &&
+                  ` (Filtered)`}
+              </StatLabel>
+              <StatNumber>
+                {new Set(filteredHistory.map((h) => h.competition)).size}
+              </StatNumber>
+              {filteredHistory.length !== stats.history.length && (
+                <Text fontSize="sm" color="gray.600">
+                  of {stats.totalCompetitions} total
+                </Text>
+              )}
+            </Stat>
+            <Stat>
+              <StatLabel>
+                Personal Best
+                {filteredHistory.length !== stats.history.length &&
+                  ` (Filtered)`}
+              </StatLabel>
+              <StatNumber>
+                {(() => {
+                  const scores = filteredHistory.map(getEffectiveScore);
+                  const filteredBest =
+                    scores.length > 0 ? Math.max(...scores) : 0;
+                  return filteredBest > 0 ? filteredBest.toFixed(2) : "N/A";
+                })()}
+              </StatNumber>
+              {filteredHistory.length !== stats.history.length &&
+                personalBest.score && (
                   <Text fontSize="sm" color="gray.600">
-                    {bestResult.eventType} (
-                    {dayjs(bestResult.date).format("MMM D, YYYY")})
+                    Overall: {Number(personalBest.score).toFixed(2)}
                   </Text>
+                )}
+              {(() => {
+                const scores = filteredHistory.map(getEffectiveScore);
+                const maxScore = Math.max(...scores);
+                const bestResult = filteredHistory.find(
+                  (h) => getEffectiveScore(h) === maxScore
                 );
-              }
-              return null;
-            })()}
-          </Stat>
-        </StatGroup>
+                if (bestResult) {
+                  return (
+                    <Text fontSize="sm" color="gray.600">
+                      {bestResult.eventType} (
+                      {dayjs(bestResult.date).format("MMM D, YYYY")})
+                    </Text>
+                  );
+                }
+                return null;
+              })()}
+            </Stat>
+          </StatGroup>
+        </Card>
 
         {/* Score History Chart */}
-        <Box>
+        <Box mb={8}>
           <Heading size="md" mb={4}>
             Score History
           </Heading>
-          <Box h="400px">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  type="number"
-                  domain={["dataMin", "dataMax"]}
-                  tickFormatter={(timestamp) =>
-                    dayjs(timestamp).format("MMM D, YYYY")
-                  }
-                  scale="time"
-                />
-                <YAxis domain={["auto", "auto"]} />
-                <Tooltip
-                  labelFormatter={(timestamp) =>
-                    dayjs(timestamp).format("MMM D, YYYY")
-                  }
-                  formatter={(value: any, name: string) => [
-                    Number(value).toFixed(2),
-                    name,
-                  ]}
-                  itemSorter={(item: any) => -item.value}
-                />
-                <Legend />
-                {chartData.map(({ eventType, data }, index) => (
-                  <Line
-                    key={eventType}
-                    type="monotone"
-                    data={data}
-                    dataKey={eventType}
-                    name={eventType}
-                    stroke={`hsl(${index * 60}, 70%, 50%)`}
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                    connectNulls
+          <Card p={6} border="none">
+            <Box h="400px">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    type="number"
+                    domain={["dataMin", "dataMax"]}
+                    tickFormatter={(timestamp) =>
+                      dayjs(timestamp).format("MMM D, YYYY")
+                    }
+                    scale="time"
                   />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </Box>
+                  <YAxis domain={["auto", "auto"]} />
+                  <Tooltip
+                    labelFormatter={(timestamp) =>
+                      dayjs(timestamp).format("MMM D, YYYY")
+                    }
+                    formatter={(value: any, name: string) => [
+                      Number(value).toFixed(2),
+                      name,
+                    ]}
+                    itemSorter={(item: any) => -item.value}
+                  />
+                  <Legend />
+                  {chartData.map(({ eventType, data }, index) => (
+                    <Line
+                      key={eventType}
+                      type="monotone"
+                      data={data}
+                      dataKey={eventType}
+                      name={eventType}
+                      stroke={`hsl(${index * 60}, 70%, 50%)`}
+                      strokeWidth={2}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
+                      connectNulls
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+          </Card>
         </Box>
 
         {/* All Results */}

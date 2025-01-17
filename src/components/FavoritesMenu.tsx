@@ -19,9 +19,9 @@ import { getFavorites, FavoriteItem } from "../utils/favorites";
 export const FAVORITES_UPDATED_EVENT = "favoritesUpdated";
 
 const TYPE_COLORS = {
-  competition: "blue",
-  event: "orange",
-  skater: "green",
+  competition: "brand",
+  event: "purple",
+  skater: "accent",
 } as const;
 
 export default function FavoritesMenu() {

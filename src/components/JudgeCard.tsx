@@ -237,39 +237,43 @@ export default function JudgeCard({ details }: JudgeCardProps) {
       )}
 
       {/* Components Table */}
-      <Text fontWeight="bold" mb={2} color="gray.700">
-        Program Components
-      </Text>
-      <Box overflowX="auto">
-        <Table size="sm" mb={4} variant="simple" colorScheme="gray">
-          <Thead>
-            <Tr bg="gray.100">
-              <Th>Component</Th>
-              <Th>Factor</Th>
-              {[...Array(details.components[0]?.judgesScores.length || 0)].map(
-                (_, i) => (
-                  <Th key={i}>J{i + 1}</Th>
-                )
-              )}
-              <Th isNumeric>Score</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {details.components.map((component, index) => (
-              <Tr key={index}>
-                <Td>{component.name}</Td>
-                <Td>{component.factor.toFixed(2)}</Td>
-                {component.judgesScores.map((score, j) => (
-                  <Td key={j}>{score.toFixed(2)}</Td>
+      {details.components.length > 0 && (
+        <>
+          <Text fontWeight="bold" mb={2} color="gray.700">
+            Program Components
+          </Text>
+          <Box overflowX="auto">
+            <Table size="sm" mb={4} variant="simple" colorScheme="gray">
+              <Thead>
+                <Tr bg="gray.100">
+                  <Th>Component</Th>
+                  <Th>Factor</Th>
+                  {[
+                    ...Array(details.components[0]?.judgesScores.length || 0),
+                  ].map((_, i) => (
+                    <Th key={i}>J{i + 1}</Th>
+                  ))}
+                  <Th isNumeric>Score</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {details.components.map((component, index) => (
+                  <Tr key={index}>
+                    <Td>{component.name}</Td>
+                    <Td>{component.factor.toFixed(2)}</Td>
+                    {component.judgesScores.map((score, j) => (
+                      <Td key={j}>{score.toFixed(2)}</Td>
+                    ))}
+                    <Td isNumeric fontWeight="medium">
+                      {component.value.toFixed(2)}
+                    </Td>
+                  </Tr>
                 ))}
-                <Td isNumeric fontWeight="medium">
-                  {component.value.toFixed(2)}
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+              </Tbody>
+            </Table>
+          </Box>
+        </>
+      )}
 
       {/* Deductions */}
       {details.deductions.length > 0 && (

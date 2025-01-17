@@ -8,6 +8,8 @@ import {
   VStack,
   Link,
   HStack,
+  Container,
+  useStyleConfig,
 } from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
 import { useQuery } from "@tanstack/react-query";
@@ -42,6 +44,11 @@ interface CompetitionDetails {
   sixEvents: SixEvent[];
 }
 
+function Card({ children }: { children: React.ReactNode }) {
+  const styles = useStyleConfig("Box", { variant: "card" });
+  return <Box __css={styles}>{children}</Box>;
+}
+
 export default function Competition() {
   const { year, ijsId } = useParams<{ year: string; ijsId: string }>();
 
@@ -57,46 +64,48 @@ export default function Competition() {
 
   if (isLoading) {
     return (
-      <Box p={8}>
+      <Container py={8}>
         <Text>Loading...</Text>
-      </Box>
+      </Container>
     );
   }
 
   if (error || !competition) {
     return (
-      <Box p={8}>
+      <Container py={8}>
         <Text color="red.500">
           Error: {error ? String(error) : "Competition not found"}
         </Text>
-      </Box>
+      </Container>
     );
   }
 
   return (
-    <Box p={8}>
-      <HStack justify="space-between" align="center" mb={4}>
-        <Heading>{competition.name}</Heading>
-        <FavoriteButton
-          type="competition"
-          name={competition.name}
-          params={{ year: year!, ijsId: ijsId! }}
-        />
-      </HStack>
-      <Box mb={8}>
-        <Text color="gray.600">
-          {dayjs(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
-          {dayjs(competition.endDate).format(DATE_FORMATS.DISPLAY)}
-          {competition.timezone && ` (${competition.timezone})`}
-        </Text>
-        <Text color="gray.600">
-          {[competition.venue, competition.city, competition.state]
-            .filter(Boolean)
-            .join(", ")}
-        </Text>
-      </Box>
+    <Container py={8}>
+      <Card>
+        <HStack justify="space-between" align="center" mb={4}>
+          <Heading>{competition.name}</Heading>
+          <FavoriteButton
+            type="competition"
+            name={competition.name}
+            params={{ year: year!, ijsId: ijsId! }}
+          />
+        </HStack>
+        <Box mb={8}>
+          <Text color="gray.600">
+            {dayjs(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
+            {dayjs(competition.endDate).format(DATE_FORMATS.DISPLAY)}
+            {competition.timezone && ` (${competition.timezone})`}
+          </Text>
+          <Text color="gray.600">
+            {[competition.venue, competition.city, competition.state]
+              .filter(Boolean)
+              .join(", ")}
+          </Text>
+        </Box>
+      </Card>
 
-      <Grid templateColumns={{ md: "repeat(2, 1fr)" }} gap={8}>
+      <Grid templateColumns={{ md: "repeat(2, 1fr)" }} gap={8} mt={8}>
         {competition.events.length > 0 ? (
           <Box>
             <Heading size="lg" mb={4}>
@@ -112,12 +121,7 @@ export default function Competition() {
                   }/event/${encodeURIComponent(event.resultsUrl || "")}`}
                   _hover={{ textDecoration: "none" }}
                 >
-                  <Box
-                    p={4}
-                    borderWidth={1}
-                    borderRadius="lg"
-                    _hover={{ bg: "gray.50" }}
-                  >
+                  <Card>
                     <Heading size="md" mb={2}>
                       {event.name}
                     </Heading>
@@ -126,7 +130,7 @@ export default function Competition() {
                       {dayjs(`2000-01-01 ${event.time}`).format("h:mm A")}
                     </Text>
                     <Text color="gray.600">Status: {event.status}</Text>
-                  </Box>
+                  </Card>
                 </Link>
               ))}
             </VStack>
@@ -155,23 +159,18 @@ export default function Competition() {
                   }/six-event/${encodeURIComponent(event.resultsUrl)}`}
                   _hover={{ textDecoration: "none" }}
                 >
-                  <Box
-                    p={4}
-                    borderWidth={1}
-                    borderRadius="lg"
-                    _hover={{ bg: "gray.50" }}
-                  >
+                  <Card>
                     <Heading size="md" mb={2}>
                       {event.name}
                     </Heading>
                     <Text color="gray.600">Segment: {event.segment}</Text>
-                  </Box>
+                  </Card>
                 </Link>
               ))}
             </VStack>
           </Box>
         )}
       </Grid>
-    </Box>
+    </Container>
   );
 }

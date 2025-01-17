@@ -20,6 +20,7 @@ import {
   Divider,
   Link,
   HStack,
+  Card,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import dayjs from "dayjs";
@@ -107,33 +108,35 @@ export default function Official() {
         </Box>
 
         {/* Summary Statistics */}
-        <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
-          <Stat>
-            <StatLabel>Total Events</StatLabel>
-            <StatNumber>{stats.totalEvents}</StatNumber>
-          </Stat>
-          <Stat>
-            <StatLabel>Total Competitions</StatLabel>
-            <StatNumber>{stats.totalCompetitions}</StatNumber>
-          </Stat>
-          <Stat>
-            <StatLabel>Elements Judged</StatLabel>
-            <StatNumber>{stats.elementStats.totalElements}</StatNumber>
-          </Stat>
-          <Stat>
-            <StatLabel>Average GOE</StatLabel>
-            <StatNumber>
-              {stats.averageGOE != null
-                ? Number(stats.averageGOE).toFixed(2)
-                : "N/A"}
-            </StatNumber>
-          </Stat>
-        </SimpleGrid>
+        <Card mb={8} p={6} border="none">
+          <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
+            <Stat>
+              <StatLabel>Total Events</StatLabel>
+              <StatNumber>{stats.totalEvents}</StatNumber>
+            </Stat>
+            <Stat>
+              <StatLabel>Total Competitions</StatLabel>
+              <StatNumber>{stats.totalCompetitions}</StatNumber>
+            </Stat>
+            <Stat>
+              <StatLabel>Elements Judged</StatLabel>
+              <StatNumber>{stats.elementStats.totalElements}</StatNumber>
+            </Stat>
+            <Stat>
+              <StatLabel>Average GOE</StatLabel>
+              <StatNumber>
+                {stats.averageGOE != null
+                  ? Number(stats.averageGOE).toFixed(2)
+                  : "N/A"}
+              </StatNumber>
+            </Stat>
+          </SimpleGrid>
+        </Card>
 
         <Divider />
 
         {/* Component Scoring Analysis */}
-        <Box>
+        <Box mb={8}>
           <Heading size="md" mb={4}>
             Program Component Scoring
           </Heading>
@@ -183,72 +186,72 @@ export default function Official() {
               </HStack>
             </PaginationRoot>
           </HStack>
-          <Table variant="simple" size="sm">
-            <Thead>
-              <Tr>
-                <Th>Date</Th>
-                <Th display={{ base: "none", md: "table-cell" }}>
-                  Competition
-                </Th>
-                <Th>Event</Th>
-                <Th display={{ base: "none", md: "table-cell" }}>Role</Th>
-                <Th display={{ base: "none", lg: "table-cell" }}>Location</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {currentHistory.map((entry, index) => (
-                <Tr key={index}>
-                  <Td>{new Date(entry.date).toLocaleDateString()}</Td>
-                  <Td display={{ base: "none", md: "table-cell" }}>
-                    <Link
-                      as={RouterLink}
-                      to={`/competition/${entry.year}/${entry.ijsId}`}
-                      color="blue.500"
-                    >
-                      {entry.competition}
-                    </Link>
-                  </Td>
-                  <Td>
-                    {entry.resultsUrl ? (
+          <Box overflowX="auto" maxW="100%">
+            <Table variant="simple" size="sm">
+              <Thead>
+                <Tr>
+                  <Th width="100px">Date</Th>
+                  <Th display={{ base: "none", md: "table-cell" }} width="30%">
+                    Competition
+                  </Th>
+                  <Th width={{ base: "60%", md: "30%" }}>Event</Th>
+                  <Th width="100px">Role</Th>
+                  <Th width="20%">Location</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {currentHistory.map((entry, index) => (
+                  <Tr key={index}>
+                    <Td whiteSpace="nowrap">
+                      {new Date(entry.date).toLocaleDateString()}
+                    </Td>
+                    <Td display={{ base: "none", md: "table-cell" }}>
                       <Link
                         as={RouterLink}
-                        to={
-                          entry.isSixEvent
-                            ? `/competition/${entry.year}/${
-                                entry.ijsId
-                              }/six-event/${encodeURIComponent(
-                                entry.resultsUrl
-                              )}`
-                            : `/competition/${entry.year}/${
-                                entry.ijsId
-                              }/event/${encodeURIComponent(entry.resultsUrl)}`
-                        }
+                        to={`/competition/${entry.year}/${entry.ijsId}`}
                         color="blue.500"
                       >
-                        {entry.eventName}
+                        {entry.competition}
                       </Link>
-                    ) : (
-                      <Text>{entry.eventName}</Text>
-                    )}
-                    <Text
-                      display={{ base: "block", md: "none" }}
-                      fontSize="sm"
-                      color="gray.600"
-                      mt={1}
-                    >
-                      {entry.competition}
-                    </Text>
-                  </Td>
-                  <Td display={{ base: "none", md: "table-cell" }}>
-                    {entry.function}
-                  </Td>
-                  <Td display={{ base: "none", lg: "table-cell" }}>
-                    {entry.location}
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+                    </Td>
+                    <Td>
+                      {entry.resultsUrl ? (
+                        <Link
+                          as={RouterLink}
+                          to={
+                            entry.isSixEvent
+                              ? `/competition/${entry.year}/${
+                                  entry.ijsId
+                                }/six-event/${encodeURIComponent(
+                                  entry.resultsUrl
+                                )}`
+                              : `/competition/${entry.year}/${
+                                  entry.ijsId
+                                }/event/${encodeURIComponent(entry.resultsUrl)}`
+                          }
+                          color="blue.500"
+                        >
+                          {entry.eventName}
+                        </Link>
+                      ) : (
+                        <Text>{entry.eventName}</Text>
+                      )}
+                      <Text
+                        display={{ base: "block", md: "none" }}
+                        fontSize="sm"
+                        color="gray.600"
+                        mt={1}
+                      >
+                        {entry.competition}
+                      </Text>
+                    </Td>
+                    <Td>{entry.function}</Td>
+                    <Td>{entry.location}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
         </Box>
       </VStack>
     </Container>

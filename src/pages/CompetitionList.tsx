@@ -1,7 +1,20 @@
 import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Box, Heading, VStack, Text, Link } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  VStack,
+  Text,
+  Link,
+  Card,
+  Container,
+  Badge,
+  HStack,
+} from "@chakra-ui/react";
 import { getCompetitions } from "../api/competitions";
+import dayjs from "dayjs";
+import { DATE_FORMATS } from "../utils/date";
+import FavoriteButton from "../components/FavoriteButton";
 
 interface Competition {
   ijsId: string;
@@ -38,52 +51,61 @@ export default function CompetitionList() {
 
   if (loading) {
     return (
-      <Box p={8}>
+      <Container py={8}>
         <Text>Loading competitions...</Text>
-      </Box>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <Box p={8}>
+      <Container py={8}>
         <Text color="red.500">Error: {error}</Text>
-      </Box>
+      </Container>
     );
   }
 
   return (
-    <Box p={8}>
+    <Container maxW="container.xl" py={8}>
       <Heading mb={6}>Figure Skating Competitions</Heading>
       <VStack align="stretch" spacing={4}>
         {competitions.map((competition) => (
-          <Link
+          <Card
             key={`${competition.year}-${competition.ijsId}`}
-            as={RouterLink}
-            to={`/competition/${competition.year}/${competition.ijsId}`}
-            _hover={{ textDecoration: "none" }}
+            p={6}
+            border="none"
           >
-            <Box
-              p={6}
-              borderWidth={1}
-              borderRadius="lg"
-              _hover={{ bg: "gray.50" }}
-            >
-              <Heading size="md" mb={2}>
-                {competition.name}
-              </Heading>
-              <Text color="gray.600">
-                {new Date(competition.startDate).toLocaleDateString()} -{" "}
-                {new Date(competition.endDate).toLocaleDateString()} (
-                {competition.timezone})
-              </Text>
-              <Text color="gray.600">
-                {competition.venue}, {competition.city}, {competition.state}
-              </Text>
-            </Box>
-          </Link>
+            <HStack justify="space-between" align="start">
+              <Box>
+                <Link
+                  as={RouterLink}
+                  to={`/competition/${competition.year}/${competition.ijsId}`}
+                  _hover={{ textDecoration: "none" }}
+                >
+                  <Heading size="sm" mb={2}>
+                    {competition.name}
+                  </Heading>
+                </Link>
+                <Text color="gray.600" fontSize="sm">
+                  {dayjs(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
+                  {dayjs(competition.endDate).format(DATE_FORMATS.DISPLAY)}
+                  {competition.timezone && ` (${competition.timezone})`}
+                </Text>
+                <Text color="gray.600" fontSize="sm">
+                  {[competition.venue, competition.city, competition.state]
+                    .filter(Boolean)
+                    .join(", ")}
+                </Text>
+              </Box>
+              <FavoriteButton
+                type="competition"
+                name={competition.name}
+                params={{ year: competition.year, ijsId: competition.ijsId }}
+              />
+            </HStack>
+          </Card>
         ))}
       </VStack>
-    </Box>
+    </Container>
   );
 }

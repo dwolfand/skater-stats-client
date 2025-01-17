@@ -9,6 +9,7 @@ import SixEventDetails from "./pages/SixEventDetails";
 import Skater from "./pages/Skater";
 import Official from "./pages/Official";
 import Layout from "./components/Layout";
+import theme from "./theme";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -16,7 +17,7 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
         <Router>
           <Layout>
             <Routes>
