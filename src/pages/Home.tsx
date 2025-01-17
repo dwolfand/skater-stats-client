@@ -87,48 +87,51 @@ export default function Home() {
     competition: CompetitionSummary;
   }) => (
     <GridItem>
-      <Card>
-        <HStack justify="space-between" align="start">
-          <Box>
-            <Link
-              as={RouterLink}
-              to={`/competition/${competition.year}/${competition.ijsId}`}
-              _hover={{ textDecoration: "none" }}
-            >
+      <Link
+        as={RouterLink}
+        to={`/competition/${competition.year}/${competition.ijsId}`}
+        _hover={{ textDecoration: "none" }}
+        display="block"
+      >
+        <Card>
+          <HStack justify="space-between" align="start">
+            <Box>
               <Heading size="sm" mb={2}>
                 {competition.name}
               </Heading>
-            </Link>
-            <Text color="gray.600" fontSize="sm">
-              {dayjs.utc(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
-              {dayjs.utc(competition.endDate).format(DATE_FORMATS.DISPLAY)}
-              {competition.timezone && ` (${competition.timezone})`}
-            </Text>
-            <Text color="gray.600" fontSize="sm">
-              {[competition.venue, competition.city, competition.state]
-                .filter(Boolean)
-                .join(", ")}
-            </Text>
-            <Badge
-              mt={2}
-              colorScheme={
-                competition.type === "in progress"
-                  ? "green"
-                  : competition.type === "upcoming"
-                  ? "brand"
-                  : "accent"
-              }
-            >
-              {competition.type}
-            </Badge>
-          </Box>
-          <FavoriteButton
-            type="competition"
-            name={competition.name}
-            params={{ year: competition.year, ijsId: competition.ijsId }}
-          />
-        </HStack>
-      </Card>
+              <Text color="gray.600" fontSize="sm">
+                {dayjs.utc(competition.startDate).format(DATE_FORMATS.DISPLAY)}{" "}
+                - {dayjs.utc(competition.endDate).format(DATE_FORMATS.DISPLAY)}
+                {competition.timezone && ` (${competition.timezone})`}
+              </Text>
+              <Text color="gray.600" fontSize="sm">
+                {[competition.venue, competition.city, competition.state]
+                  .filter(Boolean)
+                  .join(", ")}
+              </Text>
+              <Badge
+                mt={2}
+                colorScheme={
+                  competition.type === "in progress"
+                    ? "green"
+                    : competition.type === "upcoming"
+                    ? "brand"
+                    : "accent"
+                }
+              >
+                {competition.type}
+              </Badge>
+            </Box>
+            <Box onClick={(e) => e.preventDefault()}>
+              <FavoriteButton
+                type="competition"
+                name={competition.name}
+                params={{ year: competition.year, ijsId: competition.ijsId }}
+              />
+            </Box>
+          </HStack>
+        </Card>
+      </Link>
     </GridItem>
   );
 
