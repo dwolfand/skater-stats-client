@@ -562,7 +562,7 @@ export default function Home() {
                   </TabList>
 
                   <TabPanels>
-                    <TabPanel>
+                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
                       <Grid
                         templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                         gap={4}
@@ -576,7 +576,7 @@ export default function Home() {
                       </Grid>
                     </TabPanel>
 
-                    <TabPanel>
+                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
                       <Grid
                         templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                         gap={4}
@@ -590,7 +590,7 @@ export default function Home() {
                       </Grid>
                     </TabPanel>
 
-                    <TabPanel>
+                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
                       <Grid
                         templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
                         gap={4}

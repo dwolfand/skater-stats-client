@@ -220,7 +220,7 @@ export default function Results() {
   if (!data) return null;
 
   return (
-    <Box p={8}>
+    <Box p={{ base: 2, md: 8 }}>
       <VStack align="stretch" spacing={4}>
         <HStack justify="space-between" align="center">
           <Heading>{data.eventName}</Heading>
@@ -264,33 +264,35 @@ export default function Results() {
           )}
         </HStack>
       </VStack>
-      <Table variant="simple" size="sm">
-        <Thead>
-          <Tr>
-            <Th width="40px" padding={0}></Th>
-            <Th
-              width={{ base: "40px", md: "60px" }}
-              padding={{ base: 1, md: 3 }}
-              isNumeric
-            >
-              Place
-            </Th>
-            <Th padding={{ base: 1, md: 3 }}>Skater</Th>
-            <Th
-              width={{ base: "80px", md: "120px" }}
-              padding={{ base: 1, md: 3 }}
-              isNumeric
-            >
-              Score
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {data.results.map((result, index) => (
-            <ExpandableRow key={index} result={result} />
-          ))}
-        </Tbody>
-      </Table>
+      <Box overflowX="auto" maxW="100%" mt={4}>
+        <Table variant="simple" size="sm">
+          <Thead>
+            <Tr>
+              <Th width="40px" p={{ base: 1, md: 2 }}></Th>
+              <Th
+                width={{ base: "40px", md: "60px" }}
+                p={{ base: 2, md: 3 }}
+                isNumeric
+              >
+                Place
+              </Th>
+              <Th p={{ base: 2, md: 3 }}>Skater</Th>
+              <Th
+                width={{ base: "80px", md: "120px" }}
+                p={{ base: 2, md: 3 }}
+                isNumeric
+              >
+                Score
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {data.results.map((result, index) => (
+              <ExpandableRow key={index} result={result} />
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
 
       {/* Officials Section */}
       {data.officials && data.officials.length > 0 && (
@@ -298,32 +300,34 @@ export default function Results() {
           <Heading size="md" mb={4}>
             Officials
           </Heading>
-          <Table variant="simple" size="sm">
-            <Thead>
-              <Tr>
-                <Th>Function</Th>
-                <Th>Name</Th>
-                <Th>Location</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data.officials.map((official) => (
-                <Tr key={`${official.function}-${official.name}`}>
-                  <Td>{official.function}</Td>
-                  <Td>
-                    <Link
-                      as={RouterLink}
-                      to={`/official/${encodeURIComponent(official.name)}`}
-                      color="blue.500"
-                    >
-                      {official.name}
-                    </Link>
-                  </Td>
-                  <Td>{official.location}</Td>
+          <Box overflowX="auto" maxW="100%">
+            <Table variant="simple" size="sm">
+              <Thead>
+                <Tr>
+                  <Th p={{ base: 2, md: 3 }}>Function</Th>
+                  <Th p={{ base: 2, md: 3 }}>Name</Th>
+                  <Th p={{ base: 2, md: 3 }}>Location</Th>
                 </Tr>
-              ))}
-            </Tbody>
-          </Table>
+              </Thead>
+              <Tbody>
+                {data.officials.map((official) => (
+                  <Tr key={`${official.function}-${official.name}`}>
+                    <Td p={{ base: 2, md: 3 }}>{official.function}</Td>
+                    <Td p={{ base: 2, md: 3 }}>
+                      <Link
+                        as={RouterLink}
+                        to={`/official/${encodeURIComponent(official.name)}`}
+                        color="blue.500"
+                      >
+                        {official.name}
+                      </Link>
+                    </Td>
+                    <Td p={{ base: 2, md: 3 }}>{official.location}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
         </Box>
       )}
     </Box>
