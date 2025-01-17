@@ -100,7 +100,7 @@ export default function Competition() {
         {competition.events.length > 0 ? (
           <Box>
             <Heading size="lg" mb={4}>
-              Events
+              IJS Events
             </Heading>
             <VStack align="stretch" spacing={4}>
               {competition.events.map((event: Event, index: number) => (
@@ -134,25 +134,25 @@ export default function Competition() {
         ) : (
           <Box>
             <Heading size="lg" mb={4}>
-              Events
+              IJS Events
             </Heading>
-            <Text color="gray.600">No events have been scheduled yet.</Text>
+            <Text color="gray.600">No IJS events have been scheduled yet.</Text>
           </Box>
         )}
 
-        {/* {competition.sixEvents.length > 0 && (
+        {competition.sixEvents.length > 0 && (
           <Box>
             <Heading size="lg" mb={4}>
-              IJS Events
+              6.0 Events
             </Heading>
             <VStack align="stretch" spacing={4}>
-              {competition.sixEvents.map((event, index) => (
+              {competition.sixEvents.map((event: SixEvent, index: number) => (
                 <Link
                   key={index}
                   as={RouterLink}
                   to={`/competition/${competition.year}/${
                     competition.ijsId
-                  }/event/${encodeURIComponent(event.resultsUrl)}`}
+                  }/six-event/${encodeURIComponent(event.resultsUrl)}`}
                   _hover={{ textDecoration: "none" }}
                 >
                   <Box
@@ -170,7 +170,7 @@ export default function Competition() {
               ))}
             </VStack>
           </Box>
-        )} */}
+        )}
       </Grid>
     </Box>
   );

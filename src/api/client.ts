@@ -183,6 +183,13 @@ export interface SkaterStats {
         value: number;
       }[];
     };
+
+    // 6.0 specific fields
+    isSixEvent?: boolean;
+    majority?: string;
+    tieBreaker?: string;
+    judgeScores?: string[];
+    club?: string;
   }[];
   placementDistribution: {
     range: string;
@@ -247,6 +254,7 @@ export interface OfficialStats {
     ijsId: string;
     eventName: string;
     resultsUrl: string;
+    isSixEvent: boolean;
   }[];
 }
 
@@ -438,3 +446,19 @@ export const submitFeedback = async (feedback: FeedbackRequest) => {
   const { data } = await api.post("/feedback", feedback);
   return data;
 };
+
+export async function getSixEventDetails(
+  year: string,
+  ijsId: string,
+  resultsUrl: string
+) {
+  const response = await fetch(
+    `${API_BASE_URL}/competition/${year}/${ijsId}/six-event/${encodeURIComponent(
+      resultsUrl
+    )}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch six event details");
+  }
+  return response.json();
+}

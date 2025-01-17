@@ -212,9 +212,17 @@ export default function Official() {
                     {entry.resultsUrl ? (
                       <Link
                         as={RouterLink}
-                        to={`/competition/${entry.year}/${
-                          entry.ijsId
-                        }/event/${encodeURIComponent(entry.resultsUrl)}`}
+                        to={
+                          entry.isSixEvent
+                            ? `/competition/${entry.year}/${
+                                entry.ijsId
+                              }/six-event/${encodeURIComponent(
+                                entry.resultsUrl
+                              )}`
+                            : `/competition/${entry.year}/${
+                                entry.ijsId
+                              }/event/${encodeURIComponent(entry.resultsUrl)}`
+                        }
                         color="blue.500"
                       >
                         {entry.eventName}

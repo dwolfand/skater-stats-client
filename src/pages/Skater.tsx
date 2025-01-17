@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import {
-  SkaterStats,
   getSkaterStats,
   getSkaterAIAnalysis,
+  SkaterStats,
 } from "../api/client";
 import dayjs from "../utils/date";
 import math from "../utils/math";
@@ -52,11 +52,14 @@ import {
   Legend,
 } from "recharts";
 import JudgeCard from "../components/JudgeCard";
+import SixJudgeCard from "../components/SixJudgeCard";
 import { useEffect, useState, useMemo } from "react";
 import FavoriteButton from "../components/FavoriteButton";
 
+type SkaterHistoryEntry = SkaterStats["history"][0];
+
 interface ExpandableRowProps {
-  result: SkaterStats["history"][0];
+  result: SkaterHistoryEntry;
 }
 
 function getOrdinalSuffix(placement: string): string {
@@ -77,10 +80,10 @@ function getOrdinalSuffix(placement: string): string {
   }
 }
 
-function getMostFrequentEventTypeAndBest(history: SkaterStats["history"]) {
+function getMostFrequentEventTypeAndBest(history: SkaterHistoryEntry[]) {
   // Count occurrences of each event type
   const eventTypeCounts = history.reduce<Record<string, number>>(
-    (acc: Record<string, number>, curr: SkaterStats["history"][0]) => {
+    (acc: Record<string, number>, curr: SkaterHistoryEntry) => {
       acc[curr.eventType] = (acc[curr.eventType] || 0) + 1;
       return acc;
     },
@@ -98,15 +101,15 @@ function getMostFrequentEventTypeAndBest(history: SkaterStats["history"]) {
   // Get all scores for the most frequent event type
   const scores = history
     .filter(
-      (h: SkaterStats["history"][0]) =>
+      (h: SkaterHistoryEntry) =>
         h.eventType === mostFrequentEventType && h.score != null
     )
-    .map((h: SkaterStats["history"][0]) => h.score);
+    .map((h: SkaterHistoryEntry) => h.score);
 
   // Find the highest score and its corresponding event
-  const maxScore = scores.length > 0 ? math.max(scores) : null;
+  const maxScore = scores.length > 0 ? Math.max(...scores) : null;
   const bestEvent = history.find(
-    (h: SkaterStats["history"][0]) =>
+    (h: SkaterHistoryEntry) =>
       h.eventType === mostFrequentEventType && h.score === maxScore
   );
 
@@ -119,28 +122,28 @@ function getMostFrequentEventTypeAndBest(history: SkaterStats["history"]) {
 }
 
 // Helper function to get the effective score
-const getEffectiveScore = (result: SkaterStats["history"][0]) => {
+function getEffectiveScore(result: SkaterHistoryEntry): number {
+  if (result.isSixEvent) {
+    return result.majority ? parseFloat(result.majority) : 0;
+  }
   return result.segmentScore && result.segmentScore > 0
     ? result.segmentScore
     : result.score;
-};
+}
 
 function ExpandableRow({ result }: ExpandableRowProps) {
   const { isOpen, onToggle } = useDisclosure();
 
   return (
     <>
-      <Tr cursor="pointer" onClick={onToggle} _hover={{ bg: "gray.50" }}>
-        <Td>
+      <Tr>
+        <Td width="40px">
           <IconButton
             aria-label="Expand row"
             icon={isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-            size="sm"
+            onClick={onToggle}
             variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle();
-            }}
+            size="sm"
           />
         </Td>
         <Td display={{ base: "none", md: "table-cell" }}>
@@ -150,60 +153,76 @@ function ExpandableRow({ result }: ExpandableRowProps) {
           <VStack align="start" spacing={0}>
             <Link
               as={RouterLink}
-              to={`/competition/${result.year}/${
-                result.ijsId
-              }/event/${encodeURIComponent(result.resultsUrl)}`}
-              onClick={(e) => e.stopPropagation()}
-              color="blue.600"
-              _hover={{ textDecoration: "none", color: "blue.700" }}
+              to={
+                result.isSixEvent
+                  ? `/competition/${result.year}/${
+                      result.ijsId
+                    }/six-event/${encodeURIComponent(result.resultsUrl)}`
+                  : `/competition/${result.year}/${
+                      result.ijsId
+                    }/event/${encodeURIComponent(result.resultsUrl)}`
+              }
+              color="blue.500"
             >
-              <Text fontWeight="medium">{result.event}</Text>
-            </Link>
-            <Link
-              as={RouterLink}
-              to={`/competition/${result.year}/${result.ijsId}`}
-              onClick={(e) => e.stopPropagation()}
-              _hover={{ textDecoration: "none", color: "gray.700" }}
-            >
-              <Text fontSize="sm" color="gray.600">
-                {result.competition}
-              </Text>
+              {result.isSixEvent
+                ? `${result.eventType} (${result.event})`
+                : result.eventType}
             </Link>
             <Text
-              display={{ base: "block", md: "none" }}
               fontSize="sm"
-              color="gray.500"
+              color="gray.600"
+              display={{ base: "block", md: "none" }}
             >
               {dayjs(result.date).format("MMM D, YYYY")}
             </Text>
+            <Link
+              as={RouterLink}
+              to={`/competition/${result.year}/${result.ijsId}`}
+              color="gray.600"
+              fontSize="sm"
+            >
+              {result.competition}
+            </Link>
           </VStack>
         </Td>
         <Td isNumeric>
-          <Text>{Number(getEffectiveScore(result)).toFixed(2)}</Text>
-          {result.segmentScore &&
-            result.segmentScore > 0 &&
-            result.score !== result.segmentScore && (
-              <Text fontSize="sm" color="gray.600">
-                ({Number(result.score).toFixed(2)} total)
-              </Text>
-            )}
-          <Text
-            fontSize="sm"
-            color="gray.600"
-            display={{ base: "block", md: "none" }}
-          >
-            {result.placement}
-            {getOrdinalSuffix(result.placement)} Place
-          </Text>
+          {result.isSixEvent ? (
+            <VStack align="flex-end" spacing={0}>
+              <Text>{result.majority || "-"}</Text>
+              {result.tieBreaker && (
+                <Text fontSize="sm" color="gray.600">
+                  {result.tieBreaker}
+                </Text>
+              )}
+            </VStack>
+          ) : (
+            result.score?.toFixed(2) || "-"
+          )}
         </Td>
         <Td isNumeric display={{ base: "none", md: "table-cell" }}>
-          {result.placement}
+          {result.placement && (
+            <>
+              {result.placement}
+              <Text as="sup" fontSize="xs" ml={0.5}>
+                {getOrdinalSuffix(result.placement)}
+              </Text>
+            </>
+          )}
         </Td>
       </Tr>
-      {isOpen && result.judgeDetails && (
+      {isOpen && (
         <Tr>
           <Td colSpan={5} p={0}>
-            <JudgeCard details={result.judgeDetails} />
+            {result.isSixEvent ? (
+              <SixJudgeCard
+                judgeScores={result.judgeScores}
+                club={result.club}
+                majority={result.majority}
+                tieBreaker={result.tieBreaker}
+              />
+            ) : (
+              result.judgeDetails && <JudgeCard details={result.judgeDetails} />
+            )}
           </Td>
         </Tr>
       )}

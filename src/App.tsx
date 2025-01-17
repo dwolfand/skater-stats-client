@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import CompetitionList from "./pages/CompetitionList";
 import Competition from "./pages/Competition";
 import Results from "./pages/Results";
+import SixEventDetails from "./pages/SixEventDetails";
 import Skater from "./pages/Skater";
 import Official from "./pages/Official";
 import Layout from "./components/Layout";
@@ -28,6 +29,10 @@ function App() {
               <Route
                 path="/competition/:year/:ijsId/event/:eventId"
                 element={<Results />}
+              />
+              <Route
+                path="/competition/:year/:ijsId/six-event/:resultsUrl"
+                element={<SixEventDetails />}
               />
               <Route path="/skater/:name" element={<Skater />} />
               <Route path="/skater/id/:skaterId" element={<Skater />} />
