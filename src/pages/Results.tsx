@@ -155,7 +155,8 @@ export default function Results() {
     enabled: !!(year && ijsId && eventId),
   });
 
-  const segmentStatus = data?.segments.find((s) => s.isActive)?.status || "";
+  const segmentStatus =
+    data?.segments?.find((s) => s.isActive)?.status || data?.status || "";
   const isUnofficialStatus =
     segmentStatus === "Live unofficial" || segmentStatus === "Unofficial";
 

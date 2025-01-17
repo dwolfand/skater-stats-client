@@ -10,6 +10,7 @@ import {
   HStack,
   Container,
   useStyleConfig,
+  Badge,
 } from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
 import { useQuery } from "@tanstack/react-query";
@@ -124,12 +125,19 @@ export default function Competition() {
                   <Card>
                     <Heading size="md" mb={2}>
                       {event.name}
+                      <Badge
+                        ml={2}
+                        colorScheme={
+                          event.status === "Final" ? "green" : "orange"
+                        }
+                      >
+                        {event.status}
+                      </Badge>
                     </Heading>
                     <Text color="gray.600">
                       {dayjs(event.date).format(DATE_FORMATS.DISPLAY)} at{" "}
                       {dayjs(`2000-01-01 ${event.time}`).format("h:mm A")}
                     </Text>
-                    <Text color="gray.600">Status: {event.status}</Text>
                   </Card>
                 </Link>
               ))}
