@@ -11,6 +11,7 @@ import {
   Container,
   useStyleConfig,
   Badge,
+  Tooltip,
 } from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
 import { useQuery } from "@tanstack/react-query";
@@ -43,6 +44,54 @@ interface CompetitionDetails {
   state: string;
   events: Event[];
   sixEvents: SixEvent[];
+}
+
+function formatEventTime(
+  date: string,
+  time: string,
+  timezone: string | undefined
+) {
+  if (!timezone) {
+    return dayjs(`2000-01-01 ${time}`).format("h:mm A");
+  }
+
+  // Get local timezone
+  const localTimezone = dayjs.tz.guess();
+
+  // If timezones match, just return the time
+  if (timezone === localTimezone) {
+    return dayjs(`2000-01-01 ${time}`).format("h:mm A");
+  }
+
+  // Create the time in the competition's timezone
+  const competitionTime = dayjs.tz(
+    `${date} ${time}`,
+    "YYYY-MM-DD HH:mm:ss",
+    timezone
+  );
+
+  // Convert to local time
+  const localTime = competitionTime.tz(localTimezone);
+
+  // Format the display times
+  const eventTimeDisplay = competitionTime.format("h:mm A");
+  const localTimeDisplay = localTime.format("h:mm A");
+
+  // Only show local time if it's different
+  if (eventTimeDisplay !== localTimeDisplay) {
+    return (
+      <Tooltip label={`${localTimeDisplay} your time`}>
+        <Text as="span">
+          {eventTimeDisplay}{" "}
+          <Text as="span" fontSize="sm" color="gray.500">
+            ({localTimeDisplay} local)
+          </Text>
+        </Text>
+      </Tooltip>
+    );
+  }
+
+  return eventTimeDisplay;
 }
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -114,32 +163,68 @@ export default function Competition() {
             </Heading>
             <VStack align="stretch" spacing={4}>
               {competition.events.map((event: Event, index: number) => (
-                <Link
+                <Box
                   key={index}
-                  as={RouterLink}
-                  to={`/competition/${competition.year}/${
-                    competition.ijsId
-                  }/event/${encodeURIComponent(event.resultsUrl || "")}`}
-                  _hover={{ textDecoration: "none" }}
+                  opacity={!event.resultsUrl ? 0.6 : 1}
+                  position="relative"
                 >
-                  <Card>
-                    <Heading size="md" mb={2}>
-                      {event.name}
-                      <Badge
-                        ml={2}
-                        colorScheme={
-                          event.status === "Final" ? "green" : "orange"
-                        }
-                      >
-                        {event.status}
-                      </Badge>
-                    </Heading>
-                    <Text color="gray.600">
-                      {dayjs(event.date).format(DATE_FORMATS.DISPLAY)} at{" "}
-                      {dayjs(`2000-01-01 ${event.time}`).format("h:mm A")}
-                    </Text>
-                  </Card>
-                </Link>
+                  {event.resultsUrl ? (
+                    <Link
+                      as={RouterLink}
+                      to={`/competition/${competition.year}/${
+                        competition.ijsId
+                      }/event/${encodeURIComponent(event.resultsUrl)}`}
+                      _hover={{ textDecoration: "none" }}
+                    >
+                      <Card>
+                        <Heading size="md" mb={2}>
+                          {event.name}
+                          <Badge
+                            ml={2}
+                            colorScheme={
+                              event.status === "Final" ? "green" : "orange"
+                            }
+                          >
+                            {event.status}
+                          </Badge>
+                        </Heading>
+                        <Text color="gray.600">
+                          {dayjs(event.date).format(DATE_FORMATS.DISPLAY)} at{" "}
+                          {formatEventTime(
+                            event.date,
+                            event.time,
+                            competition.timezone
+                          )}
+                        </Text>
+                      </Card>
+                    </Link>
+                  ) : (
+                    <Card>
+                      <Heading size="md" mb={2}>
+                        {event.name}
+                        <Badge
+                          ml={2}
+                          colorScheme={
+                            event.status === "Final" ? "green" : "orange"
+                          }
+                        >
+                          {event.status}
+                        </Badge>
+                      </Heading>
+                      <Text color="gray.600">
+                        {dayjs(event.date).format(DATE_FORMATS.DISPLAY)} at{" "}
+                        {formatEventTime(
+                          event.date,
+                          event.time,
+                          competition.timezone
+                        )}
+                      </Text>
+                      <Text color="gray.500" fontSize="sm" mt={2}>
+                        Results not yet available
+                      </Text>
+                    </Card>
+                  )}
+                </Box>
               ))}
             </VStack>
           </Box>
