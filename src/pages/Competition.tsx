@@ -46,6 +46,25 @@ interface CompetitionDetails {
   sixEvents: SixEvent[];
 }
 
+// Convert US timezone abbreviations to IANA timezone names
+function convertToIANATimezone(timezone: string): string {
+  const timezoneMap: { [key: string]: string } = {
+    EDT: "America/New_York",
+    EST: "America/New_York",
+    ET: "America/New_York",
+    CDT: "America/Chicago",
+    CST: "America/Chicago",
+    CT: "America/Chicago",
+    MDT: "America/Denver",
+    MST: "America/Denver",
+    MT: "America/Denver",
+    PDT: "America/Los_Angeles",
+    PST: "America/Los_Angeles",
+    PT: "America/Los_Angeles",
+  };
+  return timezoneMap[timezone] || timezone;
+}
+
 function formatEventTime(
   date: string,
   time: string,
@@ -58,8 +77,11 @@ function formatEventTime(
   // Get local timezone
   const localTimezone = dayjs.tz.guess();
 
+  // Convert timezone if needed
+  const ianaTimezone = convertToIANATimezone(timezone);
+
   // If timezones match, just return the time
-  if (timezone === localTimezone) {
+  if (ianaTimezone === localTimezone) {
     return dayjs(`2000-01-01 ${time}`).format("h:mm A");
   }
 
@@ -67,7 +89,7 @@ function formatEventTime(
   const competitionTime = dayjs.tz(
     `${date} ${time}`,
     "YYYY-MM-DD HH:mm:ss",
-    timezone
+    ianaTimezone
   );
 
   // Convert to local time
