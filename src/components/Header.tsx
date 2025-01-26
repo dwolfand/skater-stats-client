@@ -24,7 +24,13 @@ import { searchEvents } from "../api/client";
 import type { SearchResult } from "../api/client";
 import dayjs from "../utils/date";
 
-const SearchInput = ({ isMobile }: { isMobile?: boolean }) => {
+const SearchInput = ({
+  isMobile,
+  onClose,
+}: {
+  isMobile?: boolean;
+  onClose?: () => void;
+}) => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
@@ -36,6 +42,7 @@ const SearchInput = ({ isMobile }: { isMobile?: boolean }) => {
 
   const handleResultClick = (result: SearchResult) => {
     setQuery("");
+    onClose?.();
     const path =
       result.type === "competition"
         ? `/competition/${result.year}/${result.ijsId}`
@@ -221,7 +228,7 @@ export default function Header() {
             style={{ width: "100%" }}
           >
             <Box pb={2} w="100%">
-              <SearchInput isMobile={true} />
+              <SearchInput isMobile={true} onClose={onMobileSearchClose} />
             </Box>
           </Collapse>
         )}

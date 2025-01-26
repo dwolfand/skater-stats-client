@@ -137,99 +137,106 @@ export default function Home() {
 
   // Function to render a search result
   const SearchResultCard = ({ result }: { result: SearchResult }) => (
-    <Card>
-      <Box display="flex" justifyContent="space-between" alignItems="start">
-        <Box>
-          <HStack spacing={2}>
-            <Link
-              as={RouterLink}
-              to={
-                result.type === "competition"
-                  ? `/competition/${result.year}/${result.ijsId}`
-                  : result.type === "skater"
-                  ? result.id
-                    ? `/skater/id/${result.id}`
-                    : `/skater/${encodeURIComponent(result.name)}`
-                  : `/official/${encodeURIComponent(result.name)}`
-              }
-              _hover={{ textDecoration: "none" }}
-            >
+    <Link
+      as={RouterLink}
+      to={
+        result.type === "competition"
+          ? `/competition/${result.year}/${result.ijsId}`
+          : result.type === "skater"
+          ? result.id
+            ? `/skater/id/${result.id}`
+            : `/skater/${encodeURIComponent(result.name)}`
+          : `/official/${encodeURIComponent(result.name)}`
+      }
+      _hover={{ textDecoration: "none" }}
+      display="block"
+    >
+      <Card>
+        <Box display="flex" justifyContent="space-between" alignItems="start">
+          <Box>
+            <HStack spacing={2}>
               <Heading size="sm">{result.name}</Heading>
-            </Link>
+              {result.type === "competition" ? (
+                <Box onClick={(e) => e.preventDefault()}>
+                  <FavoriteButton
+                    type="competition"
+                    name={result.name}
+                    params={{ year: result.year!, ijsId: result.ijsId! }}
+                  />
+                </Box>
+              ) : result.type === "skater" ? (
+                <Box onClick={(e) => e.preventDefault()}>
+                  <FavoriteButton
+                    type="skater"
+                    name={result.name}
+                    params={
+                      result.id
+                        ? { skaterId: result.id }
+                        : { name: result.name }
+                    }
+                  />
+                </Box>
+              ) : null}
+            </HStack>
             {result.type === "competition" ? (
-              <FavoriteButton
-                type="competition"
-                name={result.name}
-                params={{ year: result.year!, ijsId: result.ijsId! }}
-              />
+              <>
+                <Text color="gray.600" fontSize="sm">
+                  {dayjs.utc(result.startDate!).format(DATE_FORMATS.DISPLAY)} -{" "}
+                  {dayjs.utc(result.endDate!).format(DATE_FORMATS.DISPLAY)}
+                </Text>
+                <Text color="gray.600" fontSize="sm">
+                  {[result.venue, result.city, result.state]
+                    .filter(Boolean)
+                    .join(", ")}
+                </Text>
+              </>
             ) : result.type === "skater" ? (
-              <FavoriteButton
-                type="skater"
-                name={result.name}
-                params={
-                  result.id ? { skaterId: result.id } : { name: result.name }
-                }
-              />
-            ) : null}
-          </HStack>
-          {result.type === "competition" ? (
-            <>
-              <Text color="gray.600" fontSize="sm">
-                {dayjs.utc(result.startDate!).format(DATE_FORMATS.DISPLAY)} -{" "}
-                {dayjs.utc(result.endDate!).format(DATE_FORMATS.DISPLAY)}
-              </Text>
-              <Text color="gray.600" fontSize="sm">
-                {[result.venue, result.city, result.state]
-                  .filter(Boolean)
-                  .join(", ")}
-              </Text>
-            </>
-          ) : result.type === "skater" ? (
-            <>
-              {result.competition && (
-                <Text color="gray.600" fontSize="sm">
-                  {result.competition}
-                </Text>
-              )}
-              {result.date && (
-                <Text color="gray.500" fontSize="sm">
-                  {dayjs.utc(result.date).format(DATE_FORMATS.DISPLAY)}
-                </Text>
-              )}
-            </>
-          ) : (
-            <>
-              {result.function && (
-                <Text color="gray.600" fontSize="sm">
-                  {result.function}
-                </Text>
-              )}
-              {result.competition && (
-                <Text color="gray.600" fontSize="sm">
-                  {result.competition}
-                </Text>
-              )}
-              {result.date && (
-                <Text color="gray.500" fontSize="sm">
-                  {dayjs.utc(result.date).format(DATE_FORMATS.DISPLAY)}
-                </Text>
-              )}
-            </>
-          )}
+              <>
+                {result.competition && (
+                  <Text color="gray.600" fontSize="sm">
+                    {result.competition}
+                  </Text>
+                )}
+                {result.date && (
+                  <Text color="gray.500" fontSize="sm">
+                    {dayjs.utc(result.date).format(DATE_FORMATS.DISPLAY)}
+                  </Text>
+                )}
+              </>
+            ) : (
+              <>
+                {result.function && (
+                  <Text color="gray.600" fontSize="sm">
+                    {result.function}
+                  </Text>
+                )}
+                {result.competition && (
+                  <Text color="gray.600" fontSize="sm">
+                    {result.competition}
+                  </Text>
+                )}
+                {result.date && (
+                  <Text color="gray.500" fontSize="sm">
+                    {dayjs.utc(result.date).format(DATE_FORMATS.DISPLAY)}
+                  </Text>
+                )}
+              </>
+            )}
+          </Box>
+          <Badge
+            colorScheme={
+              result.type === "competition"
+                ? "brand"
+                : result.type === "skater"
+                ? "accent"
+                : "purple"
+            }
+          >
+            {result.type}
+          </Badge>
         </Box>
-        <Badge
-          colorScheme={
-            result.type === "competition"
-              ? "brand"
-              : result.type === "skater"
-              ? "accent"
-              : "purple"
-          }
-        >
-          {result.type}
-        </Badge>
-      </Box>
-    </Card>
+      </Card>
+    </Link>
   );
 
   // Filter competitions based on selected tab
