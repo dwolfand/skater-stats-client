@@ -197,7 +197,21 @@ function ExpandableRow({ result }: ExpandableRowProps) {
               )}
             </VStack>
           ) : (
-            result.score?.toFixed(2) || "-"
+            <VStack align="flex-end" spacing={0}>
+              <Text>
+                {result.segmentScore && result.segmentScore > 0
+                  ? result.segmentScore.toFixed(2)
+                  : result.score?.toFixed(2) || "-"}
+              </Text>
+              {result.segmentScore &&
+                result.segmentScore > 0 &&
+                result.score &&
+                result.segmentScore !== result.score && (
+                  <Text fontSize="sm" color="gray.600">
+                    {result.score.toFixed(2)}
+                  </Text>
+                )}
+            </VStack>
           )}
         </Td>
         <Td isNumeric display={{ base: "none", md: "table-cell" }}>
