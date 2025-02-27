@@ -305,8 +305,80 @@ export default function Home() {
           </Center>
         ) : !searchQuery && overallStats ? (
           <>
-            {/* Top Stats Section */}
+            {/* Competitions Section */}
             <Box>
+              <Card>
+                <Tabs
+                  onChange={(index) =>
+                    setEventFilter(
+                      ["all", "upcoming", "recent"][index] as EventFilter
+                    )
+                  }
+                  colorScheme="brand"
+                  variant="enclosed"
+                >
+                  <TabList>
+                    <Tab>All Competitions</Tab>
+                    <Tab>Upcoming</Tab>
+                    <Tab>Recent</Tab>
+                  </TabList>
+
+                  <TabPanels>
+                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
+                      <Grid
+                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                        gap={4}
+                      >
+                        {filteredCompetitions.map((competition, index) => (
+                          <CompetitionCard
+                            key={index}
+                            competition={competition}
+                          />
+                        ))}
+                      </Grid>
+                    </TabPanel>
+
+                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
+                      <Grid
+                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                        gap={4}
+                      >
+                        {filteredCompetitions.map((competition, index) => (
+                          <CompetitionCard
+                            key={index}
+                            competition={competition}
+                          />
+                        ))}
+                      </Grid>
+                    </TabPanel>
+
+                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
+                      <Grid
+                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                        gap={4}
+                      >
+                        {filteredCompetitions.map((competition, index) => (
+                          <CompetitionCard
+                            key={index}
+                            competition={competition}
+                          />
+                        ))}
+                      </Grid>
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              </Card>
+            </Box>
+
+            {/* Link to All Competitions */}
+            <Box textAlign="center" py={4}>
+              <Link as={RouterLink} to="/competitions">
+                View All Competitions
+              </Link>
+            </Box>
+
+            {/* Top Stats Section */}
+            <Box mt={8}>
               <Heading size="md" mb={4}>
                 Top Stats
               </Heading>
@@ -559,80 +631,8 @@ export default function Home() {
                 </Card>
               )}
             </Box>
-
-            {/* Competitions Section */}
-            <Box mt={8}>
-              <Card>
-                <Tabs
-                  onChange={(index) =>
-                    setEventFilter(
-                      ["all", "upcoming", "recent"][index] as EventFilter
-                    )
-                  }
-                  colorScheme="brand"
-                  variant="enclosed"
-                >
-                  <TabList>
-                    <Tab>All Competitions</Tab>
-                    <Tab>Upcoming</Tab>
-                    <Tab>Recent</Tab>
-                  </TabList>
-
-                  <TabPanels>
-                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
-                      <Grid
-                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                        gap={4}
-                      >
-                        {filteredCompetitions.map((competition, index) => (
-                          <CompetitionCard
-                            key={index}
-                            competition={competition}
-                          />
-                        ))}
-                      </Grid>
-                    </TabPanel>
-
-                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
-                      <Grid
-                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                        gap={4}
-                      >
-                        {filteredCompetitions.map((competition, index) => (
-                          <CompetitionCard
-                            key={index}
-                            competition={competition}
-                          />
-                        ))}
-                      </Grid>
-                    </TabPanel>
-
-                    <TabPanel px={{ base: 0, md: 4 }} py={4}>
-                      <Grid
-                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                        gap={4}
-                      >
-                        {filteredCompetitions.map((competition, index) => (
-                          <CompetitionCard
-                            key={index}
-                            competition={competition}
-                          />
-                        ))}
-                      </Grid>
-                    </TabPanel>
-                  </TabPanels>
-                </Tabs>
-              </Card>
-            </Box>
           </>
         ) : null}
-
-        {/* Link to All Competitions */}
-        <Box textAlign="center" py={4}>
-          <Link as={RouterLink} to="/competitions">
-            View All Competitions
-          </Link>
-        </Box>
       </VStack>
     </Container>
   );
