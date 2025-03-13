@@ -34,7 +34,7 @@ type JudgeDetails = {
     value: number;
     plannedElement: string;
     executedElement: string;
-    secondHalfBonus: boolean;
+    secondHalfBonus?: boolean;
   }[];
   components: {
     name: string;

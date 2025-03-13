@@ -340,6 +340,7 @@ export interface ScoreHistory {
       value: number;
       plannedElement: string;
       executedElement: string;
+      secondHalfBonus: boolean;
     }[];
     components: {
       name: string;
