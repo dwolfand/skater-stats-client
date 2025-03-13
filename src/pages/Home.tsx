@@ -380,7 +380,7 @@ export default function Home() {
             {/* Top Stats Section */}
             <Box mt={8}>
               <Heading size="md" mb={4}>
-                Top Stats
+                🐐 G.O.A.T. Stats
               </Heading>
               {overallStats.topStats ? (
                 <Card>
