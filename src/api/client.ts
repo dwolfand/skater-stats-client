@@ -172,6 +172,7 @@ export interface SkaterStats {
         value: number;
         plannedElement: string;
         executedElement: string;
+        secondHalfBonus: boolean;
       }[];
       components: {
         name: string;

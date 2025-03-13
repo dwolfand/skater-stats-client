@@ -61,6 +61,7 @@ type SkaterHistoryEntry = SkaterStats["history"][0];
 
 interface ExpandableRowProps {
   result: SkaterHistoryEntry;
+  showScoringSystem: boolean;
 }
 
 function getOrdinalSuffix(placement: string): string {
@@ -132,7 +133,7 @@ function getEffectiveScore(result: SkaterHistoryEntry): number {
     : result.score;
 }
 
-function ExpandableRow({ result }: ExpandableRowProps) {
+function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
   const { isOpen, onToggle } = useDisclosure();
 
   return (
@@ -165,9 +166,20 @@ function ExpandableRow({ result }: ExpandableRowProps) {
               }
               color="blue.500"
             >
-              {result.isSixEvent
-                ? `${result.eventType} (${result.event})`
-                : result.eventType}
+              <HStack spacing={2}>
+                <Text>{result.event}</Text>
+                {showScoringSystem && (
+                  <Badge
+                    colorScheme={result.isSixEvent ? "purple" : "blue"}
+                    rounded="full"
+                    px={2}
+                    fontSize="xs"
+                    fontWeight="semibold"
+                  >
+                    {result.isSixEvent ? "6.0" : "IJS"}
+                  </Badge>
+                )}
+              </HStack>
             </Link>
             <Text
               fontSize="sm"
@@ -274,6 +286,11 @@ export default function Skater() {
       }),
     enabled: !!(name || skaterId),
   });
+
+  // Check if there are any 6.0 events
+  const hasSixPointOEvents = useMemo(() => {
+    return stats?.history?.some((result) => result.isSixEvent) ?? false;
+  }, [stats?.history]);
 
   // Memoize filtered history
   const filteredHistory = useMemo(() => {
@@ -739,7 +756,11 @@ export default function Skater() {
             </Thead>
             <Tbody>
               {filteredHistory.map((result, index) => (
-                <ExpandableRow key={index} result={result} />
+                <ExpandableRow
+                  key={index}
+                  result={result}
+                  showScoringSystem={hasSixPointOEvents}
+                />
               ))}
             </Tbody>
           </Table>

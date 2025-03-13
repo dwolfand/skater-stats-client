@@ -15,7 +15,7 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { SkaterStats } from "../api/client";
+import { StarIcon } from "@chakra-ui/icons";
 
 type JudgeDetails = {
   baseElementsScore: number;
@@ -34,6 +34,7 @@ type JudgeDetails = {
     value: number;
     plannedElement: string;
     executedElement: string;
+    secondHalfBonus: boolean;
   }[];
   components: {
     name: string;
@@ -114,6 +115,32 @@ function ElementTooltip({ element }: { element: JudgeDetails["elements"][0] }) {
   );
 }
 
+function SecondHalfBonusTooltip() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <Tooltip label="Second Half Bonus" hasArrow isOpen={isOpen}>
+      <Text
+        as="span"
+        fontSize="xs"
+        color="gray.500"
+        onTouchStart={(e) => {
+          e.preventDefault();
+          onOpen();
+        }}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          setTimeout(onClose, 1000);
+        }}
+        onMouseEnter={onOpen}
+        onMouseLeave={onClose}
+      >
+        x
+      </Text>
+    </Tooltip>
+  );
+}
+
 export default function JudgeCard({ details }: JudgeCardProps) {
   const hasElements = details.elements.length > 0;
   const hasElementScore = details.totalElementScore > 0;
@@ -178,7 +205,10 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                   <Th>#</Th>
                   <Th>Element</Th>
                   {hasInfoContent && <Th>Info</Th>}
-                  <Th isNumeric>Base</Th>
+                  <Th isNumeric pr={1}>
+                    Base
+                  </Th>
+                  <Th p={0} width="8px"></Th>
                   <Th isNumeric>GOE</Th>
                   {[...Array(details.elements[0]?.judgesGoe.length || 0)].map(
                     (_, i) => (
@@ -196,7 +226,12 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                       <ElementTooltip element={element} />
                     </Td>
                     {hasInfoContent && <Td>{element.info || ""}</Td>}
-                    <Td isNumeric>{element.baseValue.toFixed(2)}</Td>
+                    <Td isNumeric pr={1}>
+                      {element.baseValue.toFixed(2)}
+                    </Td>
+                    <Td p={0}>
+                      {element.secondHalfBonus && <SecondHalfBonusTooltip />}
+                    </Td>
                     <Td
                       isNumeric
                       color={
