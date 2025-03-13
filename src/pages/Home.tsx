@@ -34,8 +34,10 @@ import {
   AccordionPanel,
   AccordionIcon,
   useStyleConfig,
+  Tooltip,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { Search2Icon } from "@chakra-ui/icons";
+import { Search2Icon, InfoIcon } from "@chakra-ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { searchEvents, getOverallStats } from "../api/client";
 import type {
@@ -59,6 +61,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [eventFilter, setEventFilter] = useState<EventFilter>("all");
+
+  const { isOpen, onOpen, onClose, onToggle } = useDisclosure();
 
   // Add debouncing effect
   useEffect(() => {
@@ -371,17 +375,50 @@ export default function Home() {
             </Box>
 
             {/* Link to All Competitions */}
-            <Box textAlign="center" py={4}>
+            <Box textAlign="center" py={2}>
               <Link as={RouterLink} to="/competitions">
                 View All Competitions
               </Link>
             </Box>
 
             {/* Top Stats Section */}
-            <Box mt={8}>
-              <Heading size="md" mb={4}>
-                🐐 G.O.A.T. Stats
-              </Heading>
+            <Box mt={4}>
+              <HStack spacing={2} mb={4}>
+                <Heading size="md">🏆 G.O.A.T. Stats</Heading>
+                <Tooltip
+                  label="These stats showcase the highest scores, best executed elements, and top program components across all competitions. (G.O.A.T. stands for Greatest Of All Time)"
+                  placement="top"
+                  hasArrow
+                  openDelay={0}
+                  closeDelay={500}
+                  isOpen={isOpen}
+                >
+                  <Box
+                    as="button"
+                    border="1px solid"
+                    borderColor="gray.700"
+                    borderRadius="full"
+                    display="inline-flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    w="18px"
+                    h="18px"
+                    onClick={onToggle}
+                    onMouseEnter={onOpen}
+                    onMouseLeave={onClose}
+                    _active={{ bg: "transparent" }}
+                  >
+                    <Text
+                      fontSize="11px"
+                      fontWeight="semibold"
+                      color="gray.700"
+                      pointerEvents="none"
+                    >
+                      i
+                    </Text>
+                  </Box>
+                </Tooltip>
+              </HStack>
               {overallStats.topStats ? (
                 <Card>
                   <Accordion allowMultiple defaultIndex={[]}>
