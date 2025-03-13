@@ -165,8 +165,8 @@ export default function Competition() {
         </HStack>
         <Box mb={8}>
           <Text color="gray.600">
-            {dayjs(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
-            {dayjs(competition.endDate).format(DATE_FORMATS.DISPLAY)}
+            {dayjs.utc(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
+            {dayjs.utc(competition.endDate).format(DATE_FORMATS.DISPLAY)}
             {competition.timezone && ` (${competition.timezone})`}
           </Text>
           <Text color="gray.600">
