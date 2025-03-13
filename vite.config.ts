@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => {
   console.log("mode", mode);
   const gaId = mode === "production" ? "G-VPFZ5HFC98" : "G-DEVELOPMENT";
 
+  // Generate a timestamp for cache busting
+  const timestamp = new Date().getTime();
+
   // Only include GA script if ID is provided
   const gaScript = gaId
     ? `
@@ -27,12 +30,24 @@ export default defineConfig(({ mode }) => {
       {
         name: "html-transform",
         transformIndexHtml(html) {
-          return html.replace("%ENV_GOOGLE_ANALYTICS%", gaScript);
+          // Add version to all script and link tags
+          html = html.replace(/%ENV_GOOGLE_ANALYTICS%/g, gaScript);
+          html = html.replace(
+            /<script type="module" src="([^"]+)"/g,
+            `<script type="module" src="$1?v=${timestamp}"`
+          );
+          html = html.replace(/<link[^>]* href="([^"]+)"/g, (match, p1) =>
+            match.replace(p1, `${p1}?v=${timestamp}`)
+          );
+          return html;
         },
       },
       VitePWA({
         registerType: "autoUpdate",
         includeAssets: ["favicon.ico", "logo192.png", "logo512.png"],
+        strategies: "injectManifest",
+        srcDir: "src",
+        filename: "sw.js",
         manifest: {
           name: "Skater Stats",
           short_name: "Skater Stats",
@@ -58,6 +73,28 @@ export default defineConfig(({ mode }) => {
             },
           ],
         },
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/skater-stats\.com\/$/,
+              handler: "NetworkFirst",
+              options: {
+                cacheName: "start-url",
+                expiration: {
+                  maxAgeSeconds: 60 * 5, // Cache for 5 minutes max
+                },
+              },
+            },
+            {
+              urlPattern: /\.(?:js|css)$/,
+              handler: "StaleWhileRevalidate",
+              options: {
+                cacheName: "static-resources",
+              },
+            },
+          ],
+        },
       }),
     ],
     base: "/",
@@ -71,6 +108,10 @@ export default defineConfig(({ mode }) => {
         input: {
           main: "./index.html",
           404: "./public/404.html",
+        },
+        output: {
+          entryFileNames: `assets/[name]-[hash].js`,
+          chunkFileNames: `assets/[name]-[hash].js`,
         },
       },
     },
