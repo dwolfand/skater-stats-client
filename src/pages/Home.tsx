@@ -9,6 +9,8 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
+  IconButton,
   VStack,
   Grid,
   GridItem,
@@ -37,7 +39,7 @@ import {
   Tooltip,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Search2Icon, InfoIcon } from "@chakra-ui/icons";
+import { Search2Icon, InfoIcon, CloseIcon } from "@chakra-ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { searchEvents, getOverallStats } from "../api/client";
 import type {
@@ -275,6 +277,17 @@ export default function Home() {
                 borderColor: "brand.500",
               }}
             />
+            {searchQuery && (
+              <InputRightElement>
+                <IconButton
+                  icon={<CloseIcon />}
+                  size="md"
+                  variant="ghost"
+                  aria-label="Clear search"
+                  onClick={() => setSearchQuery("")}
+                />
+              </InputRightElement>
+            )}
           </InputGroup>
         </Card>
 

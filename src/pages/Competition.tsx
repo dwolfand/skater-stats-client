@@ -12,11 +12,17 @@ import {
   useStyleConfig,
   Badge,
   Tooltip,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
+  IconButton,
 } from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
 import { useQuery } from "@tanstack/react-query";
 import dayjs, { DATE_FORMATS } from "../utils/date";
 import FavoriteButton from "../components/FavoriteButton";
+import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 
 interface Event {
   name: string;
@@ -123,6 +129,7 @@ function Card({ children }: { children: React.ReactNode }) {
 
 export default function Competition() {
   const { year, ijsId } = useParams<{ year: string; ijsId: string }>();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     data: competition,
@@ -133,6 +140,17 @@ export default function Competition() {
     queryFn: () => getCompetitionData(year!, ijsId!),
     enabled: !!(year && ijsId),
   });
+
+  // Filter events based on search query
+  const filteredEvents =
+    competition?.events.filter((event: Event) =>
+      event.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
+
+  const filteredSixEvents =
+    competition?.sixEvents.filter((event: SixEvent) =>
+      event.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   if (isLoading) {
     return (
@@ -177,6 +195,31 @@ export default function Competition() {
         </Box>
       </Card>
 
+      <Box mt={4} mb={6}>
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <SearchIcon color="gray.400" />
+          </InputLeftElement>
+          <Input
+            placeholder="Search events..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            bg="white"
+          />
+          {searchQuery && (
+            <InputRightElement>
+              <IconButton
+                icon={<CloseIcon />}
+                size="sm"
+                variant="ghost"
+                aria-label="Clear search"
+                onClick={() => setSearchQuery("")}
+              />
+            </InputRightElement>
+          )}
+        </InputGroup>
+      </Box>
+
       <Grid templateColumns={{ md: "repeat(2, 1fr)" }} gap={8} mt={8}>
         {competition.events.length > 0 ? (
           <Box>
@@ -184,7 +227,7 @@ export default function Competition() {
               IJS Events
             </Heading>
             <VStack align="stretch" spacing={4}>
-              {competition.events.map((event: Event, index: number) => (
+              {filteredEvents.map((event: Event, index: number) => (
                 <Box
                   key={index}
                   opacity={!event.resultsUrl ? 0.6 : 1}
@@ -265,7 +308,7 @@ export default function Competition() {
               6.0 Events
             </Heading>
             <VStack align="stretch" spacing={4}>
-              {competition.sixEvents.map((event: SixEvent, index: number) => (
+              {filteredSixEvents.map((event: SixEvent, index: number) => (
                 <Link
                   key={index}
                   as={RouterLink}

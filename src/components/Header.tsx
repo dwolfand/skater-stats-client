@@ -6,6 +6,7 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
   useDisclosure,
   IconButton,
   Collapse,
@@ -16,7 +17,7 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
-import { Search2Icon } from "@chakra-ui/icons";
+import { Search2Icon, CloseIcon } from "@chakra-ui/icons";
 import FavoritesMenu from "./FavoritesMenu";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -73,6 +74,17 @@ const SearchInput = ({
             borderColor: "blue.500",
           }}
         />
+        {query && (
+          <InputRightElement>
+            <IconButton
+              icon={<CloseIcon />}
+              size="sm"
+              variant="ghost"
+              aria-label="Clear search"
+              onClick={() => setQuery("")}
+            />
+          </InputRightElement>
+        )}
       </InputGroup>
 
       {query.length > 2 && (
