@@ -138,14 +138,30 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
 
   return (
     <>
-      <Tr>
-        <Td width="40px">
+      <Tr onClick={onToggle} style={{ cursor: "pointer" }}>
+        <Td width={{ base: "48px", md: "40px" }} p="0" textAlign="center">
           <IconButton
             aria-label="Expand row"
-            icon={isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-            onClick={onToggle}
+            icon={
+              isOpen ? (
+                <ChevronUpIcon boxSize={6} />
+              ) : (
+                <ChevronDownIcon boxSize={6} />
+              )
+            }
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
             variant="ghost"
-            size="sm"
+            size="md"
+            width="48px"
+            height="48px"
+            p="0"
+            borderRadius={0}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
           />
         </Td>
         <Td display={{ base: "none", md: "table-cell" }}>
@@ -165,6 +181,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
                     }/event/${encodeURIComponent(result.resultsUrl)}`
               }
               color="blue.500"
+              onClick={(e) => e.stopPropagation()}
             >
               <HStack spacing={2}>
                 <Text>{result.event}</Text>
@@ -193,6 +210,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
               to={`/competition/${result.year}/${result.ijsId}`}
               color="gray.600"
               fontSize="sm"
+              onClick={(e) => e.stopPropagation()}
             >
               {result.competition}
             </Link>
