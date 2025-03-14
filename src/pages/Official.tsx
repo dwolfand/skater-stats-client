@@ -55,7 +55,11 @@ export default function Official() {
   const { name } = useParams<{ name: string }>();
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: stats, isLoading } = useQuery({
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["official", name],
     queryFn: () => getOfficialStats(name!),
     enabled: !!name,
@@ -65,6 +69,24 @@ export default function Official() {
     return (
       <Container maxW="container.xl" py={8}>
         <Text>Loading...</Text>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <VStack spacing={4} align="stretch">
+          <Heading size="lg">No Competition History Found</Heading>
+          <Text>We couldn't find any competitions judged by "{name}".</Text>
+          <Text>
+            Please try again, or{" "}
+            <Link as={RouterLink} to=".." relative="path" color="blue.500">
+              go back
+            </Link>
+            .
+          </Text>
+        </VStack>
       </Container>
     );
   }
