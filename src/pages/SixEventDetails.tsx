@@ -89,6 +89,11 @@ export default function SixEventDetails() {
   const numJudges = firstResultWithScores?.judge_scores?.length || 0;
   const judgeNumbers = Array.from({ length: numJudges }, (_, i) => i + 1);
 
+  // Check if any result has a start number
+  const hasStartNumbers = eventDetails.results.some(
+    (result: SixEventResult) => result.start_number !== null
+  );
+
   return (
     <Box p={4}>
       <Link
@@ -172,7 +177,14 @@ export default function SixEventDetails() {
                     p={{ base: 2, md: 4 }}
                     fontSize={{ base: "sm", md: "md" }}
                   >
-                    {result.majority || "-"}
+                    <VStack spacing={1} align="flex-end">
+                      <Text>{result.majority || "-"}</Text>
+                      {hasStartNumbers && (
+                        <Text fontSize="xs" color="gray.500">
+                          Start: {result.start_number || "-"}
+                        </Text>
+                      )}
+                    </VStack>
                   </Td>
                   {result.tie_breaker && (
                     <Td
