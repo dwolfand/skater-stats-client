@@ -6,7 +6,6 @@ import {
   SkaterStats,
 } from "../api/client";
 import dayjs from "../utils/date";
-import math from "../utils/math";
 import {
   Box,
   Container,
@@ -56,6 +55,7 @@ import JudgeCard from "../components/JudgeCard";
 import SixJudgeCard from "../components/SixJudgeCard";
 import { useEffect, useState, useMemo } from "react";
 import FavoriteButton from "../components/FavoriteButton";
+import DownloadButton from "../components/DownloadButton";
 
 type SkaterHistoryEntry = SkaterStats["history"][0];
 
@@ -450,19 +450,23 @@ export default function Skater() {
           </HStack>
           <Collapse in={isOptionsOpen} animateOpacity>
             <Box mb={4}>
-              {!aiAnalysis && (
+              <ButtonGroup mb={4} spacing={2}>
                 <Button
                   colorScheme="blue"
                   isLoading={isLoadingAnalysis}
                   onClick={() => refetchAnalysis()}
-                  mb={4}
                   leftIcon={
                     isLoadingAnalysis ? <Spinner size="sm" /> : undefined
                   }
+                  isDisabled={!!aiAnalysis}
                 >
-                  Get AI Analysis
+                  {aiAnalysis ? "Analysis Complete" : "Get AI Analysis"}
                 </Button>
-              )}
+                <DownloadButton
+                  data={stats}
+                  filename={stats.name.replace(/\s+/g, "_") + "_stats"}
+                />
+              </ButtonGroup>
               {isLoadingAnalysis && (
                 <Alert status="info" mb={4}>
                   <AlertIcon />
