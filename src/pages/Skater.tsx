@@ -39,7 +39,7 @@ import {
   ButtonGroup,
   Card,
 } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@chakra-ui/icons";
 import { FiFilter } from "react-icons/fi";
 import {
   LineChart,
@@ -561,7 +561,7 @@ export default function Skater() {
                           {type}
                           <IconButton
                             aria-label="Remove filter"
-                            icon={<ChevronUpIcon />}
+                            icon={<CloseIcon boxSize={2} />}
                             size="xs"
                             variant="ghost"
                             onClick={() =>
@@ -616,7 +616,7 @@ export default function Skater() {
                           {level}
                           <IconButton
                             aria-label="Remove filter"
-                            icon={<ChevronUpIcon />}
+                            icon={<CloseIcon boxSize={2} />}
                             size="xs"
                             variant="ghost"
                             onClick={() =>
