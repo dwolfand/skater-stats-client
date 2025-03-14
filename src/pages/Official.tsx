@@ -77,11 +77,15 @@ export default function Official() {
     return (
       <Container maxW="container.xl" py={8}>
         <VStack spacing={4} align="stretch">
-          <Heading size="lg">No Competition History Found</Heading>
+          <Heading size="lg">No competition history found</Heading>
           <Text>We couldn't find any competitions judged by "{name}".</Text>
           <Text>
             Please try again, or{" "}
-            <Link as={RouterLink} to=".." relative="path" color="blue.500">
+            <Link
+              as="button"
+              onClick={() => window.history.back()}
+              color="blue.500"
+            >
               go back
             </Link>
             .
