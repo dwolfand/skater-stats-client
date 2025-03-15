@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import {
   Box,
@@ -20,12 +20,15 @@ import {
   Link,
   Button,
   Center,
+  useToast,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
 import { getEventResults, EventResults, ScoreHistory } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
 import FavoriteButton from "../components/FavoriteButton";
+import { formatEventTime } from "../utils/timeFormat";
+import dayjs, { DATE_FORMATS } from "../utils/date";
 
 // Add WakeLock types
 declare global {
@@ -144,10 +147,29 @@ function ExpandableRow({ result }: ExpandableRowProps) {
   );
 }
 
+function hasScoresChanged(
+  prevResults: EventResults | undefined,
+  newResults: EventResults
+) {
+  if (!prevResults) return false;
+
+  return (
+    prevResults.results.some((prevResult, index) => {
+      const newResult = newResults.results[index];
+      return (
+        prevResult.score !== newResult.score ||
+        prevResult.placement !== newResult.placement
+      );
+    }) || prevResults.status !== newResults.status
+  );
+}
+
 export default function Results() {
   const { year, ijsId, eventId } = useParams();
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [wakeLock, setWakeLock] = useState<any>(null);
+  const toast = useToast();
+  const prevDataRef = React.useRef<EventResults>();
 
   const { data, isLoading, refetch } = useQuery<EventResults>({
     queryKey: ["results", year, ijsId, eventId],
@@ -211,6 +233,44 @@ export default function Results() {
     }
   }, [segmentStatus]);
 
+  const vibrate = () => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate([200, 100, 200]); // Vibrate-pause-vibrate pattern
+    }
+  };
+
+  const notifyChanges = (newData: EventResults) => {
+    if (!prevDataRef.current) {
+      prevDataRef.current = newData;
+      return;
+    }
+
+    if (hasScoresChanged(prevDataRef.current, newData)) {
+      // Vibrate the device
+      vibrate();
+
+      // Show toast notification
+      toast({
+        title: "Scores Updated",
+        description: "New results have been received",
+        status: "info",
+        duration: 4000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+
+    // Update the previous data reference
+    prevDataRef.current = newData;
+  };
+
+  // Watch for data changes and notify if needed
+  useEffect(() => {
+    if (data && autoRefresh && isUnofficialStatus) {
+      notifyChanges(data);
+    }
+  }, [data, autoRefresh, isUnofficialStatus]);
+
   if (isLoading)
     return (
       <Center h="100vh">
@@ -224,21 +284,31 @@ export default function Results() {
     <Box p={{ base: 2, md: 8 }}>
       <VStack align="stretch" spacing={4}>
         <HStack justify="space-between" align="center">
-          <Heading>{data.eventName}</Heading>
+          <VStack align="start" spacing={1}>
+            <Heading>{data.eventName}</Heading>
+            <VStack align="start" spacing={0}>
+              <Link
+                as={RouterLink}
+                to={`/competition/${year}/${ijsId}`}
+                color="blue.500"
+                fontSize="lg"
+              >
+                {data.competitionTitle}
+              </Link>
+              {data.date && data.time && (
+                <Text color="gray.600" fontSize="md">
+                  {dayjs(data.date).format(DATE_FORMATS.DISPLAY)} at{" "}
+                  {formatEventTime(data.date, data.time, data.timezone)}
+                </Text>
+              )}
+            </VStack>
+          </VStack>
           <FavoriteButton
             type="event"
             name={data.eventName}
             params={{ year: year!, ijsId: ijsId!, eventId: eventId! }}
           />
         </HStack>
-        <Link
-          as={RouterLink}
-          to={`/competition/${year}/${ijsId}`}
-          color="blue.500"
-          fontSize="lg"
-        >
-          {data.competitionTitle}
-        </Link>
         <HStack spacing={4}>
           <Badge colorScheme={segmentStatus === "Final" ? "green" : "orange"}>
             {segmentStatus}

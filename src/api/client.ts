@@ -356,17 +356,18 @@ export interface ScoreHistory {
 }
 
 export interface EventResults {
-  results: ScoreHistory[];
-  segments: Array<{
-    title: string;
-    isActive: boolean;
-    url: string;
-    status: string;
-  }>;
-  status: string;
   eventName: string;
   competitionTitle: string;
-  officials: Array<{
+  date?: string;
+  time?: string;
+  timezone?: string;
+  status: string;
+  segments?: Array<{
+    isActive: boolean;
+    status: string;
+  }>;
+  results: ScoreHistory[];
+  officials?: Array<{
     function: string;
     name: string;
     location: string;
