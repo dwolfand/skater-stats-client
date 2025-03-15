@@ -24,6 +24,7 @@ import {
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
+import { MdNotifications, MdNotificationsOff } from "react-icons/md";
 import { getEventResults, EventResults, ScoreHistory } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
 import FavoriteButton from "../components/FavoriteButton";
@@ -168,6 +169,8 @@ export default function Results() {
   const { year, ijsId, eventId } = useParams();
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [wakeLock, setWakeLock] = useState<any>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const toast = useToast();
   const prevDataRef = React.useRef<EventResults>();
 
@@ -181,6 +184,20 @@ export default function Results() {
     data?.segments?.find((s) => s.isActive)?.status || data?.status || "";
   const isUnofficialStatus =
     segmentStatus === "Live unofficial" || segmentStatus === "Unofficial";
+
+  // Initialize audio element
+  useEffect(() => {
+    audioRef.current = new Audio("/notification.mp3");
+    audioRef.current.volume = 1.0; // Set volume to 100%
+  }, []);
+
+  const playNotificationSound = () => {
+    if (audioRef.current && !isMuted) {
+      audioRef.current.play().catch((error) => {
+        console.log("Audio playback failed:", error);
+      });
+    }
+  };
 
   // Request wake lock when auto-refresh is enabled
   useEffect(() => {
@@ -246,6 +263,9 @@ export default function Results() {
     }
 
     if (hasScoresChanged(prevDataRef.current, newData)) {
+      // Play sound
+      playNotificationSound();
+
       // Vibrate the device
       vibrate();
 
@@ -323,13 +343,26 @@ export default function Results() {
                 {autoRefresh ? "Stop Auto-Refresh" : "Start Auto-Refresh"}
               </Button>
               {autoRefresh && (
-                <Box
-                  w="8px"
-                  h="8px"
-                  borderRadius="full"
-                  bg="red.500"
-                  animation={`${pulse} 2s infinite`}
-                />
+                <HStack spacing={2}>
+                  <Box
+                    w="8px"
+                    h="8px"
+                    borderRadius="full"
+                    bg="red.500"
+                    animation={`${pulse} 2s infinite`}
+                  />
+                  <IconButton
+                    aria-label={
+                      isMuted ? "Unmute notifications" : "Mute notifications"
+                    }
+                    icon={
+                      isMuted ? <MdNotificationsOff /> : <MdNotifications />
+                    }
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsMuted(!isMuted)}
+                  />
+                </HStack>
               )}
             </HStack>
           )}
