@@ -319,6 +319,16 @@ export default function Skater() {
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [selectedEventLevels, setSelectedEventLevels] = useState<string[]>([]);
   const { isOpen: isOptionsOpen, onToggle: onOptionsToggle } = useDisclosure();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["skater", name, skaterId],
@@ -739,7 +749,14 @@ export default function Skater() {
           <Card p={6} border="none">
             <Box h="400px">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart>
+                <LineChart
+                  margin={{
+                    top: 5,
+                    right: 5,
+                    left: isMobile ? 0 : 20,
+                    bottom: 5,
+                  }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="date"
@@ -750,7 +767,7 @@ export default function Skater() {
                     }
                     scale="time"
                   />
-                  <YAxis domain={["auto", "auto"]} />
+                  <YAxis domain={["auto", "auto"]} width={isMobile ? 30 : 45} />
                   <Tooltip
                     labelFormatter={(timestamp) =>
                       dayjs(timestamp).format("MMM D, YYYY")
