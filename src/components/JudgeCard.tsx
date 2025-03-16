@@ -10,12 +10,10 @@ import {
   Grid,
   GridItem,
   Divider,
-  Tooltip,
-  HStack,
   VStack,
-  useDisclosure,
 } from "@chakra-ui/react";
-import { StarIcon } from "@chakra-ui/icons";
+import { getSymbolInfo } from "../utils/ijsSymbols";
+import HoverTooltip from "./shared/HoverTooltip";
 
 type JudgeDetails = {
   baseElementsScore: number;
@@ -53,8 +51,6 @@ interface JudgeCardProps {
 }
 
 function ElementTooltip({ element }: { element: JudgeDetails["elements"][0] }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
   if (!element.plannedElement && !element.executedElement) {
     return <>{element.elementCode}</>;
   }
@@ -62,82 +58,69 @@ function ElementTooltip({ element }: { element: JudgeDetails["elements"][0] }) {
   const hasChange = element.plannedElement !== element.executedElement;
 
   return (
-    <Box position="relative">
-      <Tooltip
-        label={
-          <VStack align="start" spacing={1} p={2}>
-            {element.plannedElement && (
-              <Text fontSize="sm">
-                <Text as="span" fontWeight="bold" color="blue.400">
-                  Planned:{" "}
-                </Text>
-                {element.plannedElement}
+    <HoverTooltip
+      text={
+        <VStack align="start" spacing={1} p={2}>
+          {element.plannedElement && (
+            <Text fontSize="sm">
+              <Text as="span" fontWeight="bold" color="blue.400">
+                Planned:{" "}
               </Text>
-            )}
-            {element.executedElement && hasChange && (
-              <Text fontSize="sm">
-                <Text
-                  as="span"
-                  fontWeight="bold"
-                  color={hasChange ? "orange.400" : "blue.400"}
-                >
-                  Executed:{" "}
-                </Text>
-                {element.executedElement}
+              {element.plannedElement}
+            </Text>
+          )}
+          {element.executedElement && hasChange && (
+            <Text fontSize="sm">
+              <Text
+                as="span"
+                fontWeight="bold"
+                color={hasChange ? "orange.400" : "blue.400"}
+              >
+                Executed:{" "}
               </Text>
-            )}
-          </VStack>
-        }
-        hasArrow
-        placement="top"
-        bg="white"
-        color="gray.800"
-        isOpen={isOpen}
-      >
-        <Text
-          cursor="pointer"
-          onClick={onOpen}
-          onMouseEnter={onOpen}
-          onMouseLeave={onClose}
-          onTouchStart={(e) => {
-            e.preventDefault();
-            onOpen();
-          }}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            setTimeout(onClose, 1000);
-          }}
-        >
-          {element.elementCode}
-        </Text>
-      </Tooltip>
-    </Box>
+              {element.executedElement}
+            </Text>
+          )}
+        </VStack>
+      }
+    >
+      {element.elementCode}
+    </HoverTooltip>
   );
 }
 
 function SecondHalfBonusTooltip() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
   return (
-    <Tooltip label="Second Half Bonus" hasArrow isOpen={isOpen}>
-      <Text
-        as="span"
-        fontSize="xs"
-        color="gray.500"
-        onTouchStart={(e) => {
-          e.preventDefault();
-          onOpen();
-        }}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          setTimeout(onClose, 1000);
-        }}
-        onMouseEnter={onOpen}
-        onMouseLeave={onClose}
-      >
+    <HoverTooltip label="Second Half Bonus">
+      <Text as="span" fontSize="xs" color="gray.500">
         x
       </Text>
-    </Tooltip>
+    </HoverTooltip>
+  );
+}
+
+function InfoTooltip({ info }: { info: string }) {
+  const symbolInfo = getSymbolInfo(info);
+
+  if (!symbolInfo) {
+    return <>{info}</>;
+  }
+
+  return (
+    <HoverTooltip
+      text={
+        <VStack align="start" spacing={1} p={2}>
+          <Text fontSize="sm">
+            <Text as="span" fontWeight="bold" color="blue.400">
+              {symbolInfo.symbol}:{" "}
+            </Text>
+            {symbolInfo.description}
+          </Text>
+        </VStack>
+      }
+    >
+      {info}
+    </HoverTooltip>
   );
 }
 
@@ -225,7 +208,15 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                     <Td>
                       <ElementTooltip element={element} />
                     </Td>
-                    {hasInfoContent && <Td>{element.info || ""}</Td>}
+                    {hasInfoContent && (
+                      <Td>
+                        {element.info ? (
+                          <InfoTooltip info={element.info} />
+                        ) : (
+                          ""
+                        )}
+                      </Td>
+                    )}
                     <Td isNumeric pr={1}>
                       {element.baseValue.toFixed(2)}
                     </Td>
