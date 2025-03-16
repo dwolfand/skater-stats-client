@@ -1,11 +1,44 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:4000/dev";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/dev";
 
-export const api = axios.create({
-  baseURL: API_BASE_URL,
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
+
+// Add request interceptor to add auth token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("skater_stats_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Add response interceptor for debugging
+api.interceptors.response.use(
+  (response) => {
+    console.log("Response:", response.status, response.data);
+    return response;
+  },
+  (error) => {
+    console.error("API Error:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers,
+      },
+    });
+    return Promise.reject(error);
+  }
+);
+
+export { api };
 
 export const getCompetitions = async () => {
   const { data } = await api.get("/competitions");
@@ -24,7 +57,7 @@ export async function getEventResults(
 ) {
   console.log("Fetching results for:", { year, ijsId, eventUrl });
   const response = await fetch(
-    `${API_BASE_URL}/competition/${year}/${ijsId}/results?url=${encodeURIComponent(
+    `${API_URL}/competition/${year}/${ijsId}/results?url=${encodeURIComponent(
       eventUrl
     )}`
   );
@@ -220,7 +253,7 @@ export async function getOfficialHistory(
   name: string
 ): Promise<OfficialHistoryEntry[]> {
   const response = await fetch(
-    `${API_BASE_URL}/official/${encodeURIComponent(name)}`
+    `${API_URL}/official/${encodeURIComponent(name)}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch official history");
@@ -458,7 +491,7 @@ export async function getSixEventDetails(
   resultsUrl: string
 ) {
   const response = await fetch(
-    `${API_BASE_URL}/competition/${year}/${ijsId}/six-event/${encodeURIComponent(
+    `${API_URL}/competition/${year}/${ijsId}/six-event/${encodeURIComponent(
       resultsUrl
     )}`
   );
