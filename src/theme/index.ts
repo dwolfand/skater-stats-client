@@ -104,7 +104,7 @@ const theme = extendTheme({
           _hover: {
             boxShadow: "2xl",
             transform: "translateY(-2px)",
-            borderColor: "brand.100",
+            borderColor: "#f4f4f4",
           },
         },
       },
@@ -166,7 +166,7 @@ const theme = extendTheme({
           _hover: {
             boxShadow: "2xl",
             transform: "translateY(-2px)",
-            borderColor: "brand.100",
+            borderColor: "#f4f4f4",
           },
         },
       },
@@ -178,12 +178,11 @@ const theme = extendTheme({
     body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
   shadows: {
-    sm: "0 1px 2px 0 rgba(74,144,226,0.05)",
-    md: "0 4px 6px -1px rgba(74,144,226,0.1)",
-    lg: "0 8px 12px -3px rgba(74,144,226,0.15), 0 2px 3px -1px rgba(74,144,226,0.1)",
-    xl: "0 15px 25px -4px rgba(74,144,226,0.2), 0 8px 12px -4px rgba(74,144,226,0.15)",
-    "2xl":
-      "0 25px 35px -5px rgba(74,144,226,0.25), 0 12px 18px -6px rgba(74,144,226,0.18)",
+    sm: "0 1px 1px 0 rgba(0,0,0,0.05)",
+    md: "0 1px 2px -1px rgba(0,0,0,0.05)",
+    lg: "0 2px 4px -1px rgba(0,0,0,0.05), 0 1px 2px -1px rgba(0,0,0,0.05)",
+    xl: "0 4px 8px -2px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.05)",
+    "2xl": "0 8px 16px -3px rgba(0,0,0,0.05), 0 4px 8px -2px rgba(0,0,0,0.05)",
   },
 });
 
