@@ -167,7 +167,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
         <Td display={{ base: "none", md: "table-cell" }}>
           {dayjs(result.date).format("MMM D, YYYY")}
         </Td>
-        <Td>
+        <Td p={{ base: 2, md: 6 }}>
           <VStack align="start" spacing={0}>
             <Link
               as={RouterLink}
@@ -192,6 +192,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
                     px={2}
                     fontSize="xs"
                     fontWeight="semibold"
+                    display={{ base: "none", md: "block" }}
                   >
                     {result.isSixEvent ? "6.0" : "IJS"}
                   </Badge>
@@ -216,7 +217,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
             </Link>
           </VStack>
         </Td>
-        <Td isNumeric>
+        <Td isNumeric p={{ base: 2, md: 6 }}>
           {result.isSixEvent ? (
             <VStack align="flex-end" spacing={0}>
               <Text>{result.majority || "-"}</Text>
@@ -224,6 +225,18 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
                 <Text fontSize="sm" color="gray.600">
                   {result.tieBreaker}
                 </Text>
+              )}
+              {showScoringSystem && (
+                <Badge
+                  colorScheme={result.isSixEvent ? "purple" : "blue"}
+                  rounded="full"
+                  px={2}
+                  fontSize="xs"
+                  fontWeight="semibold"
+                  display={{ base: "block", md: "none" }}
+                >
+                  {result.isSixEvent ? "6.0" : "IJS"}
+                </Badge>
               )}
             </VStack>
           ) : (
@@ -241,6 +254,18 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
                     {result.score.toFixed(2)}
                   </Text>
                 )}
+              {showScoringSystem && (
+                <Badge
+                  colorScheme={result.isSixEvent ? "purple" : "blue"}
+                  rounded="full"
+                  px={2}
+                  fontSize="xs"
+                  fontWeight="semibold"
+                  display={{ base: "block", md: "none" }}
+                >
+                  {result.isSixEvent ? "6.0" : "IJS"}
+                </Badge>
+              )}
             </VStack>
           )}
         </Td>
@@ -744,8 +769,17 @@ export default function Skater() {
                       data={data}
                       dataKey={eventType}
                       name={eventType}
-                      stroke={`hsl(${index * 60}, 70%, 50%)`}
-                      strokeWidth={2}
+                      stroke={
+                        [
+                          "#319795", // teal.500
+                          "#4299E1", // blue.400
+                          "#9F7AEA", // purple.400
+                          "#00B5D8", // cyan.500
+                          "#667EEA", // indigo.400
+                          "#B794F4", // purple.300
+                        ][index % 6]
+                      }
+                      strokeWidth={3}
                       dot={{ r: 4 }}
                       activeDot={{ r: 6 }}
                       connectNulls
@@ -767,10 +801,12 @@ export default function Skater() {
           <Table variant="simple">
             <Thead>
               <Tr>
-                <Th width="40px"></Th>
+                <Th width="40px" p={{ base: 1, md: 6 }}></Th>
                 <Th display={{ base: "none", md: "table-cell" }}>Date</Th>
-                <Th>Event</Th>
-                <Th isNumeric>Score</Th>
+                <Th p={{ base: 2, md: 6 }}>Event</Th>
+                <Th isNumeric p={{ base: 2, md: 6 }}>
+                  Score
+                </Th>
                 <Th isNumeric display={{ base: "none", md: "table-cell" }}>
                   Place
                 </Th>
