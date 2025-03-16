@@ -65,6 +65,7 @@ export interface CompetitionSummary {
   timezone: string;
   year: string;
   ijsId: string;
+  logoRef: string | null;
 }
 
 export interface TopScore {

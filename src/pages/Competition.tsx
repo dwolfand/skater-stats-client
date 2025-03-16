@@ -49,6 +49,7 @@ interface CompetitionDetails {
   venue: string;
   city: string;
   state: string;
+  logoRef: string | null;
   events: Event[];
   sixEvents: SixEvent[];
 }
@@ -104,26 +105,43 @@ export default function Competition() {
   return (
     <Container py={8}>
       <Card>
-        <HStack justify="space-between" align="center" mb={4}>
-          <Heading>{competition.name}</Heading>
-          <FavoriteButton
-            type="competition"
-            name={competition.name}
-            params={{ year: year!, ijsId: ijsId! }}
-          />
+        <HStack justify="space-between" align="start" spacing={6}>
+          {competition.logoRef && (
+            <Box flexShrink={0} width="120px" height="120px">
+              <img
+                src={competition.logoRef}
+                alt={`${competition.name} logo`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
+          )}
+          <Box flex="1">
+            <HStack justify="space-between" align="center" mb={4}>
+              <Heading>{competition.name}</Heading>
+              <FavoriteButton
+                type="competition"
+                name={competition.name}
+                params={{ year: year!, ijsId: ijsId! }}
+              />
+            </HStack>
+            <Box>
+              <Text color="gray.600">
+                {dayjs.utc(competition.startDate).format(DATE_FORMATS.DISPLAY)}{" "}
+                - {dayjs.utc(competition.endDate).format(DATE_FORMATS.DISPLAY)}
+                {competition.timezone && ` (${competition.timezone})`}
+              </Text>
+              <Text color="gray.600">
+                {[competition.venue, competition.city, competition.state]
+                  .filter(Boolean)
+                  .join(", ")}
+              </Text>
+            </Box>
+          </Box>
         </HStack>
-        <Box mb={8}>
-          <Text color="gray.600">
-            {dayjs.utc(competition.startDate).format(DATE_FORMATS.DISPLAY)} -{" "}
-            {dayjs.utc(competition.endDate).format(DATE_FORMATS.DISPLAY)}
-            {competition.timezone && ` (${competition.timezone})`}
-          </Text>
-          <Text color="gray.600">
-            {[competition.venue, competition.city, competition.state]
-              .filter(Boolean)
-              .join(", ")}
-          </Text>
-        </Box>
       </Card>
 
       <Box mt={4} mb={6}>

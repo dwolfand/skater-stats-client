@@ -100,8 +100,21 @@ export default function Home() {
         display="block"
       >
         <Card>
-          <HStack justify="space-between" align="start">
-            <Box>
+          <HStack justify="space-between" align="start" spacing={6}>
+            {competition.logoRef && (
+              <Box flexShrink={0} width="80px" height="80px">
+                <img
+                  src={competition.logoRef}
+                  alt={`${competition.name} logo`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                  }}
+                />
+              </Box>
+            )}
+            <Box flex="1">
               <Heading size="sm" mb={2}>
                 {competition.name}
               </Heading>

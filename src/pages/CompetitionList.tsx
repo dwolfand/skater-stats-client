@@ -26,6 +26,7 @@ interface Competition {
   venue: string;
   city: string;
   state: string;
+  logoRef: string | null;
 }
 
 export default function CompetitionList() {
@@ -75,8 +76,21 @@ export default function CompetitionList() {
             p={6}
             border="none"
           >
-            <HStack justify="space-between" align="start">
-              <Box>
+            <HStack justify="space-between" align="start" spacing={6}>
+              {competition.logoRef && (
+                <Box flexShrink={0} width="100px" height="100px">
+                  <img
+                    src={competition.logoRef}
+                    alt={`${competition.name} logo`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                    }}
+                  />
+                </Box>
+              )}
+              <Box flex="1">
                 <Link
                   as={RouterLink}
                   to={`/competition/${competition.year}/${competition.ijsId}`}
