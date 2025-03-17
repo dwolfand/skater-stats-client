@@ -8,6 +8,8 @@ import Results from "./pages/Results";
 import SixEventDetails from "./pages/SixEventDetails";
 import Skater from "./pages/Skater";
 import Official from "./pages/Official";
+import Club from "./pages/Club";
+import ClubCompetition from "./pages/ClubCompetition";
 import Layout from "./components/Layout";
 import theme from "./theme";
 import { AuthProvider } from "./context/AuthContext";
@@ -42,6 +44,11 @@ function App() {
                 <Route path="/skater/:name" element={<Skater />} />
                 <Route path="/skater/id/:skaterId" element={<Skater />} />
                 <Route path="/official/:name" element={<Official />} />
+                <Route path="/club/:clubId" element={<Club />} />
+                <Route
+                  path="/club/:clubId/competition/:year/:ijsId"
+                  element={<ClubCompetition />}
+                />
                 <Route path="/login" element={<Login />} />
                 <Route path="/profile" element={<Profile />} />
               </Routes>

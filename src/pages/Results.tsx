@@ -69,9 +69,11 @@ const pulse = keyframes`
 
 interface ExpandableRowProps {
   result: ScoreHistory;
+  year: string;
+  ijsId: string;
 }
 
-function ExpandableRow({ result }: ExpandableRowProps) {
+function ExpandableRow({ result, year, ijsId }: ExpandableRowProps) {
   const { isOpen, onToggle } = useDisclosure();
 
   return (
@@ -121,9 +123,17 @@ function ExpandableRow({ result }: ExpandableRowProps) {
                 }
               />
             </HStack>
-            <Text fontSize="sm" color="gray.600">
-              {result.club}
-            </Text>
+            {result.club && (
+              <Link
+                as={RouterLink}
+                to={`/club/${result.clubId}/competition/${year}/${ijsId}`}
+                onClick={(e) => e.stopPropagation()}
+                color="blue.500"
+                fontSize="sm"
+              >
+                {result.club}
+              </Link>
+            )}
           </VStack>
         </Td>
         <Td
@@ -392,7 +402,12 @@ export default function Results() {
           </Thead>
           <Tbody>
             {data.results.map((result, index) => (
-              <ExpandableRow key={index} result={result} />
+              <ExpandableRow
+                key={index}
+                result={result}
+                year={year!}
+                ijsId={ijsId!}
+              />
             ))}
           </Tbody>
         </Table>

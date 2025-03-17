@@ -68,9 +68,9 @@ export async function getEventResults(
 }
 
 export interface SearchResult {
-  type: "competition" | "skater" | "official";
+  type: "competition" | "skater" | "official" | "club";
   name: string;
-  id?: number; // skater ID for skater results
+  id?: number; // skater ID for skater results, club ID for club results
   // Competition fields
   startDate?: string;
   endDate?: string;
@@ -355,6 +355,7 @@ export interface ScoreHistory {
   competitionId: number;
   name?: string;
   club?: string;
+  clubId?: number;
   start?: string;
   skaterId?: number;
   judgeDetails?: {
@@ -500,3 +501,48 @@ export async function getSixEventDetails(
   }
   return response.json();
 }
+
+export interface ClubStats {
+  name: string;
+  totalSkaters: number;
+  totalCompetitions: number;
+  competitions: Array<{
+    name: string;
+    date: string;
+    year: string;
+    ijsId: string;
+    skaterCount: number;
+  }>;
+}
+
+export interface ClubCompetitionDetails {
+  clubName: string;
+  competitionName: string;
+  date: string;
+  skaters: Array<{
+    id: number;
+    name: string;
+    events: Array<{
+      name: string;
+      segment: string;
+      placement: string;
+      score: number | null;
+      majority?: string;
+      resultsUrl: string;
+      isSixEvent: boolean;
+    }>;
+  }>;
+}
+
+export const getClubStats = async (
+  clubId: string,
+  competition?: { year: string; ijsId: string }
+): Promise<ClubStats | ClubCompetitionDetails> => {
+  const params = competition
+    ? `?year=${competition.year}&ijsId=${competition.ijsId}`
+    : "";
+  const { data } = await api.get<ClubStats | ClubCompetitionDetails>(
+    `/club/${clubId}${params}`
+  );
+  return data;
+};

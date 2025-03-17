@@ -161,7 +161,7 @@ const theme = extendTheme({
           boxShadow: "xl",
           border: "1px solid",
           borderColor: "gray.100",
-          p: 6,
+          p: { base: 2, md: 6 },
           transition: "all 0.2s",
           _hover: {
             boxShadow: "2xl",

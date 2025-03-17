@@ -56,7 +56,7 @@ type EventFilter = "all" | "upcoming" | "recent";
 
 function Card({ children }: { children: React.ReactNode }) {
   const styles = useStyleConfig("Box", { variant: "card" });
-  return <Box __css={styles}>{children}</Box>;
+  return <Box __css={{ ...styles, p: { base: 2, md: 6 } }}>{children}</Box>;
 }
 
 export default function Home() {
@@ -99,10 +99,18 @@ export default function Home() {
         _hover={{ textDecoration: "none" }}
         display="block"
       >
-        <Card>
-          <HStack justify="space-between" align="start" spacing={6}>
+        <Card p={{ base: 2, md: 6 }}>
+          <HStack
+            justify="space-between"
+            align="start"
+            spacing={{ base: 2, md: 6 }}
+          >
             {competition.logoRef && (
-              <Box flexShrink={0} width="80px" height="80px">
+              <Box
+                flexShrink={0}
+                width={{ base: "60px", md: "80px" }}
+                height={{ base: "60px", md: "80px" }}
+              >
                 <img
                   src={competition.logoRef}
                   alt={`${competition.name} logo`}
@@ -114,22 +122,22 @@ export default function Home() {
                 />
               </Box>
             )}
-            <Box flex="1">
-              <Heading size="sm" mb={2}>
+            <Box flex="1" mr={{ base: 0, md: 2 }}>
+              <Heading size={{ base: "xs", md: "sm" }} mb={{ base: 1, md: 2 }}>
                 {competition.name}
               </Heading>
-              <Text color="gray.600" fontSize="sm">
+              <Text color="gray.600" fontSize={{ base: "xs", md: "sm" }}>
                 {dayjs.utc(competition.startDate).format(DATE_FORMATS.DISPLAY)}{" "}
                 - {dayjs.utc(competition.endDate).format(DATE_FORMATS.DISPLAY)}
                 {competition.timezone && ` (${competition.timezone})`}
               </Text>
-              <Text color="gray.600" fontSize="sm">
+              <Text color="gray.600" fontSize={{ base: "xs", md: "sm" }}>
                 {[competition.venue, competition.city, competition.state]
                   .filter(Boolean)
                   .join(", ")}
               </Text>
               <Badge
-                mt={2}
+                mt={{ base: 1, md: 2 }}
                 colorScheme={
                   competition.type === "in progress"
                     ? "green"
@@ -137,11 +145,16 @@ export default function Home() {
                     ? "brand"
                     : "accent"
                 }
+                fontSize={{ base: "2xs", md: "xs" }}
               >
                 {competition.type}
               </Badge>
             </Box>
-            <Box onClick={(e) => e.preventDefault()}>
+            <Box
+              onClick={(e) => e.preventDefault()}
+              flexShrink={0}
+              ml={{ base: -1, md: 0 }}
+            >
               <FavoriteButton
                 type="competition"
                 name={competition.name}
@@ -165,6 +178,8 @@ export default function Home() {
           ? result.id
             ? `/skater/id/${result.id}`
             : `/skater/${encodeURIComponent(result.name)}`
+          : result.type === "club"
+          ? `/club/${result.id}`
           : `/official/${encodeURIComponent(result.name)}`
       }
       _hover={{ textDecoration: "none" }}
@@ -222,6 +237,12 @@ export default function Home() {
                   </Text>
                 )}
               </>
+            ) : result.type === "club" ? (
+              <>
+                <Text color="gray.600" fontSize="sm">
+                  View club details
+                </Text>
+              </>
             ) : (
               <>
                 {result.function && (
@@ -248,6 +269,8 @@ export default function Home() {
                 ? "brand"
                 : result.type === "skater"
                 ? "accent"
+                : result.type === "club"
+                ? "green"
                 : "purple"
             }
           >
@@ -281,7 +304,7 @@ export default function Home() {
               <Search2Icon color="brand.500" />
             </InputLeftElement>
             <Input
-              placeholder="Search for skaters, competitions, or officials..."
+              placeholder="Search for skaters, competitions, clubs, or officials..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               variant="filled"
