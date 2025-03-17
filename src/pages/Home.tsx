@@ -99,7 +99,7 @@ export default function Home() {
         _hover={{ textDecoration: "none" }}
         display="block"
       >
-        <Card p={{ base: 2, md: 6 }}>
+        <Card>
           <HStack
             justify="space-between"
             align="start"
