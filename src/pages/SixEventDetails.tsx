@@ -13,6 +13,8 @@ import {
   VStack,
   HStack,
   Link,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { getSixEventDetails } from "../api/client";
@@ -27,6 +29,7 @@ interface SixEventResult {
   id: number;
   name: string;
   club: string | null;
+  club_id: number | null;
   place: string | null;
   judge_scores: string[] | null;
   majority: string | null;
@@ -66,9 +69,9 @@ export default function SixEventDetails() {
 
   if (isLoading) {
     return (
-      <Box p={4}>
-        <Text>Loading...</Text>
-      </Box>
+      <Center minH="calc(100vh - 64px)" p={4}>
+        <Spinner size="xl" color="blue.500" />
+      </Center>
     );
   }
 
@@ -156,9 +159,17 @@ export default function SixEventDetails() {
                         {result.name}
                       </Link>
                       {result.club && (
-                        <Text color="gray.600" fontSize="sm" mt={1}>
+                        <Link
+                          as={RouterLink}
+                          to={`/club/${result.club_id}/competition/${year}/${ijsId}`}
+                          onClick={(e) => e.stopPropagation()}
+                          color="gray.600"
+                          fontSize="sm"
+                          mt={1}
+                          display="block"
+                        >
                           {result.club}
-                        </Text>
+                        </Link>
                       )}
                     </Box>
                   </Td>

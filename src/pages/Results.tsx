@@ -128,7 +128,7 @@ function ExpandableRow({ result, year, ijsId }: ExpandableRowProps) {
                 as={RouterLink}
                 to={`/club/${result.clubId}/competition/${year}/${ijsId}`}
                 onClick={(e) => e.stopPropagation()}
-                color="blue.500"
+                color="grey.600"
                 fontSize="sm"
               >
                 {result.club}

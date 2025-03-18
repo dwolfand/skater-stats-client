@@ -171,62 +171,66 @@ export const getOverallStats = async () => {
   return data;
 };
 
+export interface ScoreHistory {
+  date: string;
+  competition: string;
+  event: string;
+  eventType: string;
+  eventLevel: string;
+  score: number;
+  segmentScore?: number;
+  placement: string;
+  totalSkaters: number;
+  year: string;
+  ijsId: string;
+  resultsUrl: string;
+  judgeDetails?: {
+    baseElementsScore: number;
+    totalElementScore: number;
+    totalComponentScore: number;
+    totalDeductions: number;
+    totalScore: number;
+    elements: {
+      number: number;
+      elementCode: string;
+      info?: string;
+      baseValue: number;
+      credit: boolean;
+      goe: number;
+      judgesGoe: number[];
+      value: number;
+      plannedElement: string;
+      executedElement: string;
+      secondHalfBonus: boolean;
+    }[];
+    components: {
+      name: string;
+      factor: number;
+      judgesScores: number[];
+      value: number;
+    }[];
+    deductions: {
+      name: string;
+      value: number;
+    }[];
+  };
+
+  // 6.0 specific fields
+  isSixEvent?: boolean;
+  majority?: string;
+  tieBreaker?: string;
+  judgeScores?: string[];
+  club?: string;
+}
+
 export interface SkaterStats {
   name: string;
+  club: string | null;
+  club_id: number | null;
   totalEvents: number;
   totalCompetitions: number;
   averageScore: number | null;
-  history: {
-    date: string;
-    competition: string;
-    event: string;
-    eventType: string;
-    eventLevel: string;
-    score: number;
-    segmentScore?: number;
-    placement: string;
-    totalSkaters: number;
-    year: string;
-    ijsId: string;
-    resultsUrl: string;
-    judgeDetails?: {
-      baseElementsScore: number;
-      totalElementScore: number;
-      totalComponentScore: number;
-      totalDeductions: number;
-      totalScore: number;
-      elements: {
-        number: number;
-        elementCode: string;
-        info?: string;
-        baseValue: number;
-        credit: boolean;
-        goe: number;
-        judgesGoe: number[];
-        value: number;
-        plannedElement: string;
-        executedElement: string;
-        secondHalfBonus: boolean;
-      }[];
-      components: {
-        name: string;
-        factor: number;
-        judgesScores: number[];
-        value: number;
-      }[];
-      deductions: {
-        name: string;
-        value: number;
-      }[];
-    };
-
-    // 6.0 specific fields
-    isSixEvent?: boolean;
-    majority?: string;
-    tieBreaker?: string;
-    judgeScores?: string[];
-    club?: string;
-  }[];
+  history: ScoreHistory[];
   placementDistribution: {
     range: string;
     count: number;
@@ -334,60 +338,6 @@ export interface Result {
   };
   judgeDetailsUrl?: string;
   judgeDetails?: JudgeDetails;
-}
-
-export interface ScoreHistory {
-  date: string;
-  competition: string;
-  event: string;
-  eventType: string;
-  eventLevel: string;
-  eventCategory?: string;
-  score: number;
-  segmentScore?: number;
-  placement: string;
-  totalSkaters: number;
-  year: string;
-  ijsId: string;
-  resultsUrl: string;
-  status?: string;
-  eventId: number;
-  competitionId: number;
-  name?: string;
-  club?: string;
-  clubId?: number;
-  start?: string;
-  skaterId?: number;
-  judgeDetails?: {
-    baseElementsScore: number;
-    totalElementScore: number;
-    totalComponentScore: number;
-    totalDeductions: number;
-    totalScore: number;
-    elements: {
-      number: number;
-      elementCode: string;
-      info?: string;
-      baseValue: number;
-      credit: boolean;
-      goe: number;
-      judgesGoe: number[];
-      value: number;
-      plannedElement: string;
-      executedElement: string;
-      secondHalfBonus: boolean;
-    }[];
-    components: {
-      name: string;
-      factor: number;
-      judgesScores: number[];
-      value: number;
-    }[];
-    deductions: {
-      name: string;
-      value: number;
-    }[];
-  };
 }
 
 export interface EventResults {

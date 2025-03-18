@@ -482,7 +482,19 @@ export default function Skater() {
         {/* Header */}
         <Box>
           <HStack justify="space-between" align="center" mb={2}>
-            <Heading size="xl">Results for {stats.name}</Heading>
+            <VStack align="start" spacing={1}>
+              <Heading size="xl">Results for {stats.name}</Heading>
+              {stats.club && (
+                <Link
+                  as={RouterLink}
+                  to={`/club/${stats.club_id}`}
+                  color="gray.600"
+                  fontSize="md"
+                >
+                  {stats.club}
+                </Link>
+              )}
+            </VStack>
             <ButtonGroup>
               <IconButton
                 aria-label="Filter options"
