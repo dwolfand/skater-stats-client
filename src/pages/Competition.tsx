@@ -232,14 +232,17 @@ export default function Competition() {
                               {event.status}
                             </Badge>
                           </Heading>
-                          <Text color="gray.600">
-                            {dayjs(event.date).format(DATE_FORMATS.DISPLAY)} at{" "}
-                            {formatEventTime(
-                              event.date,
-                              event.time,
-                              competition.timezone
-                            )}
-                          </Text>
+                          {event.date && event.time && (
+                            <Text color="gray.600">
+                              {dayjs(event.date).format(DATE_FORMATS.DISPLAY)}{" "}
+                              at{" "}
+                              {formatEventTime(
+                                event.date,
+                                event.time,
+                                competition.timezone
+                              )}
+                            </Text>
+                          )}
                         </Card>
                       </Link>
                     ) : (
@@ -255,14 +258,16 @@ export default function Competition() {
                             {event.status}
                           </Badge>
                         </Heading>
-                        <Text color="gray.600">
-                          {dayjs(event.date).format(DATE_FORMATS.DISPLAY)} at{" "}
-                          {formatEventTime(
-                            event.date,
-                            event.time,
-                            competition.timezone
-                          )}
-                        </Text>
+                        {event.date && event.time && (
+                          <Text color="gray.600">
+                            {dayjs(event.date).format(DATE_FORMATS.DISPLAY)} at{" "}
+                            {formatEventTime(
+                              event.date,
+                              event.time,
+                              competition.timezone
+                            )}
+                          </Text>
+                        )}
                         <Text color="gray.500" fontSize="sm" mt={2}>
                           Results not yet available
                         </Text>
