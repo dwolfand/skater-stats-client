@@ -221,6 +221,16 @@ export interface ScoreHistory {
   tieBreaker?: string;
   judgeScores?: string[];
   club?: string;
+  clubId?: number;
+
+  // Additional fields used in Results.tsx
+  name?: string;
+  skaterId?: number;
+  start?: string;
+  status?: string;
+  eventId?: number;
+  competitionId?: number;
+  eventCategory?: string;
 }
 
 export interface SkaterStats {
