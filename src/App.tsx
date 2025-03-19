@@ -15,14 +15,16 @@ import theme from "./theme";
 import { AuthProvider } from "./context/AuthContext";
 import { Login } from "./pages/Login";
 import { Profile } from "./pages/Profile";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 // Create a client
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ChakraProvider theme={theme}>
+    <ChakraProvider theme={theme}>
+      <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Router>
             <Layout>
@@ -51,12 +53,14 @@ function App() {
                 />
                 <Route path="/login" element={<Login />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
               </Routes>
             </Layout>
           </Router>
         </AuthProvider>
-      </ChakraProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </ChakraProvider>
   );
 }
 
