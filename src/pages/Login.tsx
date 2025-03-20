@@ -1,6 +1,14 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import {
+  Container,
+  Box,
+  Heading,
+  Text,
+  VStack,
+  Center,
+} from "@chakra-ui/react";
 
 declare global {
   interface Window {
@@ -70,22 +78,27 @@ export const Login: React.FC = () => {
   }, [login, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to Skater Stats
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Access your skating profile and more
-          </p>
-        </div>
-        <div className="mt-8 space-y-6">
-          <div className="flex justify-center">
-            <div id="google-signin"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Container maxW="container.xl" py={20}>
+      <Center>
+        <Box
+          bg="white"
+          p={8}
+          borderRadius="lg"
+          boxShadow="lg"
+          maxW="md"
+          w="full"
+        >
+          <VStack spacing={6}>
+            <Heading size="lg" textAlign="center">
+              Sign in to Skater Stats
+            </Heading>
+            <Text color="gray.600" textAlign="center">
+              Access your skating profile and more
+            </Text>
+            <Box id="google-signin" />
+          </VStack>
+        </Box>
+      </Center>
+    </Container>
   );
 };

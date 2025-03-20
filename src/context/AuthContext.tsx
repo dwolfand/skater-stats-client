@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, AuthContextType } from "../types/auth";
 import { googleLogin } from "../api/auth";
+import { authEvents, AUTH_UNAUTHORIZED } from "../api/client";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -27,6 +28,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(JSON.parse(savedUser));
     }
     setIsLoading(false);
+  }, []);
+
+  // Listen for unauthorized events
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      console.log("Received unauthorized event, logging out");
+      logout();
+    };
+
+    authEvents.addEventListener(AUTH_UNAUTHORIZED, handleUnauthorized);
+
+    return () => {
+      authEvents.removeEventListener(AUTH_UNAUTHORIZED, handleUnauthorized);
+    };
   }, []);
 
   const login = async (idToken: string) => {

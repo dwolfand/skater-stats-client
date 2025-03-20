@@ -19,18 +19,20 @@ import { getProfile, requestSkaterLink } from "../api/auth";
 import { UserStatus } from "../types/auth";
 
 export const Profile: React.FC = () => {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
   const {
     data: profile,
     isLoading: profileLoading,
+    error: profileError,
     refetch: refetchProfile,
   } = useQuery({
     queryKey: ["profile"],
     queryFn: getProfile,
     enabled: isAuthenticated,
+    retry: false, // Don't retry on error since it might be an auth issue
   });
 
   const linkSkaterMutation = useMutation({
@@ -53,6 +55,34 @@ export const Profile: React.FC = () => {
     return (
       <Container centerContent py={10}>
         <Spinner size="xl" />
+      </Container>
+    );
+  }
+
+  // Handle profile loading error
+  if (profileError) {
+    return (
+      <Container maxW="container.md" py={10}>
+        <VStack spacing={6} align="stretch">
+          <Alert status="error">
+            <AlertIcon />
+            <VStack align="stretch" spacing={2}>
+              <Text>
+                Failed to load profile data. Please try logging in again.
+              </Text>
+              <Button
+                colorScheme="red"
+                size="sm"
+                onClick={() => {
+                  logout();
+                  navigate("/login");
+                }}
+              >
+                Return to Login
+              </Button>
+            </VStack>
+          </Alert>
+        </VStack>
       </Container>
     );
   }
@@ -157,6 +187,18 @@ export const Profile: React.FC = () => {
               </Button>
             </VStack>
           )}
+        </Box>
+
+        <Box display="flex" justifyContent="center">
+          <Button
+            colorScheme="red"
+            onClick={() => {
+              logout();
+              navigate("/login");
+            }}
+          >
+            Logout
+          </Button>
         </Box>
       </VStack>
     </Container>

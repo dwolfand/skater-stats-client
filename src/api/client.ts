@@ -2,6 +2,10 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/dev";
 
+// Create an event emitter for auth events
+export const authEvents = new EventTarget();
+export const AUTH_UNAUTHORIZED = "auth_unauthorized";
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -18,7 +22,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Add response interceptor for debugging
+// Add response interceptor for error handling and debugging
 api.interceptors.response.use(
   (response) => {
     console.log("Response:", response.status, response.data);
@@ -34,6 +38,13 @@ api.interceptors.response.use(
         headers: error.config?.headers,
       },
     });
+
+    // Handle 401 Unauthorized errors
+    if (error.response?.status === 401) {
+      // Dispatch an event to notify that we got an unauthorized response
+      authEvents.dispatchEvent(new Event(AUTH_UNAUTHORIZED));
+    }
+
     return Promise.reject(error);
   }
 );
