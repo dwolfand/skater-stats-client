@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -12,15 +11,23 @@ import {
   AlertIcon,
   Spinner,
   Badge,
+  useStyleConfig,
+  Center,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getProfile, requestSkaterLink } from "../api/auth";
 import { UserStatus } from "../types/auth";
+import { LoginModalContext } from "../components/LoginModal";
+
+function Card({ children }: { children: React.ReactNode }) {
+  const styles = useStyleConfig("Box", { variant: "card" });
+  return <Box __css={{ ...styles, p: { base: 4, md: 6 } }}>{children}</Box>;
+}
 
 export const Profile: React.FC = () => {
   const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
-  const navigate = useNavigate();
+  const { openLoginModal } = React.useContext(LoginModalContext);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -45,16 +52,41 @@ export const Profile: React.FC = () => {
     },
   });
 
-  React.useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      navigate("/login");
-    }
-  }, [authLoading, isAuthenticated, navigate]);
-
-  if (authLoading || profileLoading) {
+  if (authLoading || (isAuthenticated && profileLoading)) {
     return (
       <Container centerContent py={10}>
         <Spinner size="xl" />
+      </Container>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Container maxW="container.md" py={10}>
+        <VStack spacing={6} align="stretch">
+          <Box textAlign="center">
+            <Heading size="lg" mb={2}>
+              Profile
+            </Heading>
+          </Box>
+          <Card>
+            <VStack spacing={4} align="center" py={4}>
+              <Heading size="md">Sign in to View Your Profile</Heading>
+              <Text color="gray.600" textAlign="center">
+                Access your skating profile, manage your favorites, and more.
+              </Text>
+              <Button
+                colorScheme="blue"
+                size="lg"
+                onClick={() =>
+                  openLoginModal("Please sign in to view your profile")
+                }
+              >
+                Sign In
+              </Button>
+            </VStack>
+          </Card>
+        </VStack>
       </Container>
     );
   }
@@ -75,7 +107,6 @@ export const Profile: React.FC = () => {
                 size="sm"
                 onClick={() => {
                   logout();
-                  navigate("/login");
                 }}
               >
                 Return to Login
@@ -126,33 +157,28 @@ export const Profile: React.FC = () => {
           </Alert>
         )}
 
-        <Box
-          p={6}
-          borderWidth={1}
-          borderRadius="lg"
-          display="flex"
-          alignItems="center"
-          gap={6}
-        >
-          {user?.picture && (
-            <Image
-              src={user.picture}
-              alt={user.name}
-              borderRadius="full"
-              boxSize="100px"
-            />
-          )}
-          <VStack align="stretch" flex={1}>
-            <Text>
-              <strong>Name:</strong> {user?.name}
-            </Text>
-            <Text>
-              <strong>Email:</strong> {user?.email}
-            </Text>
-          </VStack>
-        </Box>
+        <Card>
+          <Box display="flex" alignItems="center" gap={6}>
+            {user?.picture && (
+              <Image
+                src={user.picture}
+                alt={user.name}
+                borderRadius="full"
+                boxSize="100px"
+              />
+            )}
+            <VStack align="stretch" flex={1}>
+              <Text>
+                <strong>Name:</strong> {user?.name}
+              </Text>
+              <Text>
+                <strong>Email:</strong> {user?.email}
+              </Text>
+            </VStack>
+          </Box>
+        </Card>
 
-        <Box p={6} borderWidth={1} borderRadius="lg">
+        <Card>
           <Heading size="md" mb={4}>
             Skater Profile
           </Heading>
@@ -187,14 +213,13 @@ export const Profile: React.FC = () => {
               </Button>
             </VStack>
           )}
-        </Box>
+        </Card>
 
         <Box display="flex" justifyContent="center">
           <Button
             colorScheme="red"
             onClick={() => {
               logout();
-              navigate("/login");
             }}
           >
             Logout

@@ -23,6 +23,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { submitFeedback } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ interface FeedbackModalProps {
 }
 
 export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -48,7 +50,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
     try {
       await submitFeedback({
         message,
-        email: email || undefined,
+        email: user?.email || email || undefined,
       });
 
       toast({
@@ -77,7 +79,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   };
 
   const handleClose = () => {
-    if (message || email) {
+    if (message || (!user && email)) {
       onAlertOpen();
     } else {
       onClose();
@@ -109,16 +111,18 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                     minH="120px"
                   />
                 </FormControl>
-                <FormControl>
-                  <FormLabel>Email (optional)</FormLabel>
-                  <Input
-                    name="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email if you'd like us to follow up"
-                  />
-                </FormControl>
+                {!user && (
+                  <FormControl>
+                    <FormLabel>Email (optional)</FormLabel>
+                    <Input
+                      name="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email if you'd like us to follow up"
+                    />
+                  </FormControl>
+                )}
               </VStack>
             </ModalBody>
             <ModalFooter>

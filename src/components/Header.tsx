@@ -15,6 +15,8 @@ import {
   Text,
   Badge,
   Spinner,
+  Avatar,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
 import { Search2Icon, CloseIcon } from "@chakra-ui/icons";
@@ -24,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { searchEvents } from "../api/client";
 import type { SearchResult } from "../api/client";
 import dayjs from "../utils/date";
+import { useAuth } from "../context/AuthContext";
 
 const SearchInput = ({
   isMobile,
@@ -158,6 +161,7 @@ export default function Header() {
   const [isVisible, setIsVisible] = useState(true);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const location = useLocation();
+  const { isAuthenticated, user } = useAuth();
   const {
     isOpen: isMobileSearchOpen,
     onToggle: onMobileSearchToggle,
@@ -231,6 +235,18 @@ export default function Header() {
               />
             )}
             <FavoritesMenu />
+            {isAuthenticated && (
+              <Tooltip label="Your Profile">
+                <Link as={RouterLink} to="/profile">
+                  <Avatar
+                    size="sm"
+                    name={user?.name}
+                    src={user?.picture}
+                    cursor="pointer"
+                  />
+                </Link>
+              </Tooltip>
+            )}
           </HStack>
         </HStack>
 
