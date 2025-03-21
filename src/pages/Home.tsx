@@ -51,6 +51,7 @@ import type {
 } from "../api/client";
 import FavoriteButton from "../components/FavoriteButton";
 import { formatNumber } from "../utils/math";
+import { CompetitionCard } from "../components/CompetitionCard";
 
 type EventFilter = "all" | "upcoming" | "recent";
 
@@ -85,87 +86,6 @@ export default function Home() {
     queryKey: ["overallStats"],
     queryFn: getOverallStats,
   });
-
-  // Function to render a single competition card
-  const CompetitionCard = ({
-    competition,
-  }: {
-    competition: CompetitionSummary;
-  }) => (
-    <GridItem>
-      <Link
-        as={RouterLink}
-        to={`/competition/${competition.year}/${competition.ijsId}`}
-        _hover={{ textDecoration: "none" }}
-        display="block"
-      >
-        <Card>
-          <HStack
-            justify="space-between"
-            align="start"
-            spacing={{ base: 2, md: 6 }}
-          >
-            {competition.logoRef && (
-              <Box
-                flexShrink={0}
-                width={{ base: "60px", md: "80px" }}
-                height={{ base: "60px", md: "80px" }}
-              >
-                <img
-                  src={competition.logoRef}
-                  alt={`${competition.name} logo`}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                  }}
-                />
-              </Box>
-            )}
-            <Box flex="1" mr={{ base: 0, md: 2 }}>
-              <Heading size={{ base: "xs", md: "sm" }} mb={{ base: 1, md: 2 }}>
-                {competition.name}
-              </Heading>
-              <Text color="gray.600" fontSize={{ base: "xs", md: "sm" }}>
-                {dayjs.utc(competition.startDate).format(DATE_FORMATS.DISPLAY)}{" "}
-                - {dayjs.utc(competition.endDate).format(DATE_FORMATS.DISPLAY)}
-                {competition.timezone && ` (${competition.timezone})`}
-              </Text>
-              <Text color="gray.600" fontSize={{ base: "xs", md: "sm" }}>
-                {[competition.venue, competition.city, competition.state]
-                  .filter(Boolean)
-                  .join(", ")}
-              </Text>
-              <Badge
-                mt={{ base: 1, md: 2 }}
-                colorScheme={
-                  competition.type === "in progress"
-                    ? "green"
-                    : competition.type === "upcoming"
-                    ? "brand"
-                    : "accent"
-                }
-                fontSize={{ base: "2xs", md: "xs" }}
-              >
-                {competition.type}
-              </Badge>
-            </Box>
-            <Box
-              onClick={(e) => e.preventDefault()}
-              flexShrink={0}
-              ml={{ base: -1, md: 0 }}
-            >
-              <FavoriteButton
-                type="competition"
-                name={competition.name}
-                params={{ year: competition.year, ijsId: competition.ijsId }}
-              />
-            </Box>
-          </HStack>
-        </Card>
-      </Link>
-    </GridItem>
-  );
 
   // Function to render a search result
   const SearchResultCard = ({ result }: { result: SearchResult }) => (
@@ -386,6 +306,7 @@ export default function Home() {
                           <CompetitionCard
                             key={index}
                             competition={competition}
+                            showType={true}
                           />
                         ))}
                       </Grid>
@@ -400,6 +321,7 @@ export default function Home() {
                           <CompetitionCard
                             key={index}
                             competition={competition}
+                            showType={true}
                           />
                         ))}
                       </Grid>
@@ -414,6 +336,7 @@ export default function Home() {
                           <CompetitionCard
                             key={index}
                             competition={competition}
+                            showType={true}
                           />
                         ))}
                       </Grid>

@@ -1,22 +1,17 @@
 import { useState, useEffect } from "react";
-import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Heading,
   VStack,
   Text,
-  Link,
-  Card,
   Container,
-  Badge,
   HStack,
   Button,
   Select,
+  Grid,
 } from "@chakra-ui/react";
 import { getCompetitions } from "../api/competitions";
-import dayjs from "dayjs";
-import { DATE_FORMATS } from "../utils/date";
-import FavoriteButton from "../components/FavoriteButton";
+import { CompetitionCard } from "../components/CompetitionCard";
 
 const PAGE_SIZES = [10, 25, 50, 100];
 
@@ -99,57 +94,14 @@ export default function CompetitionList() {
           </Select>
         </HStack>
 
-        <VStack align="stretch" spacing={4}>
+        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
           {currentCompetitions.map((competition) => (
-            <Card
+            <CompetitionCard
               key={`${competition.year}-${competition.ijsId}`}
-              p={6}
-              border="none"
-            >
-              <HStack justify="space-between" align="start" spacing={6}>
-                {competition.logoRef && (
-                  <Box flexShrink={0} width="100px" height="100px">
-                    <img
-                      src={competition.logoRef}
-                      alt={`${competition.name} logo`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
-                    />
-                  </Box>
-                )}
-                <Box flex="1">
-                  <Link
-                    as={RouterLink}
-                    to={`/competition/${competition.year}/${competition.ijsId}`}
-                    _hover={{ textDecoration: "none" }}
-                  >
-                    <Heading size="sm" mb={2}>
-                      {competition.name}
-                    </Heading>
-                  </Link>
-                  <Text color="gray.600" fontSize="sm">
-                    {dayjs(competition.startDate).format(DATE_FORMATS.DISPLAY)}{" "}
-                    - {dayjs(competition.endDate).format(DATE_FORMATS.DISPLAY)}
-                    {competition.timezone && ` (${competition.timezone})`}
-                  </Text>
-                  <Text color="gray.600" fontSize="sm">
-                    {[competition.venue, competition.city, competition.state]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </Text>
-                </Box>
-                <FavoriteButton
-                  type="competition"
-                  name={competition.name}
-                  params={{ year: competition.year, ijsId: competition.ijsId }}
-                />
-              </HStack>
-            </Card>
+              competition={competition}
+            />
           ))}
-        </VStack>
+        </Grid>
 
         {totalPages > 1 && (
           <HStack justify="center" mt={4} spacing={2}>
