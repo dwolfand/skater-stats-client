@@ -1,4 +1,5 @@
 export type UserStatus = "pending" | "approved" | "rejected";
+export type UserRole = "admin";
 
 export interface User {
   id: string;
@@ -7,6 +8,7 @@ export interface User {
   picture?: string;
   skaterId?: number;
   status: UserStatus;
+  role?: UserRole;
 }
 
 export interface AuthResponse {
@@ -22,6 +24,7 @@ export interface UserProfile {
   skaterId?: number;
   status: UserStatus;
   skaterName?: string;
+  role?: UserRole;
 }
 
 export interface TossieReceipt {

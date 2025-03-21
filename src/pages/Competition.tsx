@@ -17,6 +17,7 @@ import {
   InputLeftElement,
   InputRightElement,
   IconButton,
+  Icon,
 } from "@chakra-ui/react";
 import { getCompetitionData } from "../api/client";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +25,8 @@ import dayjs, { DATE_FORMATS } from "../utils/date";
 import FavoriteButton from "../components/FavoriteButton";
 import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import { formatEventTime } from "../utils/timeFormat";
+import { useAdmin } from "../hooks/useAdmin";
+import { FiExternalLink } from "react-icons/fi";
 
 interface Event {
   name: string;
@@ -62,6 +65,7 @@ function Card({ children }: { children: React.ReactNode }) {
 export default function Competition() {
   const { year, ijsId } = useParams<{ year: string; ijsId: string }>();
   const [searchQuery, setSearchQuery] = useState("");
+  const isAdmin = useAdmin();
 
   const {
     data: competition,
@@ -167,6 +171,20 @@ export default function Competition() {
                     .filter(Boolean)
                     .join(", ")}
                 </Text>
+                {isAdmin && (
+                  <Link
+                    href={`https://ijs.usfigureskating.org/leaderboard/results/${year}/${ijsId}/index.asp`}
+                    isExternal
+                    color="gray.500"
+                    fontSize="sm"
+                    display="flex"
+                    alignItems="center"
+                    mt={1}
+                  >
+                    <Text>View on IJS</Text>
+                    <Icon as={FiExternalLink} ml={1} />
+                  </Link>
+                )}
               </Box>
             </Box>
           </HStack>

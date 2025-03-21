@@ -64,6 +64,21 @@ export interface Result {
 
 export interface EventResults {
   eventName: string;
+  competitionTitle: string;
   results: Result[];
   competitionId: string;
+  judgeDetailsUrl?: string | null;
+  officials: Official[];
+  segments: Array<{
+    title: string;
+    isActive: boolean;
+    url: string;
+    status: string;
+  }>;
+}
+
+export interface Official {
+  function: string;
+  name: string;
+  location: string;
 }

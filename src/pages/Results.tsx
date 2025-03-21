@@ -21,6 +21,7 @@ import {
   Button,
   Center,
   useToast,
+  Icon,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
@@ -31,6 +32,8 @@ import FavoriteButton from "../components/FavoriteButton";
 import TossieButton from "../components/TossieButton";
 import { formatEventTime } from "../utils/timeFormat";
 import dayjs, { DATE_FORMATS } from "../utils/date";
+import { useAdmin } from "../hooks/useAdmin";
+import { FiExternalLink } from "react-icons/fi";
 
 // Add WakeLock types
 declare global {
@@ -192,6 +195,7 @@ export default function Results() {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const toast = useToast();
   const prevDataRef = React.useRef<EventResults>();
+  const isAdmin = useAdmin();
 
   const { data, isLoading, refetch } = useQuery<EventResults>({
     queryKey: ["results", year, ijsId, eventId],
@@ -339,6 +343,19 @@ export default function Results() {
                   {dayjs(data.date).format(DATE_FORMATS.DISPLAY)} at{" "}
                   {formatEventTime(data.date, data.time, data.timezone)}
                 </Text>
+              )}
+              {isAdmin && data?.segments?.[0]?.url && (
+                <Link
+                  href={`https://ijs.usfigureskating.org/leaderboard/results/${year}/${ijsId}/${data.segments[0].url}`}
+                  isExternal
+                  color="gray.500"
+                  fontSize="sm"
+                  display="flex"
+                  alignItems="center"
+                >
+                  <Text>View on IJS</Text>
+                  <Icon as={FiExternalLink} ml={1} />
+                </Link>
               )}
             </VStack>
           </VStack>

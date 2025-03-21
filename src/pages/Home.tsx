@@ -111,7 +111,12 @@ export default function Home() {
             <HStack spacing={2}>
               <Heading size="sm">{result.name}</Heading>
               {result.type === "competition" ? (
-                <Box onClick={(e) => e.preventDefault()}>
+                <Box
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
                   <FavoriteButton
                     type="competition"
                     name={result.name}
@@ -119,7 +124,12 @@ export default function Home() {
                   />
                 </Box>
               ) : result.type === "skater" ? (
-                <Box onClick={(e) => e.preventDefault()}>
+                <Box
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
                   <FavoriteButton
                     type="skater"
                     name={result.name}
