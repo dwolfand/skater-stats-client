@@ -206,7 +206,7 @@ export default function Home() {
     ? [
         ...(eventFilter === "all" ? overallStats.inProgress || [] : []),
         ...(eventFilter === "all" || eventFilter === "upcoming"
-          ? [...overallStats.upcoming].reverse()
+          ? overallStats.upcoming
           : []),
         ...(eventFilter === "all" || eventFilter === "recent"
           ? overallStats.recent
