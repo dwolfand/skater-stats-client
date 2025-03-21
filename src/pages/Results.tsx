@@ -128,6 +128,7 @@ function ExpandableRow({ result, year, ijsId }: ExpandableRowProps) {
                   eventResultId={result.id}
                   skaterName={result.name || ""}
                   initialHasTossie={result.hasTossie}
+                  eventDate={result.date}
                 />
               )}
             </HStack>

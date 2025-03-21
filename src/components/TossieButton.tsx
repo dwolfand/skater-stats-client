@@ -3,12 +3,14 @@ import { IconButton, Image, Tooltip, useToast } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { LoginModalContext } from "./LoginModal";
 import { submitTossie } from "../api/client";
+import dayjs from "../utils/date";
 
 interface TossieButtonProps {
   eventResultId?: number;
   sixEventResultId?: number;
   skaterName: string;
   initialHasTossie?: boolean;
+  eventDate?: string;
 }
 
 export default function TossieButton({
@@ -16,12 +18,25 @@ export default function TossieButton({
   sixEventResultId,
   skaterName,
   initialHasTossie = false,
+  eventDate,
 }: TossieButtonProps) {
   const [isGiven, setIsGiven] = React.useState(initialHasTossie);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { isAuthenticated } = useAuth();
   const { openLoginModal } = React.useContext(LoginModalContext);
   const toast = useToast();
+
+  // Hide button if event date is null or if event is more than 60 days old
+  if (!eventDate) {
+    return null;
+  }
+
+  const eventDay = dayjs(eventDate);
+  const today = dayjs();
+  const daysSinceEvent = today.diff(eventDay, "day");
+  if (daysSinceEvent > 60) {
+    return null;
+  }
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
