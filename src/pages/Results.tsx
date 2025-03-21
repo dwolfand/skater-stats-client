@@ -344,9 +344,9 @@ export default function Results() {
                   {formatEventTime(data.date, data.time, data.timezone)}
                 </Text>
               )}
-              {isAdmin && data?.segments?.[0]?.url && (
+              {isAdmin && data?.results?.[0]?.resultsUrl && (
                 <Link
-                  href={`https://ijs.usfigureskating.org/leaderboard/results/${year}/${ijsId}/${data.segments[0].url}`}
+                  href={`https://ijs.usfigureskating.org/leaderboard/results/${year}/${ijsId}/${data.results[0].resultsUrl}`}
                   isExternal
                   color="gray.500"
                   fontSize="sm"
