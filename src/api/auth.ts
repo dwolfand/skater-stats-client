@@ -1,5 +1,10 @@
 import { api } from "./client";
-import { AuthResponse, UserProfile } from "../types/auth";
+import {
+  AuthResponse,
+  UserProfile,
+  LinkSkaterRequest,
+  TossieReceipt,
+} from "../types/auth";
 
 export const googleLogin = async (idToken: string): Promise<AuthResponse> => {
   const { data } = await api.post<AuthResponse>("/auth/google", { idToken });
@@ -11,11 +16,21 @@ export const getProfile = async (): Promise<UserProfile> => {
   return data;
 };
 
+export const getTossieReceipts = async (): Promise<TossieReceipt[]> => {
+  const { data } = await api.get<TossieReceipt[]>("/user/tossie-receipts");
+  return data;
+};
+
 export const requestSkaterLink = async (
-  skaterId: number
+  skaterId: number,
+  usfsNumber: string,
+  additionalInfo?: string
 ): Promise<UserProfile> => {
-  const { data } = await api.post<UserProfile>("/user/link-skater", {
+  const payload: LinkSkaterRequest = {
     skaterId,
-  });
+    usfsNumber,
+    additionalInfo,
+  };
+  const { data } = await api.post<UserProfile>("/user/link-skater", payload);
   return data;
 };

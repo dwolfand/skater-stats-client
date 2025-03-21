@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext, useContext, useState } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -8,20 +8,16 @@ import {
   ModalBody,
   ModalCloseButton,
   Button,
+  Textarea,
+  VStack,
+  Text,
+  useToast,
   FormControl,
   FormLabel,
   Input,
-  Textarea,
-  VStack,
-  useToast,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogOverlay,
-  useDisclosure,
+  FormHelperText,
 } from "@chakra-ui/react";
+import { useAuth } from "../context/AuthContext";
 import { submitFeedback } from "../api/client";
 
 interface FeedbackModalProps {
@@ -29,26 +25,41 @@ interface FeedbackModalProps {
   onClose: () => void;
 }
 
-export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [message, setMessage] = React.useState("");
-  const [email, setEmail] = React.useState("");
+interface FeedbackModalContextType {
+  openFeedbackModal: () => void;
+}
+
+export const FeedbackModalContext = createContext<FeedbackModalContextType>({
+  openFeedbackModal: () => {},
+});
+
+export const useFeedbackModal = () => useContext(FeedbackModalContext);
+
+export const FeedbackModal: React.FC<FeedbackModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
+  const { isAuthenticated, user } = useAuth();
+  const [feedback, setFeedback] = useState("");
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
-  const {
-    isOpen: isAlertOpen,
-    onOpen: onAlertOpen,
-    onClose: onAlertClose,
-  } = useDisclosure();
-  const cancelRef = React.useRef<HTMLButtonElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    if (!feedback.trim()) {
+      toast({
+        title: "Please enter your feedback",
+        status: "error",
+        duration: 3000,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-
     try {
       await submitFeedback({
-        message,
-        email: email || undefined,
+        message: feedback,
+        email: !isAuthenticated && email ? email : undefined,
       });
 
       toast({
@@ -56,20 +67,17 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         description: "Thank you for your feedback!",
         status: "success",
         duration: 5000,
-        isClosable: true,
       });
-
-      // Clear the form only after successful submission
-      setMessage("");
-      setEmail("");
       onClose();
-    } catch (error) {
+      setFeedback("");
+      setEmail("");
+    } catch (error: any) {
+      console.error("Error submitting feedback:", error);
       toast({
         title: "Error submitting feedback",
-        description: "Please try again later or report the issue on GitHub.",
+        description: error.response?.data?.error || "Please try again later",
         status: "error",
-        duration: 5000,
-        isClosable: true,
+        duration: 3000,
       });
     } finally {
       setIsSubmitting(false);
@@ -77,93 +85,74 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   };
 
   const handleClose = () => {
-    if (message || email) {
-      onAlertOpen();
-    } else {
-      onClose();
-    }
-  };
-
-  const handleConfirmClose = () => {
-    onAlertClose();
+    setFeedback("");
+    setEmail("");
     onClose();
   };
 
   return (
-    <>
-      <Modal isOpen={isOpen} onClose={handleClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <form onSubmit={handleSubmit}>
-            <ModalHeader>Provide Feedback</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <VStack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Message</FormLabel>
-                  <Textarea
-                    name="message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Tell us what's wrong or what could be improved..."
-                    minH="120px"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Email (optional)</FormLabel>
-                  <Input
-                    name="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email if you'd like us to follow up"
-                  />
-                </FormControl>
-              </VStack>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="ghost" mr={3} onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button
-                colorScheme="blue"
-                type="submit"
-                isLoading={isSubmitting}
-                loadingText="Submitting"
-              >
-                Submit Feedback
-              </Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+    <Modal isOpen={isOpen} onClose={handleClose} size="xl">
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Provide Feedback</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <VStack spacing={4} align="stretch">
+            <FormControl isRequired>
+              <FormLabel>Feedback</FormLabel>
+              <Textarea
+                placeholder="Tell us what's wrong or what could be improved..."
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                minH="150px"
+              />
+            </FormControl>
+            {!isAuthenticated && (
+              <FormControl>
+                <FormLabel>Email (optional)</FormLabel>
+                <Input
+                  type="email"
+                  placeholder="Enter your email if you'd like us to follow up"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <FormHelperText>
+                  We'll only use this to respond to your feedback
+                </FormHelperText>
+              </FormControl>
+            )}
+          </VStack>
+        </ModalBody>
 
-      <AlertDialog
-        isOpen={isAlertOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={onAlertClose}
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Discard Changes?
-            </AlertDialogHeader>
-
-            <AlertDialogBody>
-              Are you sure? Your feedback will be lost if you close the form.
-            </AlertDialogBody>
-
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onAlertClose}>
-                Keep Writing
-              </Button>
-              <Button colorScheme="red" onClick={handleConfirmClose} ml={3}>
-                Discard
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
+        <ModalFooter>
+          <Button variant="ghost" mr={3} onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            colorScheme="blue"
+            onClick={handleSubmit}
+            isLoading={isSubmitting}
+          >
+            Submit Feedback
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
-}
+};
+
+export const FeedbackModalProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openFeedbackModal = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
+
+  return (
+    <FeedbackModalContext.Provider value={{ openFeedbackModal }}>
+      {children}
+      <FeedbackModal isOpen={isOpen} onClose={onClose} />
+    </FeedbackModalContext.Provider>
+  );
+};

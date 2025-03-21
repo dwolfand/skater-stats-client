@@ -1,5 +1,5 @@
 import React from "react";
-import { IconButton, Icon, Tooltip } from "@chakra-ui/react";
+import { IconButton, Icon, Tooltip, useToast } from "@chakra-ui/react";
 import { StarIcon } from "@chakra-ui/icons";
 import {
   FavoriteType,
@@ -46,13 +46,23 @@ type FavoriteButtonProps =
 
 export default function FavoriteButton(props: FavoriteButtonProps) {
   const { type, name, params } = props;
+  const toast = useToast();
   const [isActive, setIsActive] = React.useState(() =>
     isFavorite(type, params)
   );
 
-  const handleToggle = () => {
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
     if (isActive) {
       removeFavorite(type, params);
+      toast({
+        title: "Removed from favorites",
+        description: `${name} has been removed from your favorites`,
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
     } else {
       switch (type) {
         case "competition":
@@ -77,6 +87,13 @@ export default function FavoriteButton(props: FavoriteButtonProps) {
           });
           break;
       }
+      toast({
+        title: "Added to favorites",
+        description: `${name} has been added to your favorites`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     }
     setIsActive(!isActive);
 

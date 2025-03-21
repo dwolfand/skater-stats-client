@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import Header from "./Header";
-import FeedbackModal from "./FeedbackModal";
+import { FeedbackModal } from "./FeedbackModal";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,33 +19,19 @@ export default function Layout({ children }: LayoutProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <>
+    <Box minH="100vh" display="flex" flexDirection="column">
       <Header />
-      <Box
-        as="main"
-        pt="60px"
-        minH={{
-          base: "100vh",
-          md: "calc(100vh - 60px)",
-        }}
-        pb={{
-          base: "0",
-          md: "100px",
-        }}
-      >
+      <Box as="main" flex="1" pt="72px" bg="gray.50">
         {children}
       </Box>
       <Box
         as="footer"
-        position={{ base: "static", md: "fixed" }}
-        bottom={0}
-        left={0}
-        right={0}
         borderTop="1px"
         borderColor="gray.200"
         bg="white"
         py={{ base: 3, md: 4 }}
         px={6}
+        mt="auto"
       >
         <VStack spacing={2} align="center">
           <HStack
@@ -118,6 +104,6 @@ export default function Layout({ children }: LayoutProps) {
         </VStack>
       </Box>
       <FeedbackModal isOpen={isOpen} onClose={onClose} />
-    </>
+    </Box>
   );
 }

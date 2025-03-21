@@ -67,15 +67,10 @@ export async function getEventResults(
   eventUrl: string
 ) {
   console.log("Fetching results for:", { year, ijsId, eventUrl });
-  const response = await fetch(
-    `${API_URL}/competition/${year}/${ijsId}/results?url=${encodeURIComponent(
-      eventUrl
-    )}`
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch event results");
-  }
-  return response.json();
+  const { data } = await api.get(`/competition/${year}/${ijsId}/results`, {
+    params: { url: eventUrl },
+  });
+  return data;
 }
 
 export interface SearchResult {
@@ -242,6 +237,10 @@ export interface ScoreHistory {
   eventId?: number;
   competitionId?: number;
   eventCategory?: string;
+
+  // Tossie fields
+  id?: number;
+  hasTossie?: boolean;
 }
 
 export interface SkaterStats {
@@ -447,14 +446,14 @@ export interface Official {
   location: string;
 }
 
-export interface FeedbackRequest {
+interface FeedbackRequest {
   message: string;
   email?: string;
 }
 
-export const submitFeedback = async (feedback: FeedbackRequest) => {
-  const { data } = await api.post("/feedback", feedback);
-  return data;
+export const submitFeedback = async (data: FeedbackRequest) => {
+  const { data: response } = await api.post("/feedback", data);
+  return response;
 };
 
 export async function getSixEventDetails(
@@ -516,4 +515,14 @@ export const getClubStats = async (
     `/club/${clubId}${params}`
   );
   return data;
+};
+
+export interface TossieRequest {
+  eventResultId?: number;
+  sixEventResultId?: number;
+}
+
+export const submitTossie = async (data: TossieRequest) => {
+  const { data: response } = await api.post("/tossies", data);
+  return response;
 };

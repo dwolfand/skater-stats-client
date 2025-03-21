@@ -28,6 +28,7 @@ import { MdNotifications, MdNotificationsOff } from "react-icons/md";
 import { getEventResults, EventResults, ScoreHistory } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
 import FavoriteButton from "../components/FavoriteButton";
+import TossieButton from "../components/TossieButton";
 import { formatEventTime } from "../utils/timeFormat";
 import dayjs, { DATE_FORMATS } from "../utils/date";
 
@@ -122,6 +123,14 @@ function ExpandableRow({ result, year, ijsId }: ExpandableRowProps) {
                     : { name: result.name }
                 }
               />
+              {result.score && (
+                <TossieButton
+                  eventResultId={result.id}
+                  skaterName={result.name || ""}
+                  initialHasTossie={result.hasTossie}
+                  eventDate={result.date}
+                />
+              )}
             </HStack>
             {result.club && (
               <Link

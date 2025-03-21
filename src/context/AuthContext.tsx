@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, AuthContextType } from "../types/auth";
-import { googleLogin } from "../api/auth";
+import { User, AuthContextType, UserProfile } from "../types/auth";
+import { googleLogin, getProfile } from "../api/auth";
 import { authEvents, AUTH_UNAUTHORIZED } from "../api/client";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -12,7 +12,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const fetchProfile = async () => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+    try {
+      const profileData = await getProfile();
+      setProfile(profileData);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      // Don't set profile to null on error, keep existing data
+    }
+  };
 
   useEffect(() => {
     // Check for existing session
@@ -25,10 +40,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
     }
     setIsLoading(false);
   }, []);
+
+  // Fetch profile when user changes
+  useEffect(() => {
+    fetchProfile();
+  }, [user]);
 
   // Listen for unauthorized events
   useEffect(() => {
@@ -66,16 +87,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     setUser(null);
+    setProfile(null);
+  };
+
+  const refreshProfile = async () => {
+    await fetchProfile();
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        profile,
         isAuthenticated: !!user,
         isLoading,
         login,
         logout,
+        refreshProfile,
       }}
     >
       {children}
