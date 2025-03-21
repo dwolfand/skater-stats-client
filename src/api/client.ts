@@ -446,14 +446,14 @@ export interface Official {
   location: string;
 }
 
-export interface FeedbackRequest {
+interface FeedbackRequest {
   message: string;
   email?: string;
 }
 
-export const submitFeedback = async (feedback: FeedbackRequest) => {
-  const { data } = await api.post("/feedback", feedback);
-  return data;
+export const submitFeedback = async (data: FeedbackRequest) => {
+  const { data: response } = await api.post("/feedback", data);
+  return response;
 };
 
 export async function getSixEventDetails(

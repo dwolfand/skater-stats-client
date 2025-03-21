@@ -19,7 +19,8 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
-import { Search2Icon, CloseIcon } from "@chakra-ui/icons";
+import { Search2Icon, CloseIcon, Icon } from "@chakra-ui/icons";
+import { FiUser } from "react-icons/fi";
 import FavoritesMenu from "./FavoritesMenu";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -235,7 +236,7 @@ export default function Header() {
               />
             )}
             <FavoritesMenu />
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <Tooltip label="Your Profile">
                 <Link as={RouterLink} to="/profile">
                   <Avatar
@@ -243,6 +244,18 @@ export default function Header() {
                     name={user?.name}
                     src={user?.picture}
                     cursor="pointer"
+                  />
+                </Link>
+              </Tooltip>
+            ) : (
+              <Tooltip label="Sign In">
+                <Link as={RouterLink} to="/profile">
+                  <IconButton
+                    aria-label="Profile"
+                    icon={<Icon as={FiUser} />}
+                    size="sm"
+                    variant="ghost"
+                    color="gray.500"
                   />
                 </Link>
               </Tooltip>
