@@ -4,6 +4,7 @@ import {
   getSkaterStats,
   getSkaterAIAnalysis,
   SkaterStats,
+  getTossieReceipts,
 } from "../api/client";
 import dayjs from "../utils/date";
 import {
@@ -38,6 +39,7 @@ import {
   Badge,
   ButtonGroup,
   Card,
+  Image,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@chakra-ui/icons";
 import { FiFilter } from "react-icons/fi";
@@ -57,6 +59,7 @@ import { useEffect, useState, useMemo } from "react";
 import FavoriteButton from "../components/FavoriteButton";
 import DownloadButton from "../components/DownloadButton";
 import { trackPageView } from "../utils/analytics";
+import TossieModal from "../components/TossieModal";
 
 type SkaterHistoryEntry = SkaterStats["history"][0];
 
@@ -320,6 +323,11 @@ export default function Skater() {
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [selectedEventLevels, setSelectedEventLevels] = useState<string[]>([]);
   const { isOpen: isOptionsOpen, onToggle: onOptionsToggle } = useDisclosure();
+  const {
+    isOpen: isTossieModalOpen,
+    onOpen: onTossieModalOpen,
+    onClose: onTossieModalClose,
+  } = useDisclosure();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -461,6 +469,16 @@ export default function Skater() {
     enabled: false, // Don't fetch automatically
   });
 
+  const { data: tossies, isLoading: isTossiesLoading } = useQuery({
+    queryKey: ["skaterTossies", name, skaterId],
+    queryFn: () =>
+      getTossieReceipts({
+        skaterId: skaterId ? parseInt(skaterId, 10) : undefined,
+        name: name,
+      }),
+    enabled: !!(name || skaterId),
+  });
+
   // Rotate loading messages
   useEffect(() => {
     if (isLoadingAnalysis) {
@@ -507,6 +525,20 @@ export default function Skater() {
               )}
             </VStack>
             <ButtonGroup>
+              <Button
+                leftIcon={
+                  <Image
+                    src="/images/tossie_filled.png"
+                    alt="Tossie"
+                    boxSize="20px"
+                  />
+                }
+                variant="ghost"
+                onClick={onTossieModalOpen}
+                isLoading={isTossiesLoading}
+              >
+                {tossies?.length || 0}
+              </Button>
               <IconButton
                 aria-label="Filter options"
                 icon={<FiFilter />}
@@ -864,6 +896,13 @@ export default function Skater() {
           </Table>
         </Box>
       </VStack>
+
+      <TossieModal
+        isOpen={isTossieModalOpen}
+        onClose={onTossieModalClose}
+        tossies={tossies}
+        isLoading={isTossiesLoading}
+      />
     </Container>
   );
 }

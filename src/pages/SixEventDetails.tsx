@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { getSixEventDetails } from "../api/client";
+import TossieButton from "../components/TossieButton";
 
 interface Official {
   function: string;
@@ -38,6 +39,7 @@ interface SixEventResult {
   status: string | null;
   skater_id: number;
   six_event_id: number;
+  hasTossie: boolean;
 }
 
 interface SixEventDetails {
@@ -145,19 +147,27 @@ export default function SixEventDetails() {
                   <Td p={{ base: 2, md: 4 }}>{result.place}.</Td>
                   <Td p={{ base: 2, md: 4 }}>
                     <Box>
-                      <Link
-                        as={RouterLink}
-                        to={
-                          result.skater_id
-                            ? `/skater/id/${result.skater_id}`
-                            : `/skater/${encodeURIComponent(result.name)}`
-                        }
-                        color="blue.500"
-                        display="block"
-                        fontSize={{ base: "sm", md: "md" }}
-                      >
-                        {result.name}
-                      </Link>
+                      <HStack spacing={2} align="center">
+                        <Link
+                          as={RouterLink}
+                          to={
+                            result.skater_id
+                              ? `/skater/id/${result.skater_id}`
+                              : `/skater/${encodeURIComponent(result.name)}`
+                          }
+                          color="blue.500"
+                          display="block"
+                          fontSize={{ base: "sm", md: "md" }}
+                        >
+                          {result.name}
+                        </Link>
+                        <TossieButton
+                          sixEventResultId={result.id}
+                          skaterName={result.name}
+                          initialHasTossie={result.hasTossie}
+                          eventDate={new Date().toISOString()} // Since six events are typically older, we'll use current date to ensure button shows
+                        />
+                      </HStack>
                       {result.club && (
                         <Link
                           as={RouterLink}

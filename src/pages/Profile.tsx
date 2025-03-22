@@ -21,12 +21,8 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { requestSkaterLink, getTossieReceipts } from "../api/auth";
-import {
-  UserStatus,
-  LinkSkaterRequest,
-  TossieReceipt,
-  LinkRequest,
-} from "../types/auth";
+import { UserStatus, LinkSkaterRequest, LinkRequest } from "../types/auth";
+import { TossieReceipt } from "../api/client";
 import { LoginModalContext } from "../components/LoginModal";
 import { SkaterLinkModal } from "../components/SkaterLinkModal";
 import { Link as RouterLink } from "react-router-dom";
@@ -56,8 +52,8 @@ const TossieReceiptItem: React.FC<{ receipt: TossieReceipt }> = ({
   const fromName = receipt.fromSkaterName || receipt.fromUserName;
   const eventUrl =
     receipt.resultType === "six_event"
-      ? `/competition/${receipt.eventYear}/${receipt.eventId}/six-event/${receipt.results_url}`
-      : `/competition/${receipt.eventYear}/${receipt.eventId}/event/${receipt.results_url}`;
+      ? `/competition/${receipt.eventYear}/${receipt.ijsId}/six-event/${receipt.results_url}`
+      : `/competition/${receipt.eventYear}/${receipt.ijsId}/event/${receipt.results_url}`;
 
   return (
     <HStack spacing={3} py={2} align="start">

@@ -276,13 +276,10 @@ export interface OfficialHistoryEntry {
 export async function getOfficialHistory(
   name: string
 ): Promise<OfficialHistoryEntry[]> {
-  const response = await fetch(
-    `${API_URL}/official/${encodeURIComponent(name)}`
+  const { data } = await api.get<OfficialHistoryEntry[]>(
+    `/official/${encodeURIComponent(name)}`
   );
-  if (!response.ok) {
-    throw new Error("Failed to fetch official history");
-  }
-  return response.json();
+  return data;
 }
 
 export interface OfficialStats {
@@ -461,15 +458,10 @@ export async function getSixEventDetails(
   ijsId: string,
   resultsUrl: string
 ) {
-  const response = await fetch(
-    `${API_URL}/competition/${year}/${ijsId}/six-event/${encodeURIComponent(
-      resultsUrl
-    )}`
+  const { data } = await api.get<SixEventDetails>(
+    `/competition/${year}/${ijsId}/six-event/${encodeURIComponent(resultsUrl)}`
   );
-  if (!response.ok) {
-    throw new Error("Failed to fetch six event details");
-  }
-  return response.json();
+  return data;
 }
 
 export interface ClubStats {
@@ -522,7 +514,61 @@ export interface TossieRequest {
   sixEventResultId?: number;
 }
 
+export interface TossieReceipt {
+  id: number;
+  fromUserId: string;
+  fromUserName: string;
+  fromUserPicture?: string;
+  fromSkaterId?: number;
+  fromSkaterName?: string;
+  created_at: string;
+  eventId: string;
+  eventName: string;
+  eventYear: number;
+  ijsId: string;
+  results_url: string;
+  resultType: "event" | "six_event";
+}
+
 export const submitTossie = async (data: TossieRequest) => {
   const { data: response } = await api.post("/tossies", data);
   return response;
 };
+
+export const getTossieReceipts = async (params: {
+  skaterId?: number;
+  name?: string;
+}): Promise<TossieReceipt[]> => {
+  const { data } = await api.get<TossieReceipt[]>("/skater/tossies", {
+    params,
+  });
+  return data;
+};
+
+export interface SixEventDetails {
+  id: number;
+  name: string;
+  segment: string;
+  status: string | null;
+  resultsUrl: string;
+  results: Array<{
+    id: number;
+    name: string;
+    club: string | null;
+    club_id: number | null;
+    place: string | null;
+    judge_scores: string[] | null;
+    majority: string | null;
+    tie_breaker: string | null;
+    start_number: string | null;
+    status: string | null;
+    skater_id: number;
+    six_event_id: number;
+    hasTossie: boolean;
+  }>;
+  officials: Array<{
+    function: string;
+    name: string;
+    location: string;
+  }>;
+}

@@ -44,7 +44,9 @@ export default function TossieButton({
 
     if (!isAuthenticated) {
       trackTossieLoginPrompt(skaterName);
-      openLoginModal(`Sign in to give a tossie to ${skaterName}!`);
+      openLoginModal(
+        `Sign in to give a tossie to ${skaterName}! It's free and fun - show your support! 🎉`
+      );
       return;
     }
 

@@ -38,6 +38,7 @@ export interface TossieReceipt {
   eventId: string;
   eventName: string;
   eventYear: number;
+  ijsId: string;
   results_url: string;
   resultType: "event" | "six_event";
 }
