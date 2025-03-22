@@ -30,7 +30,7 @@ import { getEventResults, EventResults, ScoreHistory } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
 import FavoriteButton from "../components/FavoriteButton";
 import TossieButton from "../components/TossieButton";
-import { formatEventTime } from "../utils/timeFormat";
+import { formatEventTime, convertToIANATimezone } from "../utils/timeFormat";
 import dayjs, { DATE_FORMATS } from "../utils/date";
 import { useAdmin } from "../hooks/useAdmin";
 import { FiExternalLink } from "react-icons/fi";
@@ -208,6 +208,27 @@ export default function Results() {
   const isUnofficialStatus =
     segmentStatus === "Live unofficial" || segmentStatus === "Unofficial";
 
+  const isWithinOneHourOfEvent = () => {
+    if (!data?.date || !data?.time || !data?.timezone) return false;
+
+    // Convert timezone if needed
+    const ianaTimezone = convertToIANATimezone(data.timezone);
+
+    // Create the event time in the competition's timezone
+    const eventDateTime = dayjs.tz(
+      `${data.date} ${data.time}`,
+      "YYYY-MM-DD HH:mm:ss",
+      ianaTimezone
+    );
+
+    const thirtyMinsBefore = eventDateTime.subtract(30, "minutes");
+    return dayjs().isAfter(thirtyMinsBefore);
+  };
+
+  const shouldShowAutoRefresh =
+    isUnofficialStatus ||
+    (data?.status === "Start order" && isWithinOneHourOfEvent());
+
   // Initialize audio element
   useEffect(() => {
     audioRef.current = new Audio("/notification.mp3");
@@ -258,7 +279,7 @@ export default function Results() {
     if (autoRefresh && isUnofficialStatus) {
       interval = setInterval(() => {
         refetch();
-      }, 10000);
+      }, 9000);
     }
     return () => {
       if (interval) {
@@ -369,7 +390,7 @@ export default function Results() {
           <Badge colorScheme={segmentStatus === "Final" ? "green" : "orange"}>
             {segmentStatus}
           </Badge>
-          {isUnofficialStatus && (
+          {shouldShowAutoRefresh && (
             <HStack spacing={2}>
               <Button
                 size="sm"
