@@ -510,9 +510,9 @@ export default function Skater() {
       <VStack spacing={8} align="stretch">
         {/* Header */}
         <Box>
-          <HStack justify="space-between" align="center" mb={2}>
-            <VStack align="start" spacing={1}>
-              <Heading size="xl">Results for {stats.name}</Heading>
+          <VStack align="stretch" spacing={2}>
+            <Heading size="lg">Results for {stats.name}</Heading>
+            <Flex justify="space-between" align="center">
               {stats.club && (
                 <Link
                   as={RouterLink}
@@ -523,39 +523,39 @@ export default function Skater() {
                   {stats.club}
                 </Link>
               )}
-            </VStack>
-            <ButtonGroup>
-              <Button
-                leftIcon={
-                  <Image
-                    src="/images/tossie_filled.png"
-                    alt="Tossie"
-                    boxSize="20px"
-                  />
-                }
-                variant="ghost"
-                onClick={onTossieModalOpen}
-                isLoading={isTossiesLoading}
-              >
-                {tossies?.length || 0}
-              </Button>
-              <IconButton
-                aria-label="Filter options"
-                icon={<FiFilter />}
-                onClick={onOptionsToggle}
-                variant="ghost"
-              />
-              <FavoriteButton
-                type="skater"
-                name={stats.name}
-                params={
-                  skaterId
-                    ? { skaterId: parseInt(skaterId, 10) }
-                    : { name: stats.name }
-                }
-              />
-            </ButtonGroup>
-          </HStack>
+              <ButtonGroup>
+                <Button
+                  leftIcon={
+                    <Image
+                      src="/images/tossie_filled.png"
+                      alt="Tossie"
+                      boxSize="20px"
+                    />
+                  }
+                  variant="ghost"
+                  onClick={onTossieModalOpen}
+                  isLoading={isTossiesLoading}
+                >
+                  {tossies?.length || 0}
+                </Button>
+                <IconButton
+                  aria-label="Filter options"
+                  icon={<FiFilter />}
+                  onClick={onOptionsToggle}
+                  variant="ghost"
+                />
+                <FavoriteButton
+                  type="skater"
+                  name={stats.name}
+                  params={
+                    skaterId
+                      ? { skaterId: parseInt(skaterId, 10) }
+                      : { name: stats.name }
+                  }
+                />
+              </ButtonGroup>
+            </Flex>
+          </VStack>
           <Collapse in={isOptionsOpen} animateOpacity>
             <Box mb={4}>
               <ButtonGroup mb={4} spacing={2}>
