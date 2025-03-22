@@ -12,6 +12,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
+import { trackLogin } from "../utils/analytics";
 
 declare global {
   interface Window {
@@ -40,6 +41,14 @@ export function LoginModal({ isOpen, onClose, message }: LoginModalProps) {
   const { login } = useAuth();
   const buttonId = React.useId();
 
+  // Determine login source based on message
+  const getLoginSource = (message?: string) => {
+    if (!message) return "other";
+    if (message.includes("tossie")) return "tossie";
+    if (message.includes("profile")) return "profile";
+    return "other";
+  };
+
   useEffect(() => {
     if (isOpen) {
       const initializeGoogleSignIn = () => {
@@ -51,6 +60,7 @@ export function LoginModal({ isOpen, onClose, message }: LoginModalProps) {
             if (response.credential) {
               try {
                 await login(response.credential);
+                trackLogin(getLoginSource(message));
                 onClose();
               } catch (error) {
                 console.error("Login failed:", error);

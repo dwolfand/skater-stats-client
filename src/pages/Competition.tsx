@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import {
   Box,
@@ -27,6 +27,7 @@ import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import { formatEventTime } from "../utils/timeFormat";
 import { useAdmin } from "../hooks/useAdmin";
 import { FiExternalLink } from "react-icons/fi";
+import { trackPageView } from "../utils/analytics";
 
 interface Event {
   name: string;
@@ -76,6 +77,12 @@ export default function Competition() {
     queryFn: () => getCompetitionData(year!, ijsId!),
     enabled: !!(year && ijsId),
   });
+
+  useEffect(() => {
+    if (competition) {
+      trackPageView.competition(year!, ijsId!, competition.name);
+    }
+  }, [competition, year, ijsId]);
 
   // Filter events based on search query
   const filteredEvents =

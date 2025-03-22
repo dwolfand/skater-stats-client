@@ -8,6 +8,7 @@ import {
   isFavorite,
 } from "../utils/favorites";
 import { FAVORITES_UPDATED_EVENT } from "./FavoritesMenu";
+import { trackFavoriteAction } from "../utils/analytics";
 
 interface BaseFavoriteButtonProps {
   type: FavoriteType;
@@ -56,6 +57,7 @@ export default function FavoriteButton(props: FavoriteButtonProps) {
 
     if (isActive) {
       removeFavorite(type, params);
+      trackFavoriteAction("remove", type, name);
       toast({
         title: "Removed from favorites",
         description: `${name} has been removed from your favorites`,
@@ -87,6 +89,7 @@ export default function FavoriteButton(props: FavoriteButtonProps) {
           });
           break;
       }
+      trackFavoriteAction("add", type, name);
       toast({
         title: "Added to favorites",
         description: `${name} has been added to your favorites`,

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { LoginModalContext } from "./LoginModal";
 import { submitTossie } from "../api/client";
 import dayjs from "../utils/date";
+import { trackTossieLoginPrompt } from "../utils/analytics";
 
 interface TossieButtonProps {
   eventResultId?: number;
@@ -42,6 +43,7 @@ export default function TossieButton({
     e.stopPropagation();
 
     if (!isAuthenticated) {
+      trackTossieLoginPrompt(skaterName);
       openLoginModal(`Sign in to give a tossie to ${skaterName}!`);
       return;
     }

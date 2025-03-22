@@ -52,6 +52,7 @@ import type {
 import FavoriteButton from "../components/FavoriteButton";
 import { formatNumber } from "../utils/math";
 import { CompetitionCard } from "../components/CompetitionCard";
+import { trackPageView } from "../utils/analytics";
 
 type EventFilter = "all" | "upcoming" | "recent";
 
@@ -66,6 +67,10 @@ export default function Home() {
   const [eventFilter, setEventFilter] = useState<EventFilter>("all");
 
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure();
+
+  useEffect(() => {
+    trackPageView.home();
+  }, []);
 
   // Add debouncing effect
   useEffect(() => {

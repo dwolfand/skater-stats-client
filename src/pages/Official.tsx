@@ -22,7 +22,7 @@ import {
   HStack,
   Card,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import {
   PaginationRoot,
@@ -31,6 +31,7 @@ import {
   PaginationItems,
 } from "../components/ui/pagination";
 import { getOfficialStats } from "../api/client";
+import { trackPageView } from "../utils/analytics";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -64,6 +65,12 @@ export default function Official() {
     queryFn: () => getOfficialStats(name!),
     enabled: !!name,
   });
+
+  useEffect(() => {
+    if (name) {
+      trackPageView.official(name);
+    }
+  }, [name]);
 
   if (isLoading) {
     return (

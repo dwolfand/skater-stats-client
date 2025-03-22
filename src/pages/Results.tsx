@@ -34,6 +34,7 @@ import { formatEventTime, convertToIANATimezone } from "../utils/timeFormat";
 import dayjs, { DATE_FORMATS } from "../utils/date";
 import { useAdmin } from "../hooks/useAdmin";
 import { FiExternalLink } from "react-icons/fi";
+import { trackPageView } from "../utils/analytics";
 
 // Add WakeLock types
 declare global {
@@ -334,6 +335,17 @@ export default function Results() {
       notifyChanges(data);
     }
   }, [data, autoRefresh, isUnofficialStatus]);
+
+  useEffect(() => {
+    if (data) {
+      trackPageView.event(
+        year!,
+        ijsId!,
+        data.results[0].resultsUrl,
+        data.eventName
+      );
+    }
+  }, [data, year, ijsId, eventId]);
 
   if (isLoading)
     return (

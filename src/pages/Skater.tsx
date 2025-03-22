@@ -56,6 +56,7 @@ import SixJudgeCard from "../components/SixJudgeCard";
 import { useEffect, useState, useMemo } from "react";
 import FavoriteButton from "../components/FavoriteButton";
 import DownloadButton from "../components/DownloadButton";
+import { trackPageView } from "../utils/analytics";
 
 type SkaterHistoryEntry = SkaterStats["history"][0];
 
@@ -339,6 +340,15 @@ export default function Skater() {
       }),
     enabled: !!(name || skaterId),
   });
+
+  useEffect(() => {
+    if (stats) {
+      trackPageView.skater(
+        skaterId ? parseInt(skaterId, 10) : undefined,
+        stats.name || name
+      );
+    }
+  }, [stats, skaterId, name]);
 
   // Check if there are any 6.0 events
   const hasSixPointOEvents = useMemo(() => {
