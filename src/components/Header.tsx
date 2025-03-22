@@ -57,7 +57,7 @@ const SearchInput = ({
           : `/skater/${encodeURIComponent(result.name)}`
         : result.type === "club"
         ? `/club/${result.id}`
-        : `/official/${encodeURIComponent(result.name)}`;
+        : `/official/id/${result.id}`;
     navigate(path);
   };
 

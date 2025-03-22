@@ -105,7 +105,7 @@ export default function Home() {
             : `/skater/${encodeURIComponent(result.name)}`
           : result.type === "club"
           ? `/club/${result.id}`
-          : `/official/${encodeURIComponent(result.name)}`
+          : `/official/id/${result.id}`
       }
       _hover={{ textDecoration: "none" }}
       display="block"
@@ -145,6 +145,19 @@ export default function Home() {
                     }
                   />
                 </Box>
+              ) : result.type === "club" ? (
+                <Box
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  <Badge colorScheme="blue">{result.year}</Badge>
+                </Box>
+              ) : result.type === "official" && result.location ? (
+                <Text fontSize="sm" color="gray.500">
+                  {result.location}
+                </Text>
               ) : null}
             </HStack>
             {result.type === "competition" ? (

@@ -75,9 +75,8 @@ export async function getEventResults(
 
 export interface SearchResult {
   type: "competition" | "skater" | "official" | "club";
+  id?: number;
   name: string;
-  id?: number; // skater ID for skater results, club ID for club results
-  // Competition fields
   startDate?: string;
   endDate?: string;
   venue?: string;
@@ -86,11 +85,12 @@ export interface SearchResult {
   timezone?: string;
   year?: string;
   ijsId?: string;
-  // Skater/Official fields
   competition?: string;
   date?: string;
   url?: string;
   function?: string;
+  club?: string;
+  location?: string;
 }
 
 export interface CompetitionSummary {
@@ -316,8 +316,15 @@ export interface OfficialStats {
 }
 
 export async function getOfficialStats(name: string): Promise<OfficialStats> {
-  const { data } = await api.get<OfficialStats>("/official/stats", {
+  const { data } = await api.get<OfficialStats>("/official", {
     params: { name },
+  });
+  return data;
+}
+
+export async function getOfficialStatsById(id: number): Promise<OfficialStats> {
+  const { data } = await api.get<OfficialStats>("/official", {
+    params: { id },
   });
   return data;
 }

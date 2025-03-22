@@ -30,6 +30,7 @@ export default function Routes() {
       <Route path="/skater/:name" element={<Skater />} />
       <Route path="/skater/id/:skaterId" element={<Skater />} />
       <Route path="/official/:name" element={<Official />} />
+      <Route path="/official/id/:id" element={<Official />} />
       <Route path="/club/:clubId" element={<Club />} />
       <Route
         path="/club/:clubId/competition/:year/:ijsId"

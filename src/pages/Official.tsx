@@ -30,7 +30,7 @@ import {
   PaginationNextTrigger,
   PaginationItems,
 } from "../components/ui/pagination";
-import { getOfficialStats } from "../api/client";
+import { getOfficialStats, getOfficialStatsById } from "../api/client";
 import { trackPageView } from "../utils/analytics";
 
 const ITEMS_PER_PAGE = 20;
@@ -53,7 +53,7 @@ function calculateExperienceText(firstEventDate: string): string {
 }
 
 export default function Official() {
-  const { name } = useParams<{ name: string }>();
+  const { name, id } = useParams<{ name?: string; id?: string }>();
   const [currentPage, setCurrentPage] = useState(1);
 
   const {
@@ -61,9 +61,16 @@ export default function Official() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["official", name],
-    queryFn: () => getOfficialStats(name!),
-    enabled: !!name,
+    queryKey: ["officialStats", name || id],
+    queryFn: () => {
+      if (id) {
+        return getOfficialStatsById(parseInt(id));
+      }
+      if (name) {
+        return getOfficialStats(name);
+      }
+      throw new Error("Either name or id must be provided");
+    },
   });
 
   useEffect(() => {
