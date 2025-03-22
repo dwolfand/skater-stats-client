@@ -40,6 +40,7 @@ export interface AdminInfo {
   linkRequests: LinkRequest[];
   userCount: number;
   tossieCount: number;
+  recentTossies: TossieReceipt[];
 }
 
 export const getAdminInfo = async (): Promise<AdminInfo> => {

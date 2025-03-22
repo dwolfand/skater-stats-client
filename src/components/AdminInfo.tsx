@@ -14,10 +14,14 @@ import {
   Center,
   Divider,
   HStack,
+  Link,
+  Avatar,
 } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getAdminInfo, updateLinkRequestStatus } from "../api/auth";
 import { UserStatus } from "../types/auth";
+import dayjs from "../utils/date";
 
 const statusColors: Record<UserStatus, string> = {
   pending: "yellow",
@@ -86,6 +90,73 @@ export const AdminInfo: React.FC = () => {
 
       <Divider />
 
+      <Box>
+        <Heading size="md" mb={4}>
+          Recent Tossies
+        </Heading>
+        <VStack spacing={4} align="stretch">
+          {adminInfo?.recentTossies?.map((tossie) => (
+            <Box
+              key={tossie.id}
+              p={4}
+              borderWidth="1px"
+              borderRadius="md"
+              bg="white"
+            >
+              <HStack spacing={3} align="start">
+                <Avatar
+                  size="sm"
+                  src={tossie.fromUserPicture}
+                  name={tossie.fromUserName}
+                />
+                <Box flex={1}>
+                  <HStack spacing={2} flexWrap="wrap">
+                    {tossie.fromSkaterId ? (
+                      <Link
+                        as={RouterLink}
+                        to={`/skater/id/${tossie.fromSkaterId}`}
+                        color="blue.500"
+                        fontWeight="medium"
+                      >
+                        {tossie.fromSkaterName || tossie.fromUserName}
+                      </Link>
+                    ) : (
+                      <Text fontWeight="medium">{tossie.fromUserName}</Text>
+                    )}
+                    <Text>gave a tossie to</Text>
+                    <Link
+                      as={RouterLink}
+                      to={`/skater/id/${tossie.toSkaterId}`}
+                      color="blue.500"
+                      fontWeight="medium"
+                    >
+                      {tossie.toSkaterName}
+                    </Link>
+                    <Text>at</Text>
+                    <Link
+                      as={RouterLink}
+                      to={
+                        tossie.resultType === "six_event"
+                          ? `/competition/${tossie.eventYear}/${tossie.ijsId}/six-event/${tossie.results_url}`
+                          : `/competition/${tossie.eventYear}/${tossie.ijsId}/event/${tossie.results_url}`
+                      }
+                      color="blue.500"
+                    >
+                      {tossie.eventName}
+                    </Link>
+                  </HStack>
+                  <Text fontSize="sm" color="gray.500">
+                    {dayjs(tossie.created_at).format("MMM D, YYYY h:mm A")}
+                  </Text>
+                </Box>
+              </HStack>
+            </Box>
+          ))}
+        </VStack>
+      </Box>
+
+      <Divider />
+
       <VStack spacing={4} align="stretch">
         {adminInfo?.linkRequests.map((request) => (
           <Box
@@ -107,7 +178,14 @@ export const AdminInfo: React.FC = () => {
 
                 {/* Skater Info */}
                 <Box>
-                  <Text fontWeight="medium">{request.skaterName}</Text>
+                  <Link
+                    as={RouterLink}
+                    to={`/skater/id/${request.skaterId}`}
+                    color="blue.500"
+                    fontWeight="medium"
+                  >
+                    {request.skaterName}
+                  </Link>
                   <Text fontSize="sm" color="gray.600">
                     USFS: {request.usfsNumber}
                   </Text>

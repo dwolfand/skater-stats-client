@@ -41,6 +41,8 @@ export interface TossieReceipt {
   ijsId: string;
   results_url: string;
   resultType: "event" | "six_event";
+  toSkaterId: number;
+  toSkaterName: string;
 }
 
 export interface LinkSkaterRequest {
