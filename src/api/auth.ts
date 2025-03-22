@@ -4,6 +4,7 @@ import {
   UserProfile,
   LinkSkaterRequest,
   TossieReceipt,
+  LinkRequest,
 } from "../types/auth";
 
 export const googleLogin = async (idToken: string): Promise<AuthResponse> => {
@@ -32,5 +33,27 @@ export const requestSkaterLink = async (
     additionalInfo,
   };
   const { data } = await api.post<UserProfile>("/user/link-skater", payload);
+  return data;
+};
+
+export interface AdminInfo {
+  linkRequests: LinkRequest[];
+  userCount: number;
+  tossieCount: number;
+}
+
+export const getAdminInfo = async (): Promise<AdminInfo> => {
+  const { data } = await api.get<AdminInfo>("/admin/info");
+  return data;
+};
+
+export const updateLinkRequestStatus = async (
+  requestId: string,
+  status: "pending" | "approved" | "rejected"
+): Promise<LinkRequest> => {
+  const { data } = await api.put<LinkRequest>(`/admin/link-requests/status`, {
+    requestId,
+    status,
+  });
   return data;
 };

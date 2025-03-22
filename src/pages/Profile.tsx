@@ -21,11 +21,17 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { requestSkaterLink, getTossieReceipts } from "../api/auth";
-import { UserStatus, LinkSkaterRequest, TossieReceipt } from "../types/auth";
+import {
+  UserStatus,
+  LinkSkaterRequest,
+  TossieReceipt,
+  LinkRequest,
+} from "../types/auth";
 import { LoginModalContext } from "../components/LoginModal";
 import { SkaterLinkModal } from "../components/SkaterLinkModal";
 import { Link as RouterLink } from "react-router-dom";
 import { useFeedbackModal } from "../components/FeedbackModal";
+import { AdminInfo } from "../components/AdminInfo";
 
 function Card({ children }: { children: React.ReactNode }) {
   const styles = useStyleConfig("Box", { variant: "card" });
@@ -298,6 +304,15 @@ export const Profile: React.FC = () => {
                 ))}
               </VStack>
             )}
+          </Card>
+        )}
+
+        {profile?.role === "admin" && (
+          <Card>
+            <Heading size="md" mb={4}>
+              Admin Dashboard
+            </Heading>
+            <AdminInfo />
           </Card>
         )}
 

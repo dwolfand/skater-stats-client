@@ -48,6 +48,20 @@ export interface LinkSkaterRequest {
   additionalInfo?: string;
 }
 
+export interface LinkRequest {
+  id: string;
+  userId: string;
+  userName: string;
+  email: string;
+  skaterId: number;
+  usfsNumber: string;
+  additionalInfo?: string;
+  status: UserStatus;
+  createdAt: string;
+  updatedAt: string;
+  skaterName: string;
+}
+
 export interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
