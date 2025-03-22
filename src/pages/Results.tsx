@@ -344,6 +344,7 @@ export default function Results() {
         data.results[0].resultsUrl,
         data.eventName
       );
+      document.title = `${data.eventName} - ${data.competitionTitle} - Skater Stats`;
     }
   }, [data, year, ijsId, eventId]);
 

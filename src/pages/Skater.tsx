@@ -347,6 +347,7 @@ export default function Skater() {
         skaterId ? parseInt(skaterId, 10) : undefined,
         stats.name || name
       );
+      document.title = `${stats.name} - Skater Stats`;
     }
   }, [stats, skaterId, name]);
 

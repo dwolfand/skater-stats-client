@@ -39,7 +39,7 @@ export default function Terms() {
           </Heading>
           <Text mb={3}>
             Skater Stats is a platform that provides figure skating statistics,
-            competition results, and performance analysis. The Service includes:
+            competition results, and live event updates. The Service includes:
           </Text>
           <List spacing={2} styleType="disc" pl={6}>
             <ListItem>

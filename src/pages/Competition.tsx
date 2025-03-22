@@ -81,6 +81,7 @@ export default function Competition() {
   useEffect(() => {
     if (competition) {
       trackPageView.competition(year!, ijsId!, competition.name);
+      document.title = `${competition.name} - Skater Stats`;
     }
   }, [competition, year, ijsId]);
 
