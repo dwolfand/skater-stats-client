@@ -316,14 +316,14 @@ export interface OfficialStats {
 }
 
 export async function getOfficialStats(name: string): Promise<OfficialStats> {
-  const { data } = await api.get<OfficialStats>("/official", {
+  const { data } = await api.get<OfficialStats>("/official/stats", {
     params: { name },
   });
   return data;
 }
 
 export async function getOfficialStatsById(id: number): Promise<OfficialStats> {
-  const { data } = await api.get<OfficialStats>("/official", {
+  const { data } = await api.get<OfficialStats>("/official/stats", {
     params: { id },
   });
   return data;
@@ -380,6 +380,7 @@ export interface EventResults {
     function: string;
     name: string;
     location: string;
+    id: number;
   }>;
 }
 
@@ -448,6 +449,7 @@ export interface Official {
   function: string;
   name: string;
   location: string;
+  id: number;
 }
 
 interface FeedbackRequest {
@@ -577,5 +579,6 @@ export interface SixEventDetails {
     function: string;
     name: string;
     location: string;
+    id: number;
   }>;
 }

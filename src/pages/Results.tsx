@@ -495,7 +495,7 @@ export default function Results() {
                     <Td p={{ base: 2, md: 3 }}>
                       <Link
                         as={RouterLink}
-                        to={`/official/${encodeURIComponent(official.name)}`}
+                        to={`/official/id/${official.id}`}
                         color="blue.500"
                       >
                         {official.name}

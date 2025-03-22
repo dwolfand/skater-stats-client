@@ -24,6 +24,7 @@ interface Official {
   function: string;
   name: string;
   location: string;
+  id: number;
 }
 
 interface SixEventResult {
@@ -243,7 +244,7 @@ export default function SixEventDetails() {
                     <Td p={{ base: 2, md: 4 }}>
                       <Link
                         as={RouterLink}
-                        to={`/official/${encodeURIComponent(official.name)}`}
+                        to={`/official/id/${official.id}`}
                         color="blue.500"
                         fontSize={{ base: "sm", md: "md" }}
                       >

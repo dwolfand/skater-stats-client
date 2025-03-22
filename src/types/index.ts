@@ -81,4 +81,5 @@ export interface Official {
   function: string;
   name: string;
   location: string;
+  id: number;
 }
