@@ -231,7 +231,7 @@ export default function Results() {
 
   // Initialize audio element
   useEffect(() => {
-    audioRef.current = new Audio("/notification.mp3");
+    audioRef.current = new Audio("/notification-new.mp3");
     audioRef.current.volume = 1.0; // Set volume to 100%
   }, []);
 
@@ -330,7 +330,7 @@ export default function Results() {
 
   // Watch for data changes and notify if needed
   useEffect(() => {
-    if (data && autoRefresh && isUnofficialStatus) {
+    if (data && autoRefresh && shouldShowAutoRefresh) {
       notifyChanges(data);
     }
   }, [data, autoRefresh, isUnofficialStatus]);
