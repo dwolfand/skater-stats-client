@@ -99,6 +99,7 @@ export const uploadImageToS3 = async (
     body: file,
     headers: {
       "Content-Type": file.type,
+      "x-amz-content-sha256": "UNSIGNED-PAYLOAD",
     },
   });
 };
