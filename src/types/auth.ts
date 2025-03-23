@@ -84,6 +84,11 @@ export interface TossieReceipt {
   resultType: "event" | "six_event";
 }
 
+export interface AdminTossieReceipt extends TossieReceipt {
+  toSkaterId: number;
+  toSkaterName: string;
+}
+
 export interface LinkSkaterRequest {
   skaterId: number;
   usfsNumber: string;

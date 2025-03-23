@@ -6,6 +6,7 @@ import {
   TossieReceipt,
   LinkRequest,
   ProfileCustomization,
+  AdminTossieReceipt,
 } from "../types/auth";
 
 export const googleLogin = async (idToken: string): Promise<AuthResponse> => {
@@ -41,7 +42,7 @@ export interface AdminInfo {
   linkRequests: LinkRequest[];
   userCount: number;
   tossieCount: number;
-  recentTossies: TossieReceipt[];
+  recentTossies: AdminTossieReceipt[];
 }
 
 export const getAdminInfo = async (): Promise<AdminInfo> => {
