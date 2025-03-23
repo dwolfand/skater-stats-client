@@ -71,26 +71,50 @@ export const saveProfileCustomization = async (
 };
 
 export interface ImageUploadResponse {
-  url: string; // The CDN URL of the uploaded image
+  uploadUrl: string;
+  fileUrl: string;
 }
 
-export const uploadProfileImage = async (
+export const getImageUploadUrl = async (
   file: File,
-  type: "profile" | "cover" | "gallery"
+  imageType: "profile" | "cover" | "gallery"
 ): Promise<ImageUploadResponse> => {
-  // Create a FormData object to send the file
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("type", type);
-
   const { data } = await api.post<ImageUploadResponse>(
-    "/user/upload-image",
-    formData,
+    "/user/generate-upload-url",
     {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      fileName: file.name,
+      contentType: file.type,
+      imageType,
     }
   );
   return data;
+};
+
+export const uploadImageToS3 = async (
+  file: File,
+  uploadUrl: string
+): Promise<void> => {
+  await fetch(uploadUrl, {
+    method: "PUT",
+    body: file,
+    headers: {
+      "Content-Type": file.type,
+    },
+    mode: "cors",
+    credentials: "omit",
+  });
+};
+
+export const handleImageUpload = async (
+  file: File,
+  imageType: "profile" | "cover" | "gallery"
+): Promise<string> => {
+  // Get the pre-signed URL
+  const { uploadUrl, fileUrl } = await getImageUploadUrl(file, imageType);
+
+  // Upload the file directly to S3
+  await uploadImageToS3(file, uploadUrl);
+
+  // Return the final file URL
+  return fileUrl;
 };

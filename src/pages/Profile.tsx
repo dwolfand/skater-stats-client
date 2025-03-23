@@ -214,14 +214,33 @@ export const Profile: React.FC = () => {
 
         <Card>
           <Box display="flex" alignItems="center" gap={6}>
-            {user?.picture && (
-              <Image
-                src={user.picture}
-                alt={user.name}
-                borderRadius="full"
-                boxSize="100px"
-              />
-            )}
+            <VStack spacing={4}>
+              {profile?.customization?.profileImage ? (
+                <Image
+                  src={profile.customization.profileImage}
+                  alt={user?.name}
+                  borderRadius="full"
+                  boxSize="100px"
+                  objectFit="cover"
+                />
+              ) : user?.picture ? (
+                <Image
+                  src={user.picture}
+                  alt={user?.name}
+                  borderRadius="full"
+                  boxSize="100px"
+                  objectFit="cover"
+                />
+              ) : (
+                <Avatar size="xl" name={user?.name} />
+              )}
+              {profile?.status === "approved" && (
+                <Text fontSize="sm" color="gray.500" textAlign="center">
+                  You can change your profile photo in the customization section
+                  below
+                </Text>
+              )}
+            </VStack>
             <VStack align="stretch" flex={1}>
               <Text>
                 <strong>Name:</strong> {user?.name}

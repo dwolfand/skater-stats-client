@@ -161,66 +161,90 @@ export const AdminInfo: React.FC = () => {
         {adminInfo?.linkRequests.map((request) => (
           <Box
             key={request.id}
-            p={4}
+            p={request.status === "approved" ? 2 : 4}
             borderWidth="1px"
             borderRadius="md"
             bg="white"
           >
-            <HStack align="start" justify="space-between">
-              <VStack align="stretch" spacing={3} flex={1}>
-                {/* User Info */}
-                <Box>
-                  <Text fontWeight="medium">{request.userName}</Text>
-                  <Text fontSize="sm" color="gray.600">
-                    {request.email}
-                  </Text>
-                </Box>
-
-                {/* Skater Info */}
-                <Box>
-                  <Link
-                    as={RouterLink}
-                    to={`/skater/id/${request.skaterId}`}
-                    color="blue.500"
-                    fontWeight="medium"
-                  >
-                    {request.skaterName}
-                  </Link>
-                  <Text fontSize="sm" color="gray.600">
-                    USFS: {request.usfsNumber}
-                  </Text>
-                </Box>
-
-                {/* Additional Info if present */}
-                {request.additionalInfo && (
-                  <Text fontSize="sm" color="gray.500">
-                    Note: {request.additionalInfo}
-                  </Text>
-                )}
-              </VStack>
-
-              {/* Status and Action */}
-              <VStack align="end" spacing={2} minW="120px">
-                <Badge colorScheme={statusColors[request.status]}>
+            {request.status === "approved" ? (
+              // Compact view for approved requests
+              <HStack spacing={3}>
+                <Text fontSize="sm" color="gray.600">
+                  {request.userName}
+                </Text>
+                <Text fontSize="sm" color="gray.400">
+                  →
+                </Text>
+                <Link
+                  as={RouterLink}
+                  to={`/skater/id/${request.skaterId}`}
+                  color="blue.500"
+                  fontSize="sm"
+                >
+                  {request.skaterName}
+                </Link>
+                <Badge colorScheme={statusColors[request.status]} ml="auto">
                   {statusLabels[request.status]}
                 </Badge>
-                <Select
-                  value={request.status}
-                  onChange={(e) =>
-                    updateStatusMutation.mutate({
-                      requestId: request.id,
-                      status: e.target.value as UserStatus,
-                    })
-                  }
-                  size="sm"
-                  width="full"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approve</option>
-                  <option value="rejected">Reject</option>
-                </Select>
-              </VStack>
-            </HStack>
+              </HStack>
+            ) : (
+              // Full view for pending/rejected requests
+              <HStack align="start" justify="space-between">
+                <VStack align="stretch" spacing={3} flex={1}>
+                  {/* User Info */}
+                  <Box>
+                    <Text fontWeight="medium">{request.userName}</Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {request.email}
+                    </Text>
+                  </Box>
+
+                  {/* Skater Info */}
+                  <Box>
+                    <Link
+                      as={RouterLink}
+                      to={`/skater/id/${request.skaterId}`}
+                      color="blue.500"
+                      fontWeight="medium"
+                    >
+                      {request.skaterName}
+                    </Link>
+                    <Text fontSize="sm" color="gray.600">
+                      USFS: {request.usfsNumber}
+                    </Text>
+                  </Box>
+
+                  {/* Additional Info if present */}
+                  {request.additionalInfo && (
+                    <Text fontSize="sm" color="gray.500">
+                      Note: {request.additionalInfo}
+                    </Text>
+                  )}
+                </VStack>
+
+                {/* Status and Action */}
+                <VStack align="end" spacing={2} minW="120px">
+                  <Badge colorScheme={statusColors[request.status]}>
+                    {statusLabels[request.status]}
+                  </Badge>
+                  <Select
+                    value={request.status}
+                    onChange={(e) =>
+                      updateStatusMutation.mutate({
+                        requestId: request.id,
+                        status: e.target.value as UserStatus,
+                      })
+                    }
+                    size="sm"
+                    width="full"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approve</option>
+                    <option value="rejected">Reject</option>
+                  </Select>
+                </VStack>
+              </HStack>
+            )}
           </Box>
         ))}
       </VStack>

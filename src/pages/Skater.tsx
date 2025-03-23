@@ -42,6 +42,12 @@ import {
   Image,
   SimpleGrid,
   AspectRatio,
+  Avatar,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@chakra-ui/icons";
 import { FiFilter } from "react-icons/fi";
@@ -370,6 +376,7 @@ export default function Skater() {
   } = useDisclosure();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [stats, setStats] = useState<SkaterStats | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -599,69 +606,93 @@ export default function Skater() {
         <VStack spacing={8} align="stretch">
           {/* Header */}
           <Box>
-            <VStack align="stretch" spacing={2}>
-              <Heading
-                size="lg"
-                color={themeColors.accent}
-                fontFamily={themeColors.font}
-              >
-                Results for {stats.name}
-              </Heading>
-              <Flex justify="space-between" align="center">
-                {stats.club && (
-                  <Link
-                    as={RouterLink}
-                    to={`/club/${stats.club_id}`}
-                    color={themeColors.accent}
-                    fontSize="md"
-                    fontFamily={themeColors.font}
-                  >
-                    {stats.club}
-                  </Link>
-                )}
-                <ButtonGroup>
-                  <Button
-                    leftIcon={
-                      <Image
-                        src="/images/tossie_filled.png"
-                        alt="Tossie"
-                        boxSize="20px"
-                      />
-                    }
-                    variant="solid"
-                    onClick={onTossieModalOpen}
-                    isLoading={isTossiesLoading}
-                    bg={themeColors.bg ? "white" : "transparent"}
-                    color="gray.800"
-                    _hover={{ bg: themeColors.bg ? "gray.100" : "gray.50" }}
-                  >
-                    {tossies?.length || 0}
-                  </Button>
-                  <IconButton
-                    aria-label="Filter options"
-                    icon={<FiFilter />}
-                    onClick={onOptionsToggle}
-                    variant="solid"
-                    bg={themeColors.bg ? "white" : "transparent"}
-                    color="gray.800"
-                    _hover={{ bg: themeColors.bg ? "gray.100" : "gray.50" }}
-                  />
+            <VStack align="stretch" spacing={4}>
+              <HStack spacing={6} align="start">
+                {stats.customization?.profileImage ? (
                   <Box
-                    bg={themeColors.bg ? "white" : "transparent"}
-                    borderRadius="md"
+                    as="button"
+                    onClick={() => {
+                      const imageUrl = stats.customization?.profileImage;
+                      setSelectedImage(imageUrl ? imageUrl : null);
+                    }}
+                    cursor="pointer"
+                    transition="transform 0.2s"
+                    _hover={{ transform: "scale(1.02)" }}
                   >
-                    <FavoriteButton
-                      type="skater"
-                      name={stats.name}
-                      params={
-                        skaterId
-                          ? { skaterId: parseInt(skaterId, 10) }
-                          : { name: stats.name }
-                      }
+                    <Image
+                      src={stats.customization.profileImage}
+                      alt={stats.name}
+                      borderRadius="full"
+                      boxSize="120px"
+                      objectFit="cover"
                     />
                   </Box>
-                </ButtonGroup>
-              </Flex>
+                ) : (
+                  <Avatar size="2xl" name={stats.name} />
+                )}
+                <VStack align="stretch" spacing={3}>
+                  <Heading
+                    size="lg"
+                    color={themeColors.accent}
+                    fontFamily={themeColors.font}
+                  >
+                    {stats.name}
+                  </Heading>
+                  {stats.club && (
+                    <Link
+                      as={RouterLink}
+                      to={`/club/${stats.club_id}`}
+                      color={themeColors.accent}
+                      fontSize="md"
+                      fontFamily={themeColors.font}
+                    >
+                      {stats.club}
+                    </Link>
+                  )}
+                  <ButtonGroup spacing={2}>
+                    <Button
+                      leftIcon={
+                        <Image
+                          src="/images/tossie_filled.png"
+                          alt="Tossie"
+                          boxSize="20px"
+                        />
+                      }
+                      variant="solid"
+                      onClick={onTossieModalOpen}
+                      isLoading={isTossiesLoading}
+                      bg={themeColors.bg ? "white" : "transparent"}
+                      color="gray.800"
+                      _hover={{ bg: themeColors.bg ? "gray.100" : "gray.50" }}
+                    >
+                      {tossies?.length || 0}
+                    </Button>
+                    <IconButton
+                      aria-label="Filter options"
+                      icon={<FiFilter />}
+                      onClick={onOptionsToggle}
+                      variant="solid"
+                      bg={themeColors.bg ? "white" : "transparent"}
+                      color="gray.800"
+                      _hover={{ bg: themeColors.bg ? "gray.100" : "gray.50" }}
+                    />
+                    <Box
+                      bg={themeColors.bg ? "white" : "transparent"}
+                      borderRadius="md"
+                    >
+                      <FavoriteButton
+                        type="skater"
+                        name={stats.name}
+                        params={
+                          skaterId
+                            ? { skaterId: parseInt(skaterId, 10) }
+                            : { name: stats.name }
+                        }
+                      />
+                    </Box>
+                  </ButtonGroup>
+                </VStack>
+              </HStack>
             </VStack>
             <Collapse in={isOptionsOpen} animateOpacity>
               <Box mb={4} mt={4}>
@@ -930,14 +961,22 @@ export default function Skater() {
                     </Heading>
                     <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={4}>
                       {stats.customization.galleryImages.map((image, index) => (
-                        <Image
+                        <Box
                           key={index}
-                          src={image}
-                          alt={`Gallery ${index + 1}`}
-                          borderRadius="md"
-                          objectFit="cover"
-                          aspectRatio={1}
-                        />
+                          as="button"
+                          onClick={() => setSelectedImage(image)}
+                          cursor="pointer"
+                          transition="transform 0.2s"
+                          _hover={{ transform: "scale(1.02)" }}
+                        >
+                          <Image
+                            src={image}
+                            alt={`Gallery ${index + 1}`}
+                            borderRadius="md"
+                            objectFit="cover"
+                            aspectRatio={1}
+                          />
+                        </Box>
                       ))}
                     </SimpleGrid>
                   </Card>
@@ -1239,6 +1278,33 @@ export default function Skater() {
           tossies={tossies}
           isLoading={isTossiesLoading}
         />
+
+        {/* Image Modal */}
+        <Modal
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          size="6xl"
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent bg="transparent" boxShadow="none">
+            <ModalCloseButton
+              color="white"
+              bg="blackAlpha.600"
+              _hover={{ bg: "blackAlpha.700" }}
+            />
+            <ModalBody p={0}>
+              <Image
+                src={selectedImage || ""}
+                alt="Full size"
+                w="100%"
+                h="auto"
+                maxH="90vh"
+                objectFit="contain"
+              />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
       </Container>
     </Box>
   );

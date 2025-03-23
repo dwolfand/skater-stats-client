@@ -26,7 +26,6 @@ api.interceptors.request.use((config) => {
 // Add response interceptor for error handling and debugging
 api.interceptors.response.use(
   (response) => {
-    console.log("Response:", response.status, response.data);
     return response;
   },
   (error) => {

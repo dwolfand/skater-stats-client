@@ -162,7 +162,7 @@ export default function Header() {
   const [isVisible, setIsVisible] = useState(true);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const location = useLocation();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, profile } = useAuth();
   const {
     isOpen: isMobileSearchOpen,
     onToggle: onMobileSearchToggle,
@@ -242,7 +242,7 @@ export default function Header() {
                   <Avatar
                     size="sm"
                     name={user?.name}
-                    src={user?.picture}
+                    src={profile?.customization?.profileImage || user?.picture}
                     cursor="pointer"
                   />
                 </Link>

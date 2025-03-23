@@ -27,6 +27,7 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   FaInstagram,
@@ -38,6 +39,7 @@ import {
 } from "react-icons/fa";
 import { HexColorPicker } from "react-colorful";
 import { ProfileCustomization } from "../types/auth";
+import { handleImageUpload } from "../api/auth";
 
 interface ProfileCustomizationSectionProps {
   initialCustomization?: ProfileCustomization;
@@ -59,6 +61,10 @@ export const ProfileCustomizationSection: React.FC<
     initialCustomization || {}
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState<{
+    type: "profile" | "cover" | "gallery";
+    index?: number;
+  } | null>(null);
   const toast = useToast();
 
   const handleSave = async () => {
@@ -79,6 +85,65 @@ export const ProfileCustomizationSection: React.FC<
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleImageUploadChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    type: "profile" | "cover" | "gallery",
+    index?: number
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        status: "error",
+      });
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB",
+        status: "error",
+      });
+      return;
+    }
+
+    setUploadingImage({ type, index });
+    try {
+      const fileUrl = await handleImageUpload(file, type);
+
+      if (type === "gallery") {
+        setCustomization({
+          ...customization,
+          galleryImages: [...(customization.galleryImages || []), fileUrl],
+        });
+      } else {
+        setCustomization({
+          ...customization,
+          [type === "profile" ? "profileImage" : "coverImage"]: fileUrl,
+        });
+      }
+
+      toast({
+        title: "Image uploaded successfully",
+        status: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to upload image",
+        description: "Please try again later",
+        status: "error",
+      });
+    } finally {
+      setUploadingImage(null);
     }
   };
 
@@ -470,33 +535,100 @@ export const ProfileCustomizationSection: React.FC<
             <AccordionPanel pb={4}>
               <VStack spacing={4} align="stretch">
                 <FormControl>
-                  <FormLabel>Profile Photo</FormLabel>
-                  <Box position="relative" width="fit-content">
-                    <Image
-                      src={
-                        customization.profileImage ||
-                        "https://via.placeholder.com/150"
-                      }
-                      alt="Profile"
-                      boxSize="150px"
-                      objectFit="cover"
-                      borderRadius="full"
-                      opacity={0.5}
-                    />
-                    <Badge
+                  <HStack justify="space-between" align="center" mb={2}>
+                    <FormLabel mb={0}>Profile Photo</FormLabel>
+                    {customization.profileImage && (
+                      <Button
+                        size="sm"
+                        leftIcon={<FaTrash />}
+                        variant="ghost"
+                        colorScheme="red"
+                        onClick={() =>
+                          setCustomization({
+                            ...customization,
+                            profileImage: undefined,
+                          })
+                        }
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </HStack>
+                  <Box
+                    position="relative"
+                    width="150px"
+                    height="150px"
+                    borderWidth={1}
+                    borderRadius="full"
+                    overflow="hidden"
+                  >
+                    {customization.profileImage ? (
+                      <Image
+                        src={customization.profileImage}
+                        alt="Profile"
+                        boxSize="150px"
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <VStack
+                        justify="center"
+                        align="center"
+                        h="100%"
+                        spacing={2}
+                        color="gray.500"
+                      >
+                        <FaUpload />
+                        <Text fontSize="sm">Add Photo</Text>
+                      </VStack>
+                    )}
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUploadChange(e, "profile")}
                       position="absolute"
-                      top="50%"
-                      left="50%"
-                      transform="translate(-50%, -50%)"
-                      colorScheme="blue"
-                    >
-                      Coming Soon
-                    </Badge>
+                      top={0}
+                      left={0}
+                      opacity={0}
+                      width="100%"
+                      height="100%"
+                      cursor="pointer"
+                    />
+                    {uploadingImage?.type === "profile" && (
+                      <Box
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                        bg="rgba(255, 255, 255, 0.8)"
+                        p={3}
+                        borderRadius="md"
+                      >
+                        <Spinner />
+                      </Box>
+                    )}
                   </Box>
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel>Cover Image</FormLabel>
+                  <HStack justify="space-between" align="center" mb={2}>
+                    <FormLabel mb={0}>Cover Image</FormLabel>
+                    {customization.coverImage && (
+                      <Button
+                        size="sm"
+                        leftIcon={<FaTrash />}
+                        variant="ghost"
+                        colorScheme="red"
+                        onClick={() =>
+                          setCustomization({
+                            ...customization,
+                            coverImage: undefined,
+                          })
+                        }
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </HStack>
                   <Box
                     borderWidth={1}
                     borderRadius="md"
@@ -504,7 +636,6 @@ export const ProfileCustomizationSection: React.FC<
                     position="relative"
                     height="200px"
                     overflow="hidden"
-                    opacity={0.5}
                   >
                     {customization.coverImage ? (
                       <Image
@@ -526,15 +657,31 @@ export const ProfileCustomizationSection: React.FC<
                         <Text>Click to upload cover image</Text>
                       </VStack>
                     )}
-                    <Badge
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUploadChange(e, "cover")}
                       position="absolute"
-                      top="50%"
-                      left="50%"
-                      transform="translate(-50%, -50%)"
-                      colorScheme="blue"
-                    >
-                      Coming Soon
-                    </Badge>
+                      top={0}
+                      left={0}
+                      opacity={0}
+                      width="100%"
+                      height="100%"
+                      cursor="pointer"
+                    />
+                    {uploadingImage?.type === "cover" && (
+                      <Box
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                        bg="rgba(255, 255, 255, 0.8)"
+                        p={3}
+                        borderRadius="md"
+                      >
+                        <Spinner />
+                      </Box>
+                    )}
                   </Box>
                 </FormControl>
 
@@ -542,7 +689,7 @@ export const ProfileCustomizationSection: React.FC<
                   <FormLabel>Gallery Images</FormLabel>
                   <SimpleGrid columns={{ base: 2, md: 3 }} spacing={4}>
                     {(customization.galleryImages || []).map((image, index) => (
-                      <Box key={index} position="relative" opacity={0.5}>
+                      <Box key={index} position="relative">
                         <Image
                           src={image}
                           alt={`Gallery ${index + 1}`}
@@ -557,7 +704,16 @@ export const ProfileCustomizationSection: React.FC<
                           top={2}
                           right={2}
                           size="sm"
-                          isDisabled
+                          onClick={() => {
+                            const newImages = [
+                              ...(customization.galleryImages || []),
+                            ];
+                            newImages.splice(index, 1);
+                            setCustomization({
+                              ...customization,
+                              galleryImages: newImages,
+                            });
+                          }}
                         />
                       </Box>
                     ))}
@@ -567,24 +723,38 @@ export const ProfileCustomizationSection: React.FC<
                       p={4}
                       textAlign="center"
                       position="relative"
-                      cursor="not-allowed"
                       height="100%"
                       minHeight="150px"
-                      opacity={0.5}
                     >
                       <VStack spacing={2} justify="center" h="100%">
                         <FaUpload />
                         <Text>Add Image</Text>
                       </VStack>
-                      <Badge
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUploadChange(e, "gallery")}
                         position="absolute"
-                        top="50%"
-                        left="50%"
-                        transform="translate(-50%, -50%)"
-                        colorScheme="blue"
-                      >
-                        Coming Soon
-                      </Badge>
+                        top={0}
+                        left={0}
+                        opacity={0}
+                        width="100%"
+                        height="100%"
+                        cursor="pointer"
+                      />
+                      {uploadingImage?.type === "gallery" && (
+                        <Box
+                          position="absolute"
+                          top="50%"
+                          left="50%"
+                          transform="translate(-50%, -50%)"
+                          bg="rgba(255, 255, 255, 0.8)"
+                          p={3}
+                          borderRadius="md"
+                        >
+                          <Spinner />
+                        </Box>
+                      )}
                     </Box>
                   </SimpleGrid>
                 </FormControl>
