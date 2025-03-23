@@ -37,6 +37,17 @@ export default function Privacy() {
             <ListItem>
               Profile picture (optional) from your Google account
             </ListItem>
+            <ListItem>
+              Profile customization data including:
+              <List spacing={1} styleType="circle" pl={6} mt={2}>
+                <ListItem>Profile and cover images you upload</ListItem>
+                <ListItem>Gallery images you upload</ListItem>
+                <ListItem>Biography and personal information</ListItem>
+                <ListItem>Social media links</ListItem>
+                <ListItem>Achievements and goals</ListItem>
+                <ListItem>Theme preferences</ListItem>
+              </List>
+            </ListItem>
             <ListItem>Feedback and bug reports you submit</ListItem>
             <ListItem>Your preferences and settings</ListItem>
           </List>
@@ -64,6 +75,7 @@ export default function Privacy() {
             <ListItem>Provide and maintain the Service</ListItem>
             <ListItem>Improve and personalize your experience</ListItem>
             <ListItem>Analyze usage patterns and trends</ListItem>
+            <ListItem>Monitor and enforce content guidelines</ListItem>
             <ListItem>Respond to your feedback and support requests</ListItem>
             <ListItem>Send important updates about the Service</ListItem>
           </List>
@@ -82,6 +94,13 @@ export default function Privacy() {
               Data is stored securely in AWS cloud infrastructure
             </ListItem>
             <ListItem>Passwords and sensitive data are encrypted</ListItem>
+            <ListItem>
+              User-uploaded images are stored securely in AWS S3 with strict
+              access controls
+            </ListItem>
+            <ListItem>
+              Content is monitored for compliance with our guidelines
+            </ListItem>
             <ListItem>Regular security audits are performed</ListItem>
             <ListItem>Access to personal data is strictly controlled</ListItem>
           </List>
@@ -95,6 +114,7 @@ export default function Privacy() {
           <List spacing={2} styleType="disc" pl={6}>
             <ListItem>Google Analytics for usage tracking</ListItem>
             <ListItem>Google Sign-In for authentication</ListItem>
+            <ListItem>AWS S3 for secure image storage</ListItem>
             <ListItem>Anthropic AI for performance analysis</ListItem>
             <ListItem>AWS for hosting and data storage</ListItem>
           </List>

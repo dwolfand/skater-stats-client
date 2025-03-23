@@ -49,6 +49,7 @@ export default function Terms() {
             <ListItem>AI-powered performance analysis</ListItem>
             <ListItem>Real-time competition updates</ListItem>
             <ListItem>User accounts with personalized features</ListItem>
+            <ListItem>Profile customization and image uploads</ListItem>
           </List>
         </Box>
 
@@ -74,8 +75,49 @@ export default function Terms() {
 
         <Box>
           <Heading size="md" mb={3}>
-            4. User Conduct
+            4. User Content and Conduct
           </Heading>
+          <Text mb={3}>
+            When uploading content (including images) to your profile, you agree
+            that:
+          </Text>
+          <List spacing={2} styleType="disc" pl={6} mb={4}>
+            <ListItem>
+              You own or have the necessary rights to use and share the content
+            </ListItem>
+            <ListItem>
+              The content does not violate any third-party rights (including
+              copyright and privacy rights)
+            </ListItem>
+            <ListItem>
+              The content is not offensive, inappropriate, or harmful
+            </ListItem>
+            <ListItem>
+              The content complies with our content guidelines, including:
+              <List spacing={1} styleType="circle" pl={6} mt={2}>
+                <ListItem>No explicit, violent, or adult content</ListItem>
+                <ListItem>No hate speech or discriminatory content</ListItem>
+                <ListItem>No harassment or bullying content</ListItem>
+                <ListItem>
+                  No impersonation of other skaters or individuals
+                </ListItem>
+                <ListItem>
+                  No spam or promotional content without permission
+                </ListItem>
+                <ListItem>
+                  Content must be family-friendly and appropriate for all ages
+                </ListItem>
+              </List>
+            </ListItem>
+            <ListItem>
+              You grant us a non-exclusive license to store, display, and use
+              the content for the Service
+            </ListItem>
+            <ListItem>
+              We may remove any content that violates these terms or for any
+              other reason
+            </ListItem>
+          </List>
           <Text mb={3}>You agree not to:</Text>
           <List spacing={2} styleType="disc" pl={6}>
             <ListItem>Use the Service for any illegal purposes</ListItem>
@@ -94,7 +136,51 @@ export default function Terms() {
 
         <Box>
           <Heading size="md" mb={3}>
-            5. Intellectual Property
+            5. Profile Customization
+          </Heading>
+          <Text mb={3}>
+            The Service provides profile customization features, including image
+            uploads. You understand that:
+          </Text>
+          <List spacing={2} styleType="disc" pl={6}>
+            <ListItem>
+              Profile customization features are provided "as is" and may be
+              modified or removed
+            </ListItem>
+            <ListItem>
+              All profile content must be appropriate for the figure skating
+              community and all ages
+            </ListItem>
+            <ListItem>
+              Uploaded images must be in supported formats and under 5MB in size
+            </ListItem>
+            <ListItem>
+              Profile customizations must not contain:
+              <List spacing={1} styleType="circle" pl={6} mt={2}>
+                <ListItem>Inappropriate or suggestive imagery</ListItem>
+                <ListItem>Offensive language or symbols</ListItem>
+                <ListItem>Misleading or false information</ListItem>
+                <ListItem>
+                  Content that violates skating organization rules or guidelines
+                </ListItem>
+              </List>
+            </ListItem>
+            <ListItem>
+              By enabling the "Featured Profile" option, your profile may be
+              displayed on the homepage
+            </ListItem>
+            <ListItem>
+              We may optimize or resize images to improve performance
+            </ListItem>
+            <ListItem>
+              You are responsible for any content you add to your profile
+            </ListItem>
+          </List>
+        </Box>
+
+        <Box>
+          <Heading size="md" mb={3}>
+            6. Intellectual Property
           </Heading>
           <Text>
             All content, features, and functionality of the Service, including
@@ -107,7 +193,7 @@ export default function Terms() {
 
         <Box>
           <Heading size="md" mb={3}>
-            6. Data Usage and Privacy
+            7. Data Usage and Privacy
           </Heading>
           <Text>
             Your use of the Service is also governed by our Privacy Policy. By
@@ -118,7 +204,7 @@ export default function Terms() {
 
         <Box>
           <Heading size="md" mb={3}>
-            7. Disclaimer of Warranties
+            8. Disclaimer of Warranties
           </Heading>
           <Text>
             The Service is provided "as is" without any warranties, either
@@ -129,7 +215,7 @@ export default function Terms() {
 
         <Box>
           <Heading size="md" mb={3}>
-            8. Limitation of Liability
+            9. Limitation of Liability
           </Heading>
           <Text>
             Skater Stats shall not be liable for any indirect, incidental,
@@ -140,14 +226,14 @@ export default function Terms() {
 
         <Box>
           <Heading size="md" mb={3}>
-            9. Changes to Terms
+            10. Changes to Terms
           </Heading>
           <Text>We reserve the right to modify these terms at any time.</Text>
         </Box>
 
         <Box>
           <Heading size="md" mb={3}>
-            10. Contact Information
+            11. Contact Information
           </Heading>
           <Text>
             For questions about these Terms of Service, please contact us
