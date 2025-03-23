@@ -40,6 +40,9 @@ import { useFeedbackModal } from "../components/FeedbackModal";
 import { AdminInfo } from "../components/AdminInfo";
 import { ProfileCustomizationSection } from "../components/ProfileCustomizationSection";
 
+const needSupportPrompt = `Need to combine profiles (e.g., maiden name or
+                    misspellings)? `;
+
 function Card({ children }: { children: React.ReactNode }) {
   const styles = useStyleConfig("Box", { variant: "card" });
   return <Box __css={{ ...styles, p: { base: 4, md: 6 } }}>{children}</Box>;
@@ -299,8 +302,7 @@ export const Profile: React.FC = () => {
                     currentClub={profile?.currentClub}
                   />
                   <Text fontSize="sm" color="gray.600" mt={4}>
-                    Need to combine profiles (e.g., maiden name) or update your
-                    skating club?{" "}
+                    {needSupportPrompt}
                     <Link
                       color="blue.500"
                       onClick={openFeedbackModal}
@@ -332,7 +334,7 @@ export const Profile: React.FC = () => {
                 Link Skating Profile
               </Button>
               <Text fontSize="sm" color="gray.600">
-                Need to combine profiles (e.g., maiden name or misspellings)?{" "}
+                {needSupportPrompt}
                 <Link
                   color="blue.500"
                   onClick={openFeedbackModal}
