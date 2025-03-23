@@ -5,6 +5,7 @@ import {
   LinkSkaterRequest,
   TossieReceipt,
   LinkRequest,
+  ProfileCustomization,
 } from "../types/auth";
 
 export const googleLogin = async (idToken: string): Promise<AuthResponse> => {
@@ -56,5 +57,39 @@ export const updateLinkRequestStatus = async (
     requestId,
     status,
   });
+  return data;
+};
+
+export const saveProfileCustomization = async (
+  customization: ProfileCustomization
+): Promise<UserProfile> => {
+  const { data } = await api.put<UserProfile>("/user/profile", {
+    customization,
+  });
+  return data;
+};
+
+export interface ImageUploadResponse {
+  url: string; // The CDN URL of the uploaded image
+}
+
+export const uploadProfileImage = async (
+  file: File,
+  type: "profile" | "cover" | "gallery"
+): Promise<ImageUploadResponse> => {
+  // Create a FormData object to send the file
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("type", type);
+
+  const { data } = await api.post<ImageUploadResponse>(
+    "/user/upload-image",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
   return data;
 };

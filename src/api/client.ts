@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ProfileCustomization } from "../types/auth";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/dev";
 
@@ -245,15 +246,43 @@ export interface ScoreHistory {
 
 export interface SkaterStats {
   name: string;
-  club: string | null;
-  club_id: number | null;
+  club?: string;
+  club_id?: number;
+  customization?: ProfileCustomization;
   totalEvents: number;
   totalCompetitions: number;
   averageScore: number | null;
-  history: ScoreHistory[];
-  placementDistribution: {
-    range: string;
-    count: number;
+  history: {
+    date: string;
+    competition: string;
+    event: string;
+    eventType: string;
+    eventLevel: string;
+    score: number;
+    segmentScore?: number;
+    placement?: string;
+    totalSkaters: number;
+    year: number;
+    ijsId: string;
+    resultsUrl: string;
+    status: string;
+    eventId: number;
+    competitionId: number;
+    isSixEvent: boolean;
+    majority?: string;
+    tieBreaker?: string;
+    judgeScores?: string[];
+    club?: string;
+    judgeDetails?: {
+      baseElementsScore: number;
+      totalElementScore: number;
+      totalComponentScore: number;
+      totalDeductions: number;
+      totalScore: number;
+      elements: any[];
+      components: any[];
+      deductions: any[];
+    };
   }[];
 }
 

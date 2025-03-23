@@ -16,6 +16,46 @@ export interface AuthResponse {
   token: string;
 }
 
+export interface SocialLinks {
+  instagram?: string;
+  twitter?: string;
+  tiktok?: string;
+  youtube?: string;
+}
+
+export interface ProfileCustomization {
+  // Theme & Layout
+  accentColor?: string;
+  backgroundColor?: string;
+  fontFamily?: string;
+
+  // Personal Info
+  bio?: string;
+  favoriteQuote?: string;
+  socialLinks?: {
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
+    youtube?: string;
+  };
+
+  // Skating Info
+  coach?: string;
+  achievements?: string[];
+  goals?: string;
+
+  // Media
+  profileImage?: string;
+  coverImage?: string;
+  galleryImages?: string[];
+  featuredVideo?: string;
+  profileSong?: {
+    title?: string;
+    artist?: string;
+    url?: string;
+  };
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -25,6 +65,7 @@ export interface UserProfile {
   status: UserStatus;
   skaterName?: string;
   role?: UserRole;
+  customization?: ProfileCustomization;
 }
 
 export interface TossieReceipt {
@@ -41,8 +82,6 @@ export interface TossieReceipt {
   ijsId: string;
   results_url: string;
   resultType: "event" | "six_event";
-  toSkaterId: number;
-  toSkaterName: string;
 }
 
 export interface LinkSkaterRequest {

@@ -17,17 +17,28 @@ import {
   Avatar,
   Center,
   Divider,
+  Icon,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { requestSkaterLink, getTossieReceipts } from "../api/auth";
-import { UserStatus, LinkSkaterRequest, LinkRequest } from "../types/auth";
+import {
+  requestSkaterLink,
+  getTossieReceipts,
+  saveProfileCustomization,
+} from "../api/auth";
+import {
+  UserStatus,
+  LinkSkaterRequest,
+  LinkRequest,
+  ProfileCustomization,
+} from "../types/auth";
 import { TossieReceipt } from "../api/client";
 import { LoginModalContext } from "../components/LoginModal";
 import { SkaterLinkModal } from "../components/SkaterLinkModal";
 import { Link as RouterLink } from "react-router-dom";
 import { useFeedbackModal } from "../components/FeedbackModal";
 import { AdminInfo } from "../components/AdminInfo";
+import { ProfileCustomizationSection } from "../components/ProfileCustomizationSection";
 
 function Card({ children }: { children: React.ReactNode }) {
   const styles = useStyleConfig("Box", { variant: "card" });
@@ -123,6 +134,17 @@ export const Profile: React.FC = () => {
       setError(error.response?.data?.error || "Failed to link skater profile");
     },
   });
+
+  const handleSaveCustomization = async (
+    customization: ProfileCustomization
+  ) => {
+    try {
+      await saveProfileCustomization(customization);
+      await refreshProfile();
+    } catch (error) {
+      throw error;
+    }
+  };
 
   if (authLoading) {
     return (
@@ -220,14 +242,9 @@ export const Profile: React.FC = () => {
             <VStack align="stretch" spacing={4}>
               <Text>
                 Linked to skater:{" "}
-                <Link
-                  as={RouterLink}
-                  to={`/skater/id/${profile.skaterId}`}
-                  color="blue.500"
-                  fontWeight="medium"
-                >
+                <Text as="span" fontWeight="medium">
                   {profile.skaterName}
-                </Link>
+                </Text>
               </Text>
               {profile.status === "pending" ? (
                 <Text color="gray.600">
@@ -238,23 +255,28 @@ export const Profile: React.FC = () => {
                 <>
                   <Divider />
                   <Box>
-                    <Text color="gray.600" mb={2}>
-                      Profile customization and preferences are coming soon!
-                      You'll be able to customize your profile, set notification
-                      preferences, and more.
-                    </Text>
-                    <Text color="gray.600">
-                      Have suggestions or feedback?{" "}
-                      <Link
-                        color="blue.500"
-                        onClick={() => openFeedbackModal()}
-                        cursor="pointer"
+                    <HStack spacing={4} mb={4}>
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          window.open(
+                            `/skater/id/${profile.skaterId}`,
+                            "_blank"
+                          )
+                        }
                       >
-                        Let us know what features you'd like to see
-                      </Link>
-                      .
+                        View Public Profile
+                      </Button>
+                    </HStack>
+                    <Text color="gray.600" mb={6}>
+                      Customize your profile below to make it unique! Add a bio,
+                      photos, achievements, and more.
                     </Text>
                   </Box>
+                  <ProfileCustomizationSection
+                    initialCustomization={profile?.customization}
+                    onSave={handleSaveCustomization}
+                  />
                 </>
               ) : (
                 <Text color="red.600">

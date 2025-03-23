@@ -40,6 +40,8 @@ import {
   ButtonGroup,
   Card,
   Image,
+  SimpleGrid,
+  AspectRatio,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@chakra-ui/icons";
 import { FiFilter } from "react-icons/fi";
@@ -60,6 +62,15 @@ import FavoriteButton from "../components/FavoriteButton";
 import DownloadButton from "../components/DownloadButton";
 import { trackPageView } from "../utils/analytics";
 import TossieModal from "../components/TossieModal";
+import {
+  FaInstagram,
+  FaTwitter,
+  FaTiktok,
+  FaYoutube,
+  FaMusic,
+  FaPlay,
+} from "react-icons/fa";
+import { Icon } from "@chakra-ui/react";
 
 type SkaterHistoryEntry = SkaterStats["history"][0];
 
@@ -329,6 +340,7 @@ export default function Skater() {
     onClose: onTossieModalClose,
   } = useDisclosure();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [stats, setStats] = useState<SkaterStats | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -339,7 +351,7 @@ export default function Skater() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { data: stats, isLoading } = useQuery({
+  const { data: statsData, isLoading } = useQuery({
     queryKey: ["skater", name, skaterId],
     queryFn: () =>
       getSkaterStats({
@@ -350,14 +362,15 @@ export default function Skater() {
   });
 
   useEffect(() => {
-    if (stats) {
+    if (statsData) {
       trackPageView.skater(
         skaterId ? parseInt(skaterId, 10) : undefined,
-        stats.name || name
+        statsData.name || name
       );
-      document.title = `${stats.name} - Skater Stats`;
+      document.title = `${statsData.name} - Skater Stats`;
+      setStats(statsData);
     }
-  }, [stats, skaterId, name]);
+  }, [statsData, skaterId, name]);
 
   // Check if there are any 6.0 events
   const hasSixPointOEvents = useMemo(() => {
@@ -489,6 +502,41 @@ export default function Skater() {
     }
   }, [isLoadingAnalysis]);
 
+  // Apply theme customization
+  useEffect(() => {
+    if (stats?.customization) {
+      const { backgroundColor, accentColor, fontFamily } = stats.customization;
+      const root = document.documentElement;
+
+      if (backgroundColor) {
+        root.style.setProperty("--skater-bg-color", backgroundColor);
+      }
+      if (accentColor) {
+        root.style.setProperty("--skater-accent-color", accentColor);
+      }
+      if (fontFamily) {
+        root.style.setProperty("--skater-font-family", fontFamily);
+      }
+
+      // Cleanup when component unmounts
+      return () => {
+        root.style.removeProperty("--skater-bg-color");
+        root.style.removeProperty("--skater-accent-color");
+        root.style.removeProperty("--skater-font-family");
+      };
+    }
+  }, [stats?.customization]);
+
+  // Get theme colors from customization
+  const themeColors = useMemo(() => {
+    const customization = stats?.customization;
+    return {
+      bg: customization?.backgroundColor || "",
+      accent: customization?.accentColor || "",
+      font: customization?.fontFamily || "",
+    };
+  }, [stats?.customization]);
+
   if (isLoading) {
     return (
       <Container maxW="container.xl" py={8}>
@@ -505,404 +553,669 @@ export default function Skater() {
     );
   }
 
+  const filename = stats.name?.replace(/\s+/g, "_") + "_stats";
+
   return (
-    <Container maxW="container.xl" py={8}>
-      <VStack spacing={8} align="stretch">
-        {/* Header */}
-        <Box>
-          <VStack align="stretch" spacing={2}>
-            <Heading size="lg">Results for {stats.name}</Heading>
-            <Flex justify="space-between" align="center">
-              {stats.club && (
-                <Link
-                  as={RouterLink}
-                  to={`/club/${stats.club_id}`}
-                  color="gray.600"
-                  fontSize="md"
-                >
-                  {stats.club}
-                </Link>
-              )}
-              <ButtonGroup>
-                <Button
-                  leftIcon={
-                    <Image
-                      src="/images/tossie_filled.png"
-                      alt="Tossie"
-                      boxSize="20px"
-                    />
-                  }
-                  variant="ghost"
-                  onClick={onTossieModalOpen}
-                  isLoading={isTossiesLoading}
-                >
-                  {tossies?.length || 0}
-                </Button>
-                <IconButton
-                  aria-label="Filter options"
-                  icon={<FiFilter />}
-                  onClick={onOptionsToggle}
-                  variant="ghost"
-                />
-                <FavoriteButton
-                  type="skater"
-                  name={stats.name}
-                  params={
-                    skaterId
-                      ? { skaterId: parseInt(skaterId, 10) }
-                      : { name: stats.name }
-                  }
-                />
-              </ButtonGroup>
-            </Flex>
-          </VStack>
-          <Collapse in={isOptionsOpen} animateOpacity>
-            <Box mb={4}>
-              <ButtonGroup mb={4} spacing={2}>
-                <Button
-                  colorScheme="blue"
-                  isLoading={isLoadingAnalysis}
-                  onClick={() => refetchAnalysis()}
-                  leftIcon={
-                    isLoadingAnalysis ? <Spinner size="sm" /> : undefined
-                  }
-                  isDisabled={!!aiAnalysis}
-                >
-                  {aiAnalysis ? "Analysis Complete" : "Get AI Analysis"}
-                </Button>
-                <DownloadButton
-                  data={stats}
-                  filename={stats.name.replace(/\s+/g, "_") + "_stats"}
-                />
-              </ButtonGroup>
-              {isLoadingAnalysis && (
-                <Alert status="info" mb={4}>
-                  <AlertIcon />
-                  <Box>
-                    <AlertTitle>Analyzing Data</AlertTitle>
-                    <AlertDescription>
-                      {LOADING_MESSAGES[loadingMessageIndex]}
+    <Box
+      minH="100vh"
+      style={{
+        backgroundColor: themeColors.bg,
+        fontFamily: themeColors.font,
+        color: themeColors.accent,
+      }}
+    >
+      <Container maxW="container.xl" py={8}>
+        <VStack spacing={8} align="stretch">
+          {/* Header */}
+          <Box>
+            <VStack align="stretch" spacing={2}>
+              <Heading
+                size="lg"
+                color={themeColors.accent}
+                fontFamily={themeColors.font}
+              >
+                Results for {stats.name}
+              </Heading>
+              <Flex justify="space-between" align="center">
+                {stats.club && (
+                  <Link
+                    as={RouterLink}
+                    to={`/club/${stats.club_id}`}
+                    color={themeColors.accent}
+                    fontSize="md"
+                    fontFamily={themeColors.font}
+                  >
+                    {stats.club}
+                  </Link>
+                )}
+                <ButtonGroup>
+                  <Button
+                    leftIcon={
+                      <Image
+                        src="/images/tossie_filled.png"
+                        alt="Tossie"
+                        boxSize="20px"
+                      />
+                    }
+                    variant="ghost"
+                    onClick={onTossieModalOpen}
+                    isLoading={isTossiesLoading}
+                  >
+                    {tossies?.length || 0}
+                  </Button>
+                  <IconButton
+                    aria-label="Filter options"
+                    icon={<FiFilter />}
+                    onClick={onOptionsToggle}
+                    variant="ghost"
+                  />
+                  <FavoriteButton
+                    type="skater"
+                    name={stats.name}
+                    params={
+                      skaterId
+                        ? { skaterId: parseInt(skaterId, 10) }
+                        : { name: stats.name }
+                    }
+                  />
+                </ButtonGroup>
+              </Flex>
+            </VStack>
+            <Collapse in={isOptionsOpen} animateOpacity>
+              <Box mb={4}>
+                <ButtonGroup mb={4} spacing={2}>
+                  <Button
+                    colorScheme="blue"
+                    isLoading={isLoadingAnalysis}
+                    onClick={() => refetchAnalysis()}
+                    leftIcon={
+                      isLoadingAnalysis ? <Spinner size="sm" /> : undefined
+                    }
+                    isDisabled={!!aiAnalysis}
+                  >
+                    {aiAnalysis ? "Analysis Complete" : "Get AI Analysis"}
+                  </Button>
+                  <DownloadButton data={stats} filename={filename} />
+                </ButtonGroup>
+                {isLoadingAnalysis && (
+                  <Alert status="info" mb={4}>
+                    <AlertIcon />
+                    <Box>
+                      <AlertTitle>Analyzing Data</AlertTitle>
+                      <AlertDescription>
+                        {LOADING_MESSAGES[loadingMessageIndex]}
+                      </AlertDescription>
+                    </Box>
+                  </Alert>
+                )}
+                {aiAnalysis && (
+                  <Alert
+                    status="info"
+                    variant="left-accent"
+                    flexDirection="column"
+                    alignItems="flex-start"
+                    mb={4}
+                  >
+                    <AlertTitle mb={2}>AI Analysis</AlertTitle>
+                    <AlertDescription whiteSpace="pre-wrap">
+                      {aiAnalysis.analysis}
                     </AlertDescription>
-                  </Box>
-                </Alert>
-              )}
-              {aiAnalysis && (
-                <Alert
-                  status="info"
-                  variant="left-accent"
-                  flexDirection="column"
-                  alignItems="flex-start"
-                  mb={4}
-                >
-                  <AlertTitle mb={2}>AI Analysis</AlertTitle>
-                  <AlertDescription whiteSpace="pre-wrap">
-                    {aiAnalysis.analysis}
-                  </AlertDescription>
-                </Alert>
-              )}
-              {isAnalysisError && (
-                <Alert status="error" mb={4}>
-                  <AlertIcon />
-                  <AlertDescription>
-                    Failed to get AI analysis. Please try again.
-                  </AlertDescription>
-                </Alert>
-              )}
+                  </Alert>
+                )}
+                {isAnalysisError && (
+                  <Alert status="error" mb={4}>
+                    <AlertIcon />
+                    <AlertDescription>
+                      Failed to get AI analysis. Please try again.
+                    </AlertDescription>
+                  </Alert>
+                )}
 
-              {/* Filter Controls */}
-              <Box>
-                <Flex gap={4} direction={{ base: "column", md: "row" }}>
-                  <Box flex={1}>
-                    <Select
-                      placeholder="Event Types"
-                      value=""
-                      variant="filled"
-                      focusBorderColor="brand.500"
-                      bg="white"
-                      boxShadow="md"
-                      _hover={{ bg: "white" }}
-                      _focus={{ bg: "white" }}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === "") {
-                          setSelectedEventTypes([]);
-                        } else if (!selectedEventTypes.includes(value)) {
-                          setSelectedEventTypes([...selectedEventTypes, value]);
-                        }
-                      }}
-                      mb={2}
-                    >
-                      {uniqueValues.eventTypes.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </Select>
-                    <Flex gap={2} flexWrap="wrap">
-                      {selectedEventTypes.map((type) => (
-                        <Badge
-                          key={type}
-                          colorScheme="brand"
-                          display="flex"
-                          alignItems="center"
-                          gap={1}
-                          p={1}
-                        >
-                          {type}
-                          <IconButton
-                            aria-label="Remove filter"
-                            icon={<CloseIcon boxSize={2} />}
-                            size="xs"
-                            variant="ghost"
-                            onClick={() =>
-                              setSelectedEventTypes(
-                                selectedEventTypes.filter((t) => t !== type)
-                              )
-                            }
-                          />
-                        </Badge>
-                      ))}
-                    </Flex>
-                  </Box>
-                  <Box flex={1}>
-                    <Select
-                      placeholder="Event Levels"
-                      value=""
-                      variant="filled"
-                      focusBorderColor="brand.500"
-                      bg="white"
-                      boxShadow="md"
-                      _hover={{ bg: "white" }}
-                      _focus={{ bg: "white" }}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === "") {
-                          setSelectedEventLevels([]);
-                        } else if (!selectedEventLevels.includes(value)) {
-                          setSelectedEventLevels([
-                            ...selectedEventLevels,
-                            value,
-                          ]);
-                        }
-                      }}
-                      mb={2}
-                    >
-                      {uniqueValues.eventLevels.map((level) => (
-                        <option key={level} value={level}>
-                          {level}
-                        </option>
-                      ))}
-                    </Select>
-                    <Flex gap={2} flexWrap="wrap">
-                      {selectedEventLevels.map((level) => (
-                        <Badge
-                          key={level}
-                          colorScheme="brand"
-                          display="flex"
-                          alignItems="center"
-                          gap={1}
-                          p={1}
-                        >
-                          {level}
-                          <IconButton
-                            aria-label="Remove filter"
-                            icon={<CloseIcon boxSize={2} />}
-                            size="xs"
-                            variant="ghost"
-                            onClick={() =>
-                              setSelectedEventLevels(
-                                selectedEventLevels.filter((l) => l !== level)
-                              )
-                            }
-                          />
-                        </Badge>
-                      ))}
-                    </Flex>
-                  </Box>
-                </Flex>
+                {/* Filter Controls */}
+                <Box>
+                  <Flex gap={4} direction={{ base: "column", md: "row" }}>
+                    <Box flex={1}>
+                      <Select
+                        placeholder="Event Types"
+                        value=""
+                        variant="filled"
+                        focusBorderColor="brand.500"
+                        bg="white"
+                        boxShadow="md"
+                        _hover={{ bg: "white" }}
+                        _focus={{ bg: "white" }}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "") {
+                            setSelectedEventTypes([]);
+                          } else if (!selectedEventTypes.includes(value)) {
+                            setSelectedEventTypes([
+                              ...selectedEventTypes,
+                              value,
+                            ]);
+                          }
+                        }}
+                        mb={2}
+                      >
+                        {uniqueValues.eventTypes.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </Select>
+                      <Flex gap={2} flexWrap="wrap">
+                        {selectedEventTypes.map((type) => (
+                          <Badge
+                            key={type}
+                            colorScheme="brand"
+                            display="flex"
+                            alignItems="center"
+                            gap={1}
+                            p={1}
+                          >
+                            {type}
+                            <IconButton
+                              aria-label="Remove filter"
+                              icon={<CloseIcon boxSize={2} />}
+                              size="xs"
+                              variant="ghost"
+                              onClick={() =>
+                                setSelectedEventTypes(
+                                  selectedEventTypes.filter((t) => t !== type)
+                                )
+                              }
+                            />
+                          </Badge>
+                        ))}
+                      </Flex>
+                    </Box>
+                    <Box flex={1}>
+                      <Select
+                        placeholder="Event Levels"
+                        value=""
+                        variant="filled"
+                        focusBorderColor="brand.500"
+                        bg="white"
+                        boxShadow="md"
+                        _hover={{ bg: "white" }}
+                        _focus={{ bg: "white" }}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "") {
+                            setSelectedEventLevels([]);
+                          } else if (!selectedEventLevels.includes(value)) {
+                            setSelectedEventLevels([
+                              ...selectedEventLevels,
+                              value,
+                            ]);
+                          }
+                        }}
+                        mb={2}
+                      >
+                        {uniqueValues.eventLevels.map((level) => (
+                          <option key={level} value={level}>
+                            {level}
+                          </option>
+                        ))}
+                      </Select>
+                      <Flex gap={2} flexWrap="wrap">
+                        {selectedEventLevels.map((level) => (
+                          <Badge
+                            key={level}
+                            colorScheme="brand"
+                            display="flex"
+                            alignItems="center"
+                            gap={1}
+                            p={1}
+                          >
+                            {level}
+                            <IconButton
+                              aria-label="Remove filter"
+                              icon={<CloseIcon boxSize={2} />}
+                              size="xs"
+                              variant="ghost"
+                              onClick={() =>
+                                setSelectedEventLevels(
+                                  selectedEventLevels.filter((l) => l !== level)
+                                )
+                              }
+                            />
+                          </Badge>
+                        ))}
+                      </Flex>
+                    </Box>
+                  </Flex>
+                </Box>
               </Box>
-            </Box>
-          </Collapse>
-        </Box>
+            </Collapse>
+          </Box>
 
-        {/* Key Statistics */}
-        <Card p={6} mb={8} border="none">
-          <StatGroup>
-            <Stat>
-              <StatLabel>
-                Events
-                {filteredHistory.length !== stats.history.length &&
-                  ` (Filtered)`}
-              </StatLabel>
-              <StatNumber>{filteredHistory.length}</StatNumber>
-              {filteredHistory.length !== stats.history.length && (
-                <Text fontSize="sm" color="gray.600">
-                  of {stats.totalEvents} total
-                </Text>
+          {/* Customization */}
+          {stats.customization && (
+            <Box mb={8}>
+              {/* Cover Image */}
+              {stats.customization.coverImage && (
+                <Box
+                  h="200px"
+                  mb={6}
+                  bgImage={`url(${stats.customization.coverImage})`}
+                  bgSize="cover"
+                  bgPosition="center"
+                  borderRadius="lg"
+                />
               )}
-            </Stat>
-            <Stat>
-              <StatLabel>
-                Competitions
-                {filteredHistory.length !== stats.history.length &&
-                  ` (Filtered)`}
-              </StatLabel>
-              <StatNumber>
-                {new Set(filteredHistory.map((h) => h.competition)).size}
-              </StatNumber>
-              {filteredHistory.length !== stats.history.length && (
-                <Text fontSize="sm" color="gray.600">
-                  of {stats.totalCompetitions} total
-                </Text>
+
+              {/* Bio and Quote */}
+              <Card
+                p={6}
+                mb={6}
+                bg="white"
+                color={themeColors.accent}
+                fontFamily={themeColors.font}
+              >
+                <VStack spacing={4} align="stretch">
+                  {stats.customization?.bio && (
+                    <Box>
+                      <Heading
+                        size="sm"
+                        mb={2}
+                        color={themeColors.accent}
+                        fontFamily={themeColors.font}
+                      >
+                        About Me
+                      </Heading>
+                      <Text whiteSpace="pre-wrap">
+                        {stats.customization.bio}
+                      </Text>
+                    </Box>
+                  )}
+
+                  {stats.customization?.favoriteQuote && (
+                    <Box>
+                      <Text
+                        fontSize="lg"
+                        fontStyle="italic"
+                        color={themeColors.accent}
+                        fontFamily={themeColors.font}
+                      >
+                        "{stats.customization.favoriteQuote}"
+                      </Text>
+                    </Box>
+                  )}
+                </VStack>
+              </Card>
+
+              {/* Skating Info */}
+              {(stats.customization?.coach || stats.customization?.goals) && (
+                <Card p={6} mb={6} bg="white">
+                  <VStack spacing={4} align="stretch">
+                    {stats.customization?.coach && (
+                      <Box>
+                        <Heading size="sm" mb={2}>
+                          Coach
+                        </Heading>
+                        <Text>{stats.customization.coach}</Text>
+                      </Box>
+                    )}
+
+                    {stats.customization?.goals && (
+                      <Box>
+                        <Heading size="sm" mb={2}>
+                          Goals
+                        </Heading>
+                        <Text>{stats.customization.goals}</Text>
+                      </Box>
+                    )}
+                  </VStack>
+                </Card>
               )}
-            </Stat>
-            <Stat>
-              <StatLabel>
-                Personal Best
-                {filteredHistory.length !== stats.history.length &&
-                  ` (Filtered)`}
-              </StatLabel>
-              <StatNumber>
-                {(() => {
-                  const scores = filteredHistory.map(getEffectiveScore);
-                  const filteredBest =
-                    scores.length > 0 ? Math.max(...scores) : 0;
-                  return filteredBest > 0 ? filteredBest.toFixed(2) : "N/A";
-                })()}
-              </StatNumber>
-              {filteredHistory.length !== stats.history.length &&
-                personalBest.score && (
+
+              {/* Achievements */}
+              {stats.customization.achievements &&
+                stats.customization.achievements.length > 0 && (
+                  <Card p={6} mb={6}>
+                    <Heading size="sm" mb={4}>
+                      Achievements
+                    </Heading>
+                    <VStack spacing={2} align="stretch">
+                      {stats.customization.achievements.map(
+                        (achievement, index) => (
+                          <Text key={index}>{achievement}</Text>
+                        )
+                      )}
+                    </VStack>
+                  </Card>
+                )}
+
+              {/* Gallery */}
+              {stats.customization.galleryImages &&
+                stats.customization.galleryImages.length > 0 && (
+                  <Card p={6} mb={6}>
+                    <Heading size="sm" mb={4}>
+                      Gallery
+                    </Heading>
+                    <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={4}>
+                      {stats.customization.galleryImages.map((image, index) => (
+                        <Image
+                          key={index}
+                          src={image}
+                          alt={`Gallery ${index + 1}`}
+                          borderRadius="md"
+                          objectFit="cover"
+                          aspectRatio={1}
+                        />
+                      ))}
+                    </SimpleGrid>
+                  </Card>
+                )}
+
+              {/* Featured Video */}
+              {stats.customization.featuredVideo && (
+                <Card p={6} mb={6}>
+                  <Heading size="sm" mb={4}>
+                    Featured Video
+                  </Heading>
+                  <AspectRatio ratio={16 / 9}>
+                    <iframe
+                      src={stats.customization.featuredVideo}
+                      title="Featured Video"
+                      allowFullScreen
+                    />
+                  </AspectRatio>
+                </Card>
+              )}
+
+              {/* Social Links */}
+              {stats.customization.socialLinks &&
+                Object.values(stats.customization.socialLinks).some(
+                  Boolean
+                ) && (
+                  <Card p={6} mb={6}>
+                    <Heading size="sm" mb={4}>
+                      Connect With Me
+                    </Heading>
+                    <HStack spacing={4}>
+                      {stats.customization.socialLinks.instagram && (
+                        <Link
+                          href={`https://instagram.com/${stats.customization.socialLinks.instagram}`}
+                          isExternal
+                        >
+                          <Icon as={FaInstagram} boxSize={6} />
+                        </Link>
+                      )}
+                      {stats.customization.socialLinks.twitter && (
+                        <Link
+                          href={`https://twitter.com/${stats.customization.socialLinks.twitter}`}
+                          isExternal
+                        >
+                          <Icon as={FaTwitter} boxSize={6} />
+                        </Link>
+                      )}
+                      {stats.customization.socialLinks.tiktok && (
+                        <Link
+                          href={`https://tiktok.com/@${stats.customization.socialLinks.tiktok}`}
+                          isExternal
+                        >
+                          <Icon as={FaTiktok} boxSize={6} />
+                        </Link>
+                      )}
+                      {stats.customization.socialLinks.youtube && (
+                        <Link
+                          href={stats.customization.socialLinks.youtube}
+                          isExternal
+                        >
+                          <Icon as={FaYoutube} boxSize={6} />
+                        </Link>
+                      )}
+                    </HStack>
+                  </Card>
+                )}
+
+              {/* Profile Song */}
+              {stats.customization?.profileSong && (
+                <Card p={6} mb={6} bg="white">
+                  <Heading size="sm" mb={4}>
+                    My Song
+                  </Heading>
+                  <HStack spacing={4}>
+                    <Icon as={FaMusic} boxSize={6} />
+                    <VStack align="start" spacing={0}>
+                      <Text fontWeight="medium">
+                        {stats.customization.profileSong.title}
+                      </Text>
+                      <Text color="gray.600">
+                        {stats.customization.profileSong.artist}
+                      </Text>
+                    </VStack>
+                    {stats.customization?.profileSong?.url && (
+                      <IconButton
+                        aria-label="Play song"
+                        icon={<FaPlay />}
+                        onClick={() =>
+                          window.open(
+                            stats.customization?.profileSong?.url || "",
+                            "_blank"
+                          )
+                        }
+                        ml="auto"
+                      />
+                    )}
+                  </HStack>
+                </Card>
+              )}
+            </Box>
+          )}
+
+          {/* Key Statistics */}
+          <Card
+            p={6}
+            mb={8}
+            border="none"
+            bg={themeColors.bg}
+            color={themeColors.accent}
+            fontFamily={themeColors.font}
+          >
+            <StatGroup>
+              <Stat>
+                <StatLabel>
+                  Events
+                  {filteredHistory.length !== stats.history.length &&
+                    ` (Filtered)`}
+                </StatLabel>
+                <StatNumber>{filteredHistory.length}</StatNumber>
+                {filteredHistory.length !== stats.history.length && (
                   <Text fontSize="sm" color="gray.600">
-                    Overall: {Number(personalBest.score).toFixed(2)}
+                    of {stats.totalEvents} total
                   </Text>
                 )}
-              {(() => {
-                const scores = filteredHistory.map(getEffectiveScore);
-                const maxScore = Math.max(...scores);
-                const bestResult = filteredHistory.find(
-                  (h) => getEffectiveScore(h) === maxScore
-                );
-                if (bestResult) {
-                  return (
+              </Stat>
+              <Stat>
+                <StatLabel>
+                  Competitions
+                  {filteredHistory.length !== stats.history.length &&
+                    ` (Filtered)`}
+                </StatLabel>
+                <StatNumber>
+                  {new Set(filteredHistory.map((h) => h.competition)).size}
+                </StatNumber>
+                {filteredHistory.length !== stats.history.length && (
+                  <Text fontSize="sm" color="gray.600">
+                    of {stats.totalCompetitions} total
+                  </Text>
+                )}
+              </Stat>
+              <Stat>
+                <StatLabel>
+                  Personal Best
+                  {filteredHistory.length !== stats.history.length &&
+                    ` (Filtered)`}
+                </StatLabel>
+                <StatNumber>
+                  {(() => {
+                    const scores = filteredHistory.map(getEffectiveScore);
+                    const filteredBest =
+                      scores.length > 0 ? Math.max(...scores) : 0;
+                    return filteredBest > 0 ? filteredBest.toFixed(2) : "N/A";
+                  })()}
+                </StatNumber>
+                {filteredHistory.length !== stats.history.length &&
+                  personalBest.score && (
                     <Text fontSize="sm" color="gray.600">
-                      {bestResult.eventType} (
-                      {dayjs(bestResult.date).format("MMM D, YYYY")})
+                      Overall: {Number(personalBest.score).toFixed(2)}
                     </Text>
+                  )}
+                {(() => {
+                  const scores = filteredHistory.map(getEffectiveScore);
+                  const maxScore = Math.max(...scores);
+                  const bestResult = filteredHistory.find(
+                    (h) => getEffectiveScore(h) === maxScore
                   );
-                }
-                return null;
-              })()}
-            </Stat>
-          </StatGroup>
-        </Card>
-
-        {/* Score History Chart */}
-        <Box mb={8}>
-          <Heading size="md" mb={4}>
-            Score History
-          </Heading>
-          <Card p={6} border="none">
-            <Box h="400px">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  margin={{
-                    top: 5,
-                    right: 5,
-                    left: isMobile ? 0 : 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="date"
-                    type="number"
-                    domain={["dataMin", "dataMax"]}
-                    tickFormatter={(timestamp) =>
-                      dayjs(timestamp).format("MMM D, YYYY")
-                    }
-                    scale="time"
-                  />
-                  <YAxis domain={["auto", "auto"]} width={isMobile ? 30 : 45} />
-                  <Tooltip
-                    labelFormatter={(timestamp) =>
-                      dayjs(timestamp).format("MMM D, YYYY")
-                    }
-                    formatter={(value: any, name: string) => [
-                      Number(value).toFixed(2),
-                      name,
-                    ]}
-                    itemSorter={(item: any) => -item.value}
-                  />
-                  <Legend />
-                  {chartData.map(({ eventType, data }, index) => (
-                    <Line
-                      key={eventType}
-                      type="monotone"
-                      data={data}
-                      dataKey={eventType}
-                      name={eventType}
-                      stroke={
-                        [
-                          "#319795", // teal.500
-                          "#4299E1", // blue.400
-                          "#9F7AEA", // purple.400
-                          "#00B5D8", // cyan.500
-                          "#667EEA", // indigo.400
-                          "#B794F4", // purple.300
-                        ][index % 6]
-                      }
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                      connectNulls
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </Box>
+                  if (bestResult) {
+                    return (
+                      <Text fontSize="sm" color="gray.600">
+                        {bestResult.eventType} (
+                        {dayjs(bestResult.date).format("MMM D, YYYY")})
+                      </Text>
+                    );
+                  }
+                  return null;
+                })()}
+              </Stat>
+            </StatGroup>
           </Card>
-        </Box>
 
-        {/* All Results */}
-        <Box>
-          <Heading size="md" mb={4}>
-            All Results{" "}
-            {filteredHistory.length !== stats?.history.length &&
-              `(Showing ${filteredHistory.length} of ${stats?.history.length})`}
-          </Heading>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th width="40px" p={{ base: 1, md: 6 }}></Th>
-                <Th display={{ base: "none", md: "table-cell" }}>Date</Th>
-                <Th p={{ base: 2, md: 6 }}>Event</Th>
-                <Th isNumeric p={{ base: 2, md: 6 }}>
-                  Score
-                </Th>
-                <Th isNumeric display={{ base: "none", md: "table-cell" }}>
-                  Place
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {filteredHistory.map((result, index) => (
-                <ExpandableRow
-                  key={index}
-                  result={result}
-                  showScoringSystem={hasSixPointOEvents}
-                />
-              ))}
-            </Tbody>
-          </Table>
-        </Box>
-      </VStack>
+          {/* Score History Chart */}
+          <Box mb={8}>
+            <Heading
+              size="md"
+              mb={4}
+              color={themeColors.accent}
+              fontFamily={themeColors.font}
+            >
+              Score History
+            </Heading>
+            <Card
+              p={6}
+              border="none"
+              bg={themeColors.bg}
+              color={themeColors.accent}
+              fontFamily={themeColors.font}
+            >
+              <Box h="400px">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    margin={{
+                      top: 5,
+                      right: 5,
+                      left: isMobile ? 0 : 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      type="number"
+                      domain={["dataMin", "dataMax"]}
+                      tickFormatter={(timestamp) =>
+                        dayjs(timestamp).format("MMM D, YYYY")
+                      }
+                      scale="time"
+                    />
+                    <YAxis
+                      domain={["auto", "auto"]}
+                      width={isMobile ? 30 : 45}
+                    />
+                    <Tooltip
+                      labelFormatter={(timestamp) =>
+                        dayjs(timestamp).format("MMM D, YYYY")
+                      }
+                      formatter={(value: any, name: string) => [
+                        Number(value).toFixed(2),
+                        name,
+                      ]}
+                      itemSorter={(item: any) => -item.value}
+                    />
+                    <Legend />
+                    {chartData.map(({ eventType, data }, index) => (
+                      <Line
+                        key={eventType}
+                        type="monotone"
+                        data={data}
+                        dataKey={eventType}
+                        name={eventType}
+                        stroke={
+                          [
+                            "#319795", // teal.500
+                            "#4299E1", // blue.400
+                            "#9F7AEA", // purple.400
+                            "#00B5D8", // cyan.500
+                            "#667EEA", // indigo.400
+                            "#B794F4", // purple.300
+                          ][index % 6]
+                        }
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                        connectNulls
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </Box>
+            </Card>
+          </Box>
 
-      <TossieModal
-        isOpen={isTossieModalOpen}
-        onClose={onTossieModalClose}
-        tossies={tossies}
-        isLoading={isTossiesLoading}
-      />
-    </Container>
+          {/* All Results */}
+          <Box>
+            <Heading
+              size="md"
+              mb={4}
+              color={themeColors.accent}
+              fontFamily={themeColors.font}
+            >
+              All Results{" "}
+              {filteredHistory.length !== stats?.history.length &&
+                `(Showing ${filteredHistory.length} of ${stats?.history.length})`}
+            </Heading>
+            <Table
+              variant="simple"
+              bg={themeColors.bg}
+              color={themeColors.accent}
+              fontFamily={themeColors.font}
+            >
+              <Thead>
+                <Tr>
+                  <Th width="40px" p={{ base: 1, md: 6 }}></Th>
+                  <Th display={{ base: "none", md: "table-cell" }}>Date</Th>
+                  <Th p={{ base: 2, md: 6 }}>Event</Th>
+                  <Th isNumeric p={{ base: 2, md: 6 }}>
+                    Score
+                  </Th>
+                  <Th isNumeric display={{ base: "none", md: "table-cell" }}>
+                    Place
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {filteredHistory.map((result, index) => (
+                  <ExpandableRow
+                    key={index}
+                    result={result}
+                    showScoringSystem={hasSixPointOEvents}
+                  />
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+        </VStack>
+
+        <TossieModal
+          isOpen={isTossieModalOpen}
+          onClose={onTossieModalClose}
+          tossies={tossies}
+          isLoading={isTossiesLoading}
+        />
+      </Container>
+    </Box>
   );
 }
