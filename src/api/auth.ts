@@ -99,12 +99,7 @@ export const uploadImageToS3 = async (
     body: file,
     headers: {
       "Content-Type": file.type,
-      "x-amz-content-sha256": "UNSIGNED-PAYLOAD",
-      "x-amz-checksum-crc32": "AAAAAA==",
-      "x-amz-sdk-checksum-algorithm": "CRC32",
     },
-    mode: "cors",
-    credentials: "omit",
   });
 };
 
