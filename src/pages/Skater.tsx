@@ -153,7 +153,11 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
 
   return (
     <>
-      <Tr onClick={onToggle} style={{ cursor: "pointer" }}>
+      <Tr
+        onClick={onToggle}
+        style={{ cursor: "pointer" }}
+        _hover={{ bg: "gray.50" }}
+      >
         <Td width={{ base: "48px", md: "40px" }} p="0" textAlign="center">
           <IconButton
             aria-label="Expand row"
@@ -179,7 +183,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
             justifyContent="center"
           />
         </Td>
-        <Td display={{ base: "none", md: "table-cell" }}>
+        <Td display={{ base: "none", md: "table-cell" }} color="gray.900">
           {dayjs(result.date).format("MMM D, YYYY")}
         </Td>
         <Td p={{ base: 2, md: 6 }}>
@@ -199,7 +203,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
               onClick={(e) => e.stopPropagation()}
             >
               <HStack spacing={2}>
-                <Text>{result.event}</Text>
+                <Text color="gray.900">{result.event}</Text>
                 {showScoringSystem && (
                   <Badge
                     colorScheme={result.isSixEvent ? "purple" : "blue"}
@@ -235,7 +239,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
         <Td isNumeric p={{ base: 2, md: 6 }}>
           {result.isSixEvent ? (
             <VStack align="flex-end" spacing={0}>
-              <Text>{result.majority || "-"}</Text>
+              <Text color="gray.900">{result.majority || "-"}</Text>
               {result.tieBreaker && (
                 <Text fontSize="sm" color="gray.600">
                   {result.tieBreaker}
@@ -256,7 +260,7 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
             </VStack>
           ) : (
             <VStack align="flex-end" spacing={0}>
-              <Text>
+              <Text color="gray.900">
                 {result.segmentScore && result.segmentScore > 0
                   ? result.segmentScore.toFixed(2)
                   : result.score?.toFixed(2) || "-"}
@@ -284,11 +288,15 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
             </VStack>
           )}
         </Td>
-        <Td isNumeric display={{ base: "none", md: "table-cell" }}>
+        <Td
+          isNumeric
+          display={{ base: "none", md: "table-cell" }}
+          color="gray.900"
+        >
           {result.placement && (
             <>
               {result.placement}
-              <Text as="sup" fontSize="xs" ml={0.5}>
+              <Text as="sup" fontSize="xs" ml={0.5} color="gray.900">
                 {getOrdinalSuffix(result.placement)}
               </Text>
             </>
@@ -327,6 +335,27 @@ const LOADING_MESSAGES = [
   "Identifying strengths and areas for improvement...",
   "Compiling comprehensive analysis...",
 ];
+
+// Helper function to format video URLs for embedding
+const getEmbedUrl = (url: string) => {
+  // YouTube URL patterns
+  const youtubePatterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/,
+  ];
+
+  // Check for YouTube URLs
+  for (const pattern of youtubePatterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return `https://www.youtube.com/embed/${match[1]}?autoplay=0`;
+    }
+  }
+
+  // Return original URL if no patterns match
+  return url;
+};
 
 export default function Skater() {
   const { name, skaterId } = useParams<{ name?: string; skaterId?: string }>();
@@ -917,9 +946,11 @@ export default function Skater() {
                   </Heading>
                   <AspectRatio ratio={16 / 9}>
                     <iframe
-                      src={stats.customization.featuredVideo}
+                      src={getEmbedUrl(stats.customization.featuredVideo)}
                       title="Featured Video"
                       allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      style={{ border: 0 }}
                     />
                   </AspectRatio>
                 </Card>
@@ -1011,7 +1042,7 @@ export default function Skater() {
             p={6}
             mb={8}
             border="none"
-            bg={themeColors.bg}
+            bg="white"
             color={themeColors.accent}
             fontFamily={themeColors.font}
           >
@@ -1097,7 +1128,7 @@ export default function Skater() {
             <Card
               p={6}
               border="none"
-              bg={themeColors.bg}
+              bg="white"
               color={themeColors.accent}
               fontFamily={themeColors.font}
             >
@@ -1177,12 +1208,7 @@ export default function Skater() {
               {filteredHistory.length !== stats?.history.length &&
                 `(Showing ${filteredHistory.length} of ${stats?.history.length})`}
             </Heading>
-            <Table
-              variant="simple"
-              bg={themeColors.bg}
-              color={themeColors.accent}
-              fontFamily={themeColors.font}
-            >
+            <Table variant="simple" bg="white" fontFamily={themeColors.font}>
               <Thead>
                 <Tr>
                   <Th width="40px" p={{ base: 1, md: 6 }}></Th>

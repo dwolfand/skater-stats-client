@@ -141,7 +141,7 @@ export default function JudgeCard({ details }: JudgeCardProps) {
           <Text fontWeight="bold" fontSize="sm" color="gray.600">
             Total Segment Score
           </Text>
-          <Text fontSize="xl" fontWeight="bold">
+          <Text fontSize="xl" fontWeight="bold" color="gray.900">
             {details.totalScore && details.totalScore.toFixed(2)}
           </Text>
         </GridItem>
@@ -150,7 +150,7 @@ export default function JudgeCard({ details }: JudgeCardProps) {
             <Text fontWeight="bold" fontSize="sm" color="gray.600">
               Total Element Score
             </Text>
-            <Text fontSize="xl" fontWeight="bold">
+            <Text fontSize="xl" fontWeight="bold" color="gray.900">
               {details.totalElementScore.toFixed(2)}
             </Text>
           </GridItem>
@@ -159,7 +159,7 @@ export default function JudgeCard({ details }: JudgeCardProps) {
           <Text fontWeight="bold" fontSize="sm" color="gray.600">
             Total Component Score
           </Text>
-          <Text fontSize="xl" fontWeight="bold">
+          <Text fontSize="xl" fontWeight="bold" color="gray.900">
             {details.totalComponentScore.toFixed(2)}
           </Text>
         </GridItem>
@@ -185,31 +185,37 @@ export default function JudgeCard({ details }: JudgeCardProps) {
             <Table size="sm" mb={4} variant="simple" colorScheme="gray">
               <Thead>
                 <Tr bg="gray.100">
-                  <Th>#</Th>
-                  <Th>Element</Th>
-                  {hasInfoContent && <Th>Info</Th>}
-                  <Th isNumeric pr={1}>
+                  <Th color="gray.700">#</Th>
+                  <Th color="gray.700">Element</Th>
+                  {hasInfoContent && <Th color="gray.700">Info</Th>}
+                  <Th isNumeric pr={1} color="gray.700">
                     Base
                   </Th>
                   <Th p={0} width="8px"></Th>
-                  <Th isNumeric>GOE</Th>
+                  <Th isNumeric color="gray.700">
+                    GOE
+                  </Th>
                   {[...Array(details.elements[0]?.judgesGoe.length || 0)].map(
                     (_, i) => (
-                      <Th key={i}>J{i + 1}</Th>
+                      <Th key={i} color="gray.700">
+                        J{i + 1}
+                      </Th>
                     )
                   )}
-                  <Th isNumeric>Score</Th>
+                  <Th isNumeric color="gray.700">
+                    Score
+                  </Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {details.elements.map((element, index) => (
                   <Tr key={index}>
-                    <Td>{element.number}</Td>
-                    <Td>
+                    <Td color="gray.900">{element.number}</Td>
+                    <Td color="gray.900">
                       <ElementTooltip element={element} />
                     </Td>
                     {hasInfoContent && (
-                      <Td>
+                      <Td color="gray.900">
                         {element.info ? (
                           <InfoTooltip info={element.info} />
                         ) : (
@@ -217,7 +223,7 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                         )}
                       </Td>
                     )}
-                    <Td isNumeric pr={1}>
+                    <Td isNumeric pr={1} color="gray.900">
                       {element.baseValue.toFixed(2)}
                     </Td>
                     <Td p={0}>
@@ -230,7 +236,7 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                           ? "red.500"
                           : element.goe > 0
                           ? "green.500"
-                          : undefined
+                          : "gray.900"
                       }
                     >
                       {element.goe > 0 ? "+" : ""}
@@ -244,14 +250,14 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                             ? "red.500"
                             : goe > 0
                             ? "green.500"
-                            : undefined
+                            : "gray.900"
                         }
                       >
                         {goe > 0 ? "+" : ""}
                         {goe}
                       </Td>
                     ))}
-                    <Td isNumeric fontWeight="medium">
+                    <Td isNumeric fontWeight="medium" color="gray.900">
                       {element.value.toFixed(2)}
                     </Td>
                   </Tr>
@@ -272,25 +278,31 @@ export default function JudgeCard({ details }: JudgeCardProps) {
             <Table size="sm" mb={4} variant="simple" colorScheme="gray">
               <Thead>
                 <Tr bg="gray.100">
-                  <Th>Component</Th>
-                  <Th>Factor</Th>
+                  <Th color="gray.700">Component</Th>
+                  <Th color="gray.700">Factor</Th>
                   {[
                     ...Array(details.components[0]?.judgesScores.length || 0),
                   ].map((_, i) => (
-                    <Th key={i}>J{i + 1}</Th>
+                    <Th key={i} color="gray.700">
+                      J{i + 1}
+                    </Th>
                   ))}
-                  <Th isNumeric>Score</Th>
+                  <Th isNumeric color="gray.700">
+                    Score
+                  </Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {details.components.map((component, index) => (
                   <Tr key={index}>
-                    <Td>{component.name}</Td>
-                    <Td>{component.factor.toFixed(2)}</Td>
+                    <Td color="gray.900">{component.name}</Td>
+                    <Td color="gray.900">{component.factor.toFixed(2)}</Td>
                     {component.judgesScores.map((score, j) => (
-                      <Td key={j}>{score.toFixed(2)}</Td>
+                      <Td key={j} color="gray.900">
+                        {score.toFixed(2)}
+                      </Td>
                     ))}
-                    <Td isNumeric fontWeight="medium">
+                    <Td isNumeric fontWeight="medium" color="gray.900">
                       {component.value.toFixed(2)}
                     </Td>
                   </Tr>
@@ -310,17 +322,19 @@ export default function JudgeCard({ details }: JudgeCardProps) {
           <Table size="sm" variant="simple" colorScheme="gray">
             <Thead>
               <Tr bg="gray.100">
-                <Th>Description</Th>
-                <Th isNumeric>Value</Th>
+                <Th color="gray.700">Description</Th>
+                <Th isNumeric color="gray.700">
+                  Value
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
               {details.deductions.map((deduction, index) => (
                 <Tr key={index}>
-                  <Td>{deduction.name}</Td>
+                  <Td color="gray.900">{deduction.name}</Td>
                   <Td
                     isNumeric
-                    color={deduction.value !== 0 ? "red.500" : undefined}
+                    color={deduction.value !== 0 ? "red.500" : "gray.900"}
                     fontWeight="medium"
                   >
                     -{deduction.value.toFixed(2)}

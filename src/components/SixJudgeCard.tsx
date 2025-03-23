@@ -32,15 +32,21 @@ export default function SixJudgeCard({
               <Thead>
                 <Tr bg="gray.100">
                   {judgeScores.map((_, index) => (
-                    <Th key={index} textAlign="center" width="40px" px={2}>
+                    <Th
+                      key={index}
+                      textAlign="center"
+                      width="40px"
+                      px={2}
+                      color="gray.700"
+                    >
                       J{index + 1}
                     </Th>
                   ))}
-                  <Th textAlign="center" width="40px" px={2}>
+                  <Th textAlign="center" width="40px" px={2} color="gray.700">
                     Maj.
                   </Th>
                   {tieBreaker && (
-                    <Th textAlign="center" width="40px" px={2}>
+                    <Th textAlign="center" width="40px" px={2} color="gray.700">
                       Tie Br.
                     </Th>
                   )}
@@ -54,15 +60,21 @@ export default function SixJudgeCard({
                       textAlign="center"
                       fontWeight="medium"
                       px={2}
+                      color="gray.900"
                     >
                       {score}
                     </Td>
                   ))}
-                  <Td textAlign="center" fontWeight="medium" px={2}>
+                  <Td
+                    textAlign="center"
+                    fontWeight="medium"
+                    px={2}
+                    color="gray.900"
+                  >
                     {majority || "-"}
                   </Td>
                   {tieBreaker && (
-                    <Td textAlign="center" px={2} color="gray.600">
+                    <Td textAlign="center" px={2} color="gray.900">
                       {tieBreaker}
                     </Td>
                   )}
@@ -72,8 +84,8 @@ export default function SixJudgeCard({
           </Box>
         )}
         {club && (
-          <Text>
-            <Text as="span" fontWeight="bold">
+          <Text color="gray.900">
+            <Text as="span" fontWeight="bold" color="gray.700">
               Club:
             </Text>{" "}
             {club}
