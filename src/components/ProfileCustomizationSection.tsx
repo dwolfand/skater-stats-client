@@ -602,6 +602,51 @@ export const ProfileCustomizationSection: React.FC<
                     placeholder="YouTube or Vimeo URL..."
                   />
                 </FormControl>
+
+                <FormControl>
+                  <FormLabel>Profile Song</FormLabel>
+                  <VStack spacing={2}>
+                    <Input
+                      value={customization.profileSong?.title}
+                      onChange={(e) =>
+                        setCustomization({
+                          ...customization,
+                          profileSong: {
+                            ...customization.profileSong,
+                            title: e.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Song title..."
+                    />
+                    <Input
+                      value={customization.profileSong?.artist}
+                      onChange={(e) =>
+                        setCustomization({
+                          ...customization,
+                          profileSong: {
+                            ...customization.profileSong,
+                            artist: e.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Artist name..."
+                    />
+                    <Input
+                      value={customization.profileSong?.url}
+                      onChange={(e) =>
+                        setCustomization({
+                          ...customization,
+                          profileSong: {
+                            ...customization.profileSong,
+                            url: e.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Song URL (Spotify, Apple Music, etc.)..."
+                    />
+                  </VStack>
+                </FormControl>
               </VStack>
             </AccordionPanel>
           </AccordionItem>

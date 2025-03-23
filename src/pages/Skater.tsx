@@ -592,6 +592,8 @@ export default function Skater() {
         fontFamily: themeColors.font,
         color: themeColors.accent,
       }}
+      mt="-64px"
+      pt="64px"
     >
       <Container maxW="container.xl" py={8}>
         <VStack spacing={8} align="stretch">
@@ -626,9 +628,12 @@ export default function Skater() {
                         boxSize="20px"
                       />
                     }
-                    variant="ghost"
+                    variant="solid"
                     onClick={onTossieModalOpen}
                     isLoading={isTossiesLoading}
+                    bg={themeColors.bg ? "white" : "transparent"}
+                    color="gray.800"
+                    _hover={{ bg: themeColors.bg ? "gray.100" : "gray.50" }}
                   >
                     {tossies?.length || 0}
                   </Button>
@@ -636,22 +641,30 @@ export default function Skater() {
                     aria-label="Filter options"
                     icon={<FiFilter />}
                     onClick={onOptionsToggle}
-                    variant="ghost"
+                    variant="solid"
+                    bg={themeColors.bg ? "white" : "transparent"}
+                    color="gray.800"
+                    _hover={{ bg: themeColors.bg ? "gray.100" : "gray.50" }}
                   />
-                  <FavoriteButton
-                    type="skater"
-                    name={stats.name}
-                    params={
-                      skaterId
-                        ? { skaterId: parseInt(skaterId, 10) }
-                        : { name: stats.name }
-                    }
-                  />
+                  <Box
+                    bg={themeColors.bg ? "white" : "transparent"}
+                    borderRadius="md"
+                  >
+                    <FavoriteButton
+                      type="skater"
+                      name={stats.name}
+                      params={
+                        skaterId
+                          ? { skaterId: parseInt(skaterId, 10) }
+                          : { name: stats.name }
+                      }
+                    />
+                  </Box>
                 </ButtonGroup>
               </Flex>
             </VStack>
             <Collapse in={isOptionsOpen} animateOpacity>
-              <Box mb={4}>
+              <Box mb={4} mt={4}>
                 <ButtonGroup mb={4} spacing={2}>
                   <Button
                     colorScheme="blue"
@@ -708,8 +721,10 @@ export default function Skater() {
                         placeholder="Event Types"
                         value=""
                         variant="filled"
-                        focusBorderColor="brand.500"
+                        focusBorderColor="blue.500"
                         bg="white"
+                        color="gray.800"
+                        _placeholder={{ color: "gray.500" }}
                         boxShadow="md"
                         _hover={{ bg: "white" }}
                         _focus={{ bg: "white" }}
@@ -763,8 +778,10 @@ export default function Skater() {
                         placeholder="Event Levels"
                         value=""
                         variant="filled"
-                        focusBorderColor="brand.500"
+                        focusBorderColor="blue.500"
                         bg="white"
+                        color="gray.800"
+                        _placeholder={{ color: "gray.500" }}
                         boxShadow="md"
                         _hover={{ bg: "white" }}
                         _focus={{ bg: "white" }}
@@ -821,7 +838,7 @@ export default function Skater() {
 
           {/* Customization */}
           {stats.customization && (
-            <Box mb={8}>
+            <Box>
               {/* Cover Image */}
               {stats.customization.coverImage && (
                 <Box
@@ -835,22 +852,11 @@ export default function Skater() {
               )}
 
               {/* Bio and Quote */}
-              <Card
-                p={6}
-                mb={6}
-                bg="white"
-                color={themeColors.accent}
-                fontFamily={themeColors.font}
-              >
+              <Card p={6} mb={6} bg="white" fontFamily={themeColors.font}>
                 <VStack spacing={4} align="stretch">
                   {stats.customization?.bio && (
                     <Box>
-                      <Heading
-                        size="sm"
-                        mb={2}
-                        color={themeColors.accent}
-                        fontFamily={themeColors.font}
-                      >
+                      <Heading size="sm" mb={2} fontFamily={themeColors.font}>
                         About Me
                       </Heading>
                       <Text whiteSpace="pre-wrap">
@@ -864,7 +870,6 @@ export default function Skater() {
                       <Text
                         fontSize="lg"
                         fontStyle="italic"
-                        color={themeColors.accent}
                         fontFamily={themeColors.font}
                       >
                         "{stats.customization.favoriteQuote}"
@@ -902,7 +907,7 @@ export default function Skater() {
               {/* Achievements */}
               {stats.customization.achievements &&
                 stats.customization.achievements.length > 0 && (
-                  <Card p={6} mb={6}>
+                  <Card p={6} mb={6} bg="white" fontFamily={themeColors.font}>
                     <Heading size="sm" mb={4}>
                       Achievements
                     </Heading>
@@ -919,7 +924,7 @@ export default function Skater() {
               {/* Gallery */}
               {stats.customization.galleryImages &&
                 stats.customization.galleryImages.length > 0 && (
-                  <Card p={6} mb={6}>
+                  <Card p={6} mb={6} bg="white" fontFamily={themeColors.font}>
                     <Heading size="sm" mb={4}>
                       Gallery
                     </Heading>
@@ -940,7 +945,7 @@ export default function Skater() {
 
               {/* Featured Video */}
               {stats.customization.featuredVideo && (
-                <Card p={6} mb={6}>
+                <Card p={6} mb={6} bg="white" fontFamily={themeColors.font}>
                   <Heading size="sm" mb={4}>
                     Featured Video
                   </Heading>
@@ -961,7 +966,7 @@ export default function Skater() {
                 Object.values(stats.customization.socialLinks).some(
                   Boolean
                 ) && (
-                  <Card p={6} mb={6}>
+                  <Card p={6} mb={6} bg="white" fontFamily={themeColors.font}>
                     <Heading size="sm" mb={4}>
                       Connect With Me
                     </Heading>
@@ -1004,7 +1009,7 @@ export default function Skater() {
 
               {/* Profile Song */}
               {stats.customization?.profileSong && (
-                <Card p={6} mb={6} bg="white">
+                <Card p={6} mb={0} bg="white" fontFamily={themeColors.font}>
                   <Heading size="sm" mb={4}>
                     My Song
                   </Heading>
@@ -1040,10 +1045,9 @@ export default function Skater() {
           {/* Key Statistics */}
           <Card
             p={6}
-            mb={8}
+            mb={6}
             border="none"
             bg="white"
-            color={themeColors.accent}
             fontFamily={themeColors.font}
           >
             <StatGroup>
@@ -1116,7 +1120,7 @@ export default function Skater() {
           </Card>
 
           {/* Score History Chart */}
-          <Box mb={8}>
+          <Box mb={6}>
             <Heading
               size="md"
               mb={4}
@@ -1125,13 +1129,7 @@ export default function Skater() {
             >
               Score History
             </Heading>
-            <Card
-              p={6}
-              border="none"
-              bg="white"
-              color={themeColors.accent}
-              fontFamily={themeColors.font}
-            >
+            <Card p={6} border="none" bg="white" fontFamily={themeColors.font}>
               <Box h="400px">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
