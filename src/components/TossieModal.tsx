@@ -27,9 +27,10 @@ interface TossieModalProps {
   isLoading: boolean;
 }
 
-const TossieReceiptItem: React.FC<{ receipt: TossieReceipt }> = ({
-  receipt,
-}) => {
+const TossieReceiptItem: React.FC<{
+  receipt: TossieReceipt;
+  onClose: () => void;
+}> = ({ receipt, onClose }) => {
   const fromName = receipt.fromSkaterName || receipt.fromUserName;
   const eventUrl =
     receipt.resultType === "six_event"
@@ -51,6 +52,7 @@ const TossieReceiptItem: React.FC<{ receipt: TossieReceipt }> = ({
               to={`/skater/id/${receipt.fromSkaterId}`}
               color="blue.500"
               fontWeight="medium"
+              onClick={onClose}
             >
               {fromName}
             </Link>
@@ -58,7 +60,12 @@ const TossieReceiptItem: React.FC<{ receipt: TossieReceipt }> = ({
             <Text fontWeight="medium">{fromName}</Text>
           )}
           <Text>gave a tossie at</Text>
-          <Link as={RouterLink} to={eventUrl} color="blue.500">
+          <Link
+            as={RouterLink}
+            to={eventUrl}
+            color="blue.500"
+            onClick={onClose}
+          >
             {receipt.eventName}
           </Link>
         </HStack>
@@ -100,7 +107,11 @@ export default function TossieModal({
               pr={2}
             >
               {tossies.map((receipt) => (
-                <TossieReceiptItem key={receipt.id} receipt={receipt} />
+                <TossieReceiptItem
+                  key={receipt.id}
+                  receipt={receipt}
+                  onClose={onClose}
+                />
               ))}
             </VStack>
           )}
