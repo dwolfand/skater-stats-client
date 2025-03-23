@@ -28,6 +28,8 @@ import {
   AccordionPanel,
   AccordionIcon,
   Spinner,
+  Switch,
+  FormHelperText,
 } from "@chakra-ui/react";
 import {
   FaInstagram,
@@ -366,22 +368,6 @@ export const ProfileCustomizationSection: React.FC<
                       />
                     </HStack>
                     <HStack>
-                      <FaTwitter />
-                      <Input
-                        value={customization.socialLinks?.twitter}
-                        onChange={(e) =>
-                          setCustomization({
-                            ...customization,
-                            socialLinks: {
-                              ...customization.socialLinks,
-                              twitter: e.target.value,
-                            },
-                          })
-                        }
-                        placeholder="Twitter username"
-                      />
-                    </HStack>
-                    <HStack>
                       <FaTiktok />
                       <Input
                         value={customization.socialLinks?.tiktok}
@@ -461,6 +447,25 @@ export const ProfileCustomizationSection: React.FC<
                     }
                     placeholder="Share your skating goals..."
                   />
+                </FormControl>
+
+                <FormControl display="flex" alignItems="center">
+                  <FormLabel htmlFor="can-be-featured" mb="0">
+                    Featured Profile
+                  </FormLabel>
+                  <Switch
+                    id="can-be-featured"
+                    isChecked={customization.canBeFeatured}
+                    onChange={(e) =>
+                      setCustomization({
+                        ...customization,
+                        canBeFeatured: e.target.checked,
+                      })
+                    }
+                  />
+                  <FormHelperText ml={2}>
+                    Allow your profile to be featured on the homepage
+                  </FormHelperText>
                 </FormControl>
 
                 <FormControl>

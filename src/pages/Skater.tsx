@@ -883,32 +883,35 @@ export default function Skater() {
               )}
 
               {/* Bio and Quote */}
-              <Card p={6} mb={6} bg="white" fontFamily={themeColors.font}>
-                <VStack spacing={4} align="stretch">
-                  {stats.customization?.bio && (
-                    <Box>
-                      <Heading size="sm" mb={2} fontFamily={themeColors.font}>
-                        About Me
-                      </Heading>
-                      <Text whiteSpace="pre-wrap">
-                        {stats.customization.bio}
-                      </Text>
-                    </Box>
-                  )}
+              {(stats.customization?.bio ||
+                stats.customization?.favoriteQuote) && (
+                <Card p={6} mb={6} bg="white" fontFamily={themeColors.font}>
+                  <VStack spacing={4} align="stretch">
+                    {stats.customization?.bio && (
+                      <Box>
+                        <Heading size="sm" mb={2} fontFamily={themeColors.font}>
+                          About Me
+                        </Heading>
+                        <Text whiteSpace="pre-wrap">
+                          {stats.customization.bio}
+                        </Text>
+                      </Box>
+                    )}
 
-                  {stats.customization?.favoriteQuote && (
-                    <Box>
-                      <Text
-                        fontSize="lg"
-                        fontStyle="italic"
-                        fontFamily={themeColors.font}
-                      >
-                        "{stats.customization.favoriteQuote}"
-                      </Text>
-                    </Box>
-                  )}
-                </VStack>
-              </Card>
+                    {stats.customization?.favoriteQuote && (
+                      <Box>
+                        <Text
+                          fontSize="lg"
+                          fontStyle="italic"
+                          fontFamily={themeColors.font}
+                        >
+                          "{stats.customization.favoriteQuote}"
+                        </Text>
+                      </Box>
+                    )}
+                  </VStack>
+                </Card>
+              )}
 
               {/* Skating Info */}
               {(stats.customization?.coach || stats.customization?.goals) && (
@@ -936,7 +939,7 @@ export default function Skater() {
               )}
 
               {/* Achievements */}
-              {stats.customization.achievements &&
+              {stats.customization?.achievements &&
                 stats.customization.achievements.length > 0 && (
                   <Card p={6} mb={6} bg="white" fontFamily={themeColors.font}>
                     <Heading size="sm" mb={4}>

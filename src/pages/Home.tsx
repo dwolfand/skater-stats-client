@@ -38,6 +38,8 @@ import {
   useStyleConfig,
   Tooltip,
   useDisclosure,
+  Image,
+  Avatar,
 } from "@chakra-ui/react";
 import { Search2Icon, InfoIcon, CloseIcon } from "@chakra-ui/icons";
 import { useQuery } from "@tanstack/react-query";
@@ -53,6 +55,7 @@ import FavoriteButton from "../components/FavoriteButton";
 import { formatNumber } from "../utils/math";
 import { CompetitionCard } from "../components/CompetitionCard";
 import { trackPageView } from "../utils/analytics";
+import { motion } from "framer-motion";
 
 type EventFilter = "all" | "upcoming" | "recent";
 
@@ -296,6 +299,87 @@ export default function Home() {
                 ))
               )}
             </VStack>
+          </Box>
+        )}
+
+        {/* Featured Skaters */}
+        {!searchQuery && overallStats?.featuredSkaters?.length > 0 && (
+          <Box>
+            <HStack justify="space-between" mb={4}>
+              <Heading size="md">Featured Skaters</Heading>
+              <Link as={RouterLink} to="/featured" color="brand.500">
+                See All
+              </Link>
+            </HStack>
+            <Box position="relative" overflow="hidden" px={{ base: 0, md: 4 }}>
+              <Box
+                display="flex"
+                overflowX="auto"
+                gap={4}
+                pb={4}
+                sx={{
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                  "&::-webkit-scrollbar": {
+                    display: "none",
+                  },
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
+                {overallStats.featuredSkaters.map((skater) => (
+                  <Box
+                    key={skater.id}
+                    minW={{ base: "150px", md: "200px" }}
+                    flexShrink={0}
+                  >
+                    <Link
+                      as={RouterLink}
+                      to={`/skater/id/${skater.id}`}
+                      _hover={{ textDecoration: "none" }}
+                    >
+                      <Card>
+                        <VStack spacing={3} align="center">
+                          {skater.profileImage ? (
+                            <Image
+                              src={skater.profileImage}
+                              alt={skater.name}
+                              borderRadius="full"
+                              boxSize={{ base: "100px", md: "120px" }}
+                              objectFit="cover"
+                            />
+                          ) : (
+                            <Avatar
+                              size={{ base: "xl", md: "2xl" }}
+                              name={skater.name}
+                            />
+                          )}
+                          <VStack spacing={1}>
+                            <Text
+                              fontWeight="medium"
+                              fontSize={{ base: "sm", md: "md" }}
+                              textAlign="center"
+                              noOfLines={1}
+                            >
+                              {skater.name}
+                            </Text>
+                            {skater.club && (
+                              <Text
+                                fontSize={{ base: "xs", md: "sm" }}
+                                color="gray.600"
+                                textAlign="center"
+                                noOfLines={1}
+                              >
+                                {skater.club}
+                              </Text>
+                            )}
+                          </VStack>
+                        </VStack>
+                      </Card>
+                    </Link>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
           </Box>
         )}
 

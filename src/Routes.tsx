@@ -12,6 +12,7 @@ import { Login } from "./pages/Login";
 import { Profile } from "./pages/Profile";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Featured from "./pages/Featured";
 
 export default function Routes() {
   return (
@@ -38,6 +39,7 @@ export default function Routes() {
       />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/featured" element={<Featured />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
     </RouterRoutes>

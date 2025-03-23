@@ -43,6 +43,7 @@ export interface ProfileCustomization {
   coach?: string;
   achievements?: string[];
   goals?: string;
+  canBeFeatured?: boolean;
 
   // Media
   profileImage?: string;

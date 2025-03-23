@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ProfileCustomization } from "../types/auth";
+import { trackEvent } from "../utils/analytics";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/dev";
 
@@ -159,6 +160,13 @@ export interface OverallStats {
   upcoming: CompetitionSummary[];
   recent: CompetitionSummary[];
   inProgress: CompetitionSummary[];
+  featuredSkaters: {
+    id: number;
+    name: string;
+    club: string | null;
+    profileImage: string | null;
+    customization?: ProfileCustomization;
+  }[];
   topStats: TopStats;
 }
 
@@ -610,3 +618,47 @@ export interface SixEventDetails {
     id: number;
   }>;
 }
+
+export const trackPageView = {
+  home: () => trackEvent("view_page", { page_type: "home" }),
+  competition: (year: string, ijsId: string, name: string) =>
+    trackEvent("view_page", {
+      page_type: "competition",
+      competition_year: year,
+      competition_id: ijsId,
+      competition_name: name,
+    }),
+  event: (year: string, ijsId: string, eventId: string, name: string) =>
+    trackEvent("view_page", {
+      page_type: "event",
+      competition_year: year,
+      competition_id: ijsId,
+      event_id: eventId,
+      event_name: name,
+    }),
+  skater: (skaterId?: number, name?: string) =>
+    trackEvent("view_page", {
+      page_type: "skater",
+      skater_id: skaterId,
+      skater_name: name,
+    }),
+  official: (name: string) =>
+    trackEvent("view_page", {
+      page_type: "official",
+      official_name: name,
+    }),
+  featured: () => trackEvent("view_page", { page_type: "featured" }),
+};
+
+export interface FeaturedSkater {
+  id: number;
+  name: string;
+  club: string | null;
+  profileImage: string | null;
+  customization?: ProfileCustomization;
+}
+
+export const getFeaturedSkaters = async () => {
+  const { data } = await api.get<FeaturedSkater[]>("/featuredSkaters");
+  return data;
+};
