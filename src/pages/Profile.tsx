@@ -295,6 +295,8 @@ export const Profile: React.FC = () => {
                   <ProfileCustomizationSection
                     initialCustomization={profile?.customization}
                     onSave={handleSaveCustomization}
+                    clubHistory={profile?.clubHistory}
+                    currentClub={profile?.currentClub}
                   />
                   <Text fontSize="sm" color="gray.600" mt={4}>
                     Need to combine profiles (e.g., maiden name) or update your
@@ -330,8 +332,7 @@ export const Profile: React.FC = () => {
                 Link Skating Profile
               </Button>
               <Text fontSize="sm" color="gray.600">
-                Need to combine profiles (e.g., maiden name) or update your
-                skating club?{" "}
+                Need to combine profiles (e.g., maiden name or misspellings)?{" "}
                 <Link
                   color="blue.500"
                   onClick={openFeedbackModal}

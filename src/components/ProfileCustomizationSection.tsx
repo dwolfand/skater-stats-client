@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   VStack,
   FormControl,
@@ -30,6 +30,7 @@ import {
   Spinner,
   Switch,
   FormHelperText,
+  Divider,
 } from "@chakra-ui/react";
 import {
   FaInstagram,
@@ -42,10 +43,18 @@ import {
 import { HexColorPicker } from "react-colorful";
 import { ProfileCustomization } from "../types/auth";
 import { handleImageUpload } from "../api/auth";
+import { api, changeSkaterClub } from "../api/client";
+
+interface Club {
+  id: number;
+  name: string;
+}
 
 interface ProfileCustomizationSectionProps {
   initialCustomization?: ProfileCustomization;
   onSave: (customization: ProfileCustomization) => Promise<void>;
+  clubHistory?: Club[];
+  currentClub?: string;
 }
 
 const FONT_OPTIONS = [
@@ -58,7 +67,7 @@ const FONT_OPTIONS = [
 
 export const ProfileCustomizationSection: React.FC<
   ProfileCustomizationSectionProps
-> = ({ initialCustomization, onSave }) => {
+> = ({ initialCustomization, onSave, clubHistory = [], currentClub }) => {
   const [customization, setCustomization] = useState<ProfileCustomization>(
     initialCustomization || {}
   );
@@ -67,7 +76,32 @@ export const ProfileCustomizationSection: React.FC<
     type: "profile" | "cover" | "gallery";
     index?: number;
   } | null>(null);
+  const [selectedClubId, setSelectedClubId] = useState<string>("");
+  const [changingClub, setChangingClub] = useState(false);
   const toast = useToast();
+
+  const handleClubChange = async () => {
+    if (!selectedClubId) return;
+
+    setChangingClub(true);
+    try {
+      await changeSkaterClub(selectedClubId);
+      toast({
+        title: "Club updated successfully!",
+        status: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to update club",
+        description: "Please try again later",
+        status: "error",
+        duration: 3000,
+      });
+    } finally {
+      setChangingClub(false);
+    }
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -401,6 +435,45 @@ export const ProfileCustomizationSection: React.FC<
                     </HStack>
                   </VStack>
                 </FormControl>
+
+                <Divider my={4} />
+
+                <Box>
+                  <FormControl>
+                    <FormLabel>Current Skating Club</FormLabel>
+                    <HStack spacing={4}>
+                      <Select
+                        placeholder="Select club"
+                        value={selectedClubId || ""}
+                        onChange={(e) => setSelectedClubId(e.target.value)}
+                        isDisabled={!clubHistory?.length}
+                      >
+                        {clubHistory.map((club) => (
+                          <option key={club.id} value={club.id}>
+                            {club.name}
+                          </option>
+                        ))}
+                      </Select>
+                      <Button
+                        colorScheme="blue"
+                        onClick={handleClubChange}
+                        isLoading={changingClub}
+                        isDisabled={!selectedClubId || changingClub}
+                      >
+                        Change Club
+                      </Button>
+                    </HStack>
+                    <FormHelperText>
+                      {currentClub ? (
+                        <>Current club: {currentClub}</>
+                      ) : clubHistory?.length ? (
+                        "Select from clubs in your competition history"
+                      ) : (
+                        "No competition history available"
+                      )}
+                    </FormHelperText>
+                  </FormControl>
+                </Box>
               </VStack>
             </AccordionPanel>
           </AccordionItem>
@@ -464,7 +537,7 @@ export const ProfileCustomizationSection: React.FC<
                     }
                   />
                   <FormHelperText ml={2}>
-                    Allow your profile to be featured on the homepage
+                    Can we feature your profile on the homepage?
                   </FormHelperText>
                 </FormControl>
 

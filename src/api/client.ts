@@ -662,3 +662,10 @@ export const getFeaturedSkaters = async () => {
   const { data } = await api.get<FeaturedSkater[]>("/featuredSkaters");
   return data;
 };
+
+export const changeSkaterClub = async (clubId: string) => {
+  const { data } = await api.post<{ message: string }>("/skater/change-club", {
+    clubId,
+  });
+  return data;
+};

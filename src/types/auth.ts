@@ -67,6 +67,11 @@ export interface UserProfile {
   skaterName?: string;
   role?: UserRole;
   customization?: ProfileCustomization;
+  currentClub?: string;
+  clubHistory?: Array<{
+    id: number;
+    name: string;
+  }>;
 }
 
 export interface TossieReceipt {
