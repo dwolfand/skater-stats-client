@@ -40,8 +40,7 @@ import { useFeedbackModal } from "../components/FeedbackModal";
 import { AdminInfo } from "../components/AdminInfo";
 import { ProfileCustomizationSection } from "../components/ProfileCustomizationSection";
 
-const needSupportPrompt = `Need to combine profiles (e.g., maiden name or
-                    misspellings)? `;
+const needSupportPrompt = `Need to combine profiles (e.g., maiden name or misspellings)? `;
 
 function Card({ children }: { children: React.ReactNode }) {
   const styles = useStyleConfig("Box", { variant: "card" });

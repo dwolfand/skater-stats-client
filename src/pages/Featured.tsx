@@ -20,7 +20,11 @@ import { trackEvent } from "../utils/analytics";
 
 function Card({ children }: { children: React.ReactNode }) {
   const styles = useStyleConfig("Box", { variant: "card" });
-  return <Box __css={{ ...styles, p: { base: 4, md: 6 } }}>{children}</Box>;
+  return (
+    <Box __css={{ ...styles, p: { base: 4, md: 6 }, width: "100%" }}>
+      {children}
+    </Box>
+  );
 }
 
 export default function Featured() {
@@ -105,6 +109,9 @@ export default function Featured() {
                         textAlign="center"
                         noOfLines={2}
                         mt={2}
+                        maxW="100%"
+                        overflow="hidden"
+                        wordBreak="break-word"
                       >
                         {skater.customization.bio}
                       </Text>
