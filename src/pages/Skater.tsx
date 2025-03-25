@@ -147,7 +147,17 @@ function getMostFrequentEventTypeAndBest(history: SkaterHistoryEntry[]) {
 // Helper function to get the effective score
 function getEffectiveScore(result: SkaterHistoryEntry): number {
   if (result.isSixEvent) {
-    return result.majority ? parseFloat(result.majority) : 0;
+    // For 6.0 scoring, majority is in format "4/1" where 1 is the actual score
+    if (result.majority) {
+      try {
+        const parts = result.majority.split("/");
+        return parts.length > 1 ? parseFloat(parts[1]) : 0;
+      } catch (error) {
+        console.error("Error parsing majority score:", error);
+        return 0;
+      }
+    }
+    return 0;
   }
   return result.segmentScore && result.segmentScore > 0
     ? result.segmentScore
