@@ -55,7 +55,7 @@ export default function Featured() {
             Featured Skaters
           </Heading>
           <Text color="gray.600">
-            Meet some of our amazing skaters from across the country
+            Meet some of our amazing skaters from across the country.
           </Text>
         </Box>
 
