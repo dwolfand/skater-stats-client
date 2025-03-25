@@ -162,12 +162,14 @@ export default function SixEventDetails() {
                         >
                           {result.name}
                         </Link>
-                        <TossieButton
-                          sixEventResultId={result.id}
-                          skaterName={result.name}
-                          initialHasTossie={result.hasTossie}
-                          eventDate={new Date().toISOString()} // Since six events are typically older, we'll use current date to ensure button shows
-                        />
+                        {result.majority && (
+                          <TossieButton
+                            sixEventResultId={result.id}
+                            skaterName={result.name}
+                            initialHasTossie={result.hasTossie}
+                            eventDate={new Date().toISOString()} // Since six events are typically older, we'll use current date to ensure button shows
+                          />
+                        )}
                       </HStack>
                       {result.club && (
                         <Link
