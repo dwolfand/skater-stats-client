@@ -596,6 +596,8 @@ export interface SixEventDetails {
   segment: string;
   status: string | null;
   resultsUrl: string;
+  startDate: string;
+  endDate: string;
   results: Array<{
     id: number;
     name: string;

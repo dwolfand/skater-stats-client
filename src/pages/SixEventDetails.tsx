@@ -51,6 +51,7 @@ interface SixEventDetails {
   resultsUrl: string;
   results: SixEventResult[];
   officials: Official[];
+  startDate: string;
 }
 
 export default function SixEventDetails() {
@@ -167,7 +168,7 @@ export default function SixEventDetails() {
                             sixEventResultId={result.id}
                             skaterName={result.name}
                             initialHasTossie={result.hasTossie}
-                            eventDate={new Date().toISOString()} // Since six events are typically older, we'll use current date to ensure button shows
+                            eventDate={eventDetails.startDate}
                           />
                         )}
                       </HStack>
