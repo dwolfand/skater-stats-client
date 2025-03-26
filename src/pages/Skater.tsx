@@ -77,6 +77,9 @@ import {
   FaPlay,
 } from "react-icons/fa";
 import { Icon } from "@chakra-ui/react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import "../styles/markdown.css";
 
 type SkaterHistoryEntry = SkaterStats["history"][0];
 
@@ -740,8 +743,12 @@ export default function Skater() {
                     mb={4}
                   >
                     <AlertTitle mb={2}>AI Analysis</AlertTitle>
-                    <AlertDescription whiteSpace="pre-wrap">
-                      {aiAnalysis.analysis}
+                    <AlertDescription width="100%">
+                      <Box className="markdown-content">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {aiAnalysis.analysis}
+                        </ReactMarkdown>
+                      </Box>
                     </AlertDescription>
                   </Alert>
                 )}
