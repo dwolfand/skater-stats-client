@@ -198,6 +198,7 @@ export interface ScoreHistory {
   year: string;
   ijsId: string;
   resultsUrl: string;
+  competitionType?: "ijs" | "ijs_nonqual";
   judgeDetails?: {
     baseElementsScore: number;
     totalElementScore: number;
@@ -598,6 +599,7 @@ export interface SixEventDetails {
   resultsUrl: string;
   startDate: string;
   endDate: string;
+  type: string;
   results: Array<{
     id: number;
     name: string;
