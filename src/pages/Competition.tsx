@@ -54,6 +54,7 @@ interface CompetitionDetails {
   city: string;
   state: string;
   logoRef: string | null;
+  type: string;
   events: Event[];
   sixEvents: SixEvent[];
 }
@@ -181,7 +182,15 @@ export default function Competition() {
                 </Text>
                 {isAdmin && (
                   <Link
-                    href={`https://ijs.usfigureskating.org/leaderboard/results/${year}/${ijsId}/index.asp`}
+                    href={`https://ijs.usfigureskating.org/leaderboard/${
+                      competition.type === "ijs_nonqual"
+                        ? "nonqual_results"
+                        : "results"
+                    }/${year}/${ijsId}/${
+                      competition.type === "ijs_nonqual"
+                        ? "index.html"
+                        : "index.asp"
+                    }`}
                     isExternal
                     color="gray.500"
                     fontSize="sm"
@@ -189,7 +198,7 @@ export default function Competition() {
                     alignItems="center"
                     mt={1}
                   >
-                    <Text>View on IJS</Text>
+                    <Text>View on IJS*</Text>
                     <Icon as={FiExternalLink} ml={1} />
                   </Link>
                 )}

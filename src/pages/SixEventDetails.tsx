@@ -15,10 +15,13 @@ import {
   Link,
   Spinner,
   Center,
+  Icon,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { getSixEventDetails } from "../api/client";
+import { getCompetitionData, getSixEventDetails } from "../api/client";
 import TossieButton from "../components/TossieButton";
+import { FiExternalLink } from "react-icons/fi";
+import { useAdmin } from "../hooks/useAdmin";
 
 interface Official {
   function: string;
@@ -49,6 +52,7 @@ interface SixEventDetails {
   segment: string;
   status: string | null;
   resultsUrl: string;
+  type: string;
   results: SixEventResult[];
   officials: Official[];
   startDate: string;
@@ -60,6 +64,13 @@ export default function SixEventDetails() {
     ijsId: string;
     resultsUrl: string;
   }>();
+  const isAdmin = useAdmin();
+
+  const { data: competitionData, isLoading: isCompetitionLoading } = useQuery({
+    queryKey: ["competition", year, ijsId],
+    queryFn: () => getCompetitionData(year!, ijsId!),
+    enabled: !!(year && ijsId),
+  });
 
   const {
     data: eventDetails,
@@ -71,7 +82,7 @@ export default function SixEventDetails() {
     enabled: !!(year && ijsId && resultsUrl),
   });
 
-  if (isLoading) {
+  if (isLoading || isCompetitionLoading) {
     return (
       <Center minH="calc(100vh - 64px)" p={4}>
         <Spinner size="xl" color="blue.500" />
@@ -103,22 +114,44 @@ export default function SixEventDetails() {
 
   return (
     <Box p={4}>
-      <Link
-        as={RouterLink}
-        to={`/competition/${year}/${ijsId}`}
-        mb={4}
-        display="inline-block"
-      >
-        ← Back to Competition
-      </Link>
-
-      <Heading mb={4} fontSize={{ base: "xl", md: "2xl" }}>
-        {eventDetails.name}
-      </Heading>
-      <Text mb={8} color="gray.600">
-        Segment: {eventDetails.segment}
-        {eventDetails.status && ` • Status: ${eventDetails.status}`}
-      </Text>
+      <VStack align="stretch" spacing={8} mb={4}>
+        <HStack justify="space-between" align="flex-start">
+          <VStack align="start" spacing={1}>
+            <Heading fontSize={{ base: "xl", md: "2xl" }}>
+              {eventDetails.name}
+            </Heading>
+            <Link
+              as={RouterLink}
+              to={`/competition/${year}/${ijsId}`}
+              color="blue.500"
+              fontSize="lg"
+            >
+              {competitionData?.name || "Competition"}
+            </Link>
+            <Text color="gray.600">
+              Segment: {eventDetails.segment}
+              {eventDetails.status && ` • Status: ${eventDetails.status}`}
+            </Text>
+            {isAdmin && (
+              <Link
+                href={`https://ijs.usfigureskating.org/leaderboard/${
+                  eventDetails.type === "ijs_nonqual"
+                    ? "nonqual_results"
+                    : "results"
+                }/${year}/${ijsId}/${eventDetails.resultsUrl}`}
+                isExternal
+                color="gray.500"
+                fontSize="sm"
+                display="flex"
+                alignItems="center"
+              >
+                <Text>View on IJS*</Text>
+                <Icon as={FiExternalLink} ml={1} />
+              </Link>
+            )}
+          </VStack>
+        </HStack>
+      </VStack>
 
       {eventDetails.results.length > 0 && (
         <Box mb={8} overflowX="auto">

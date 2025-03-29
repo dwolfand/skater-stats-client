@@ -380,14 +380,18 @@ export default function Results() {
               )}
               {isAdmin && data?.results?.[0]?.resultsUrl && (
                 <Link
-                  href={`https://ijs.usfigureskating.org/leaderboard/results/${year}/${ijsId}/${data.results[0].resultsUrl}`}
+                  href={`https://ijs.usfigureskating.org/leaderboard/${
+                    data.results[0].competitionType === "ijs_nonqual"
+                      ? "nonqual_results"
+                      : "results"
+                  }/${year}/${ijsId}/${data.results[0].resultsUrl}`}
                   isExternal
                   color="gray.500"
                   fontSize="sm"
                   display="flex"
                   alignItems="center"
                 >
-                  <Text>View on IJS</Text>
+                  <Text>View on IJS*</Text>
                   <Icon as={FiExternalLink} ml={1} />
                 </Link>
               )}
