@@ -58,6 +58,40 @@ export default defineConfig(({ mode }) => {
             },
           ],
         },
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg}"],
+          skipWaiting: true,
+          clientsClaim: true,
+          navigateFallbackDenylist: [/^\/api\//],
+          runtimeCaching: [
+            {
+              urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
+              handler: "NetworkOnly",
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: "CacheFirst",
+              options: {
+                cacheName: "google-fonts-cache",
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+              },
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: "CacheFirst",
+              options: {
+                cacheName: "gstatic-fonts-cache",
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+              },
+            },
+          ],
+        },
       }),
     ],
     base: "/",
