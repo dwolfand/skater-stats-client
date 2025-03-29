@@ -82,3 +82,22 @@ export const trackLogin = (source: "tossie" | "profile" | "other") => {
     login_source: source,
   });
 };
+
+// PWA install tracking
+export const trackPWA = {
+  bannerShown: () => {
+    trackEvent("pwa_banner_shown");
+  },
+  bannerDismissed: () => {
+    trackEvent("pwa_banner_dismissed");
+  },
+  installClicked: () => {
+    trackEvent("pwa_install_clicked");
+  },
+  installAccepted: () => {
+    trackEvent("pwa_install_accepted");
+  },
+  installRejected: () => {
+    trackEvent("pwa_install_rejected");
+  },
+};

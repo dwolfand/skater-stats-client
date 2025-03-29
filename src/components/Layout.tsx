@@ -10,6 +10,7 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 import Header from "./Header";
 import { FeedbackModal } from "./FeedbackModal";
+import { PWAInstallBanner, PWAInstallSpacer } from "./PWAInstallBanner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -103,7 +104,9 @@ export default function Layout({ children }: LayoutProps) {
           </HStack>
         </VStack>
       </Box>
+      <PWAInstallSpacer />
       <FeedbackModal isOpen={isOpen} onClose={onClose} />
+      <PWAInstallBanner />
     </Box>
   );
 }

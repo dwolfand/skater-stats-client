@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import { LoginModalProvider } from "./components/LoginModal";
 import { FeedbackModalProvider } from "./components/FeedbackModal";
+import { PWAInstallProvider } from "./context/PWAInstallContext";
 import theme from "./theme";
 import Routes from "./Routes";
 import Layout from "./components/Layout";
@@ -19,9 +20,11 @@ function App() {
           <AuthProvider>
             <LoginModalProvider>
               <FeedbackModalProvider>
-                <Layout>
-                  <Routes />
-                </Layout>
+                <PWAInstallProvider>
+                  <Layout>
+                    <Routes />
+                  </Layout>
+                </PWAInstallProvider>
               </FeedbackModalProvider>
             </LoginModalProvider>
           </AuthProvider>
