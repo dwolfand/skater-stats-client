@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { copyFileSync } from "fs";
+import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -28,6 +30,21 @@ export default defineConfig(({ mode }) => {
         name: "html-transform",
         transformIndexHtml(html) {
           return html.replace("%ENV_GOOGLE_ANALYTICS%", gaScript);
+        },
+      },
+      // Copy _headers file to build directory
+      {
+        name: "copy-files",
+        closeBundle() {
+          try {
+            copyFileSync(
+              resolve(__dirname, "public/_headers"),
+              resolve(__dirname, "dist/_headers")
+            );
+            console.log("_headers file copied to build output");
+          } catch (error) {
+            console.error("Error copying _headers file:", error);
+          }
         },
       },
       VitePWA({
@@ -59,9 +76,13 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
+          // Add cache busting for HTML and JS files
           globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg}"],
+          // Skip waiting to install new service worker
           skipWaiting: true,
+          // Take control immediately
           clientsClaim: true,
+          // Don't cache API requests
           navigateFallbackDenylist: [/^\/api\//],
           runtimeCaching: [
             {
@@ -75,7 +96,7 @@ export default defineConfig(({ mode }) => {
                 cacheName: "google-fonts-cache",
                 expiration: {
                   maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
                 },
               },
             },
@@ -86,7 +107,7 @@ export default defineConfig(({ mode }) => {
                 cacheName: "gstatic-fonts-cache",
                 expiration: {
                   maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
                 },
               },
             },
