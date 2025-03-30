@@ -53,7 +53,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: "Skater Stats",
           short_name: "Skater Stats",
-          description: "Figure Skating Score History and Live Results",
+          description: "See your past scores and get live updates",
           theme_color: "#2B6CB0",
           background_color: "#ffffff",
           display: "standalone",
