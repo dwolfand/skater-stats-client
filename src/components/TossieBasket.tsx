@@ -28,6 +28,8 @@ import {
   TOSSIE_CATEGORIES,
   getCategoryInfo,
 } from "../types/tossies";
+import { TossieOpeningAnimation } from "./TossieOpeningAnimation";
+import { TossieDetailsModal } from "./TossieDetailsModal";
 
 interface TossieRowProps {
   type: string;
@@ -80,8 +82,14 @@ const TossieRow: React.FC<TossieRowProps> = ({
       borderColor={isCollected ? "gray.200" : "gray.100"}
       bg={bgColor}
       _hover={
-        (onClick && !isLoading) || isCollected
-          ? { bg: hoverBgColor, cursor: onClick ? "pointer" : "default" }
+        isCollected
+          ? {
+              bg: hoverBgColor,
+              cursor: "pointer",
+              borderColor: "blue.200",
+              transform: "translateY(-2px)",
+              boxShadow: "sm",
+            }
           : {}
       }
       opacity={isCollected ? 1 : 0.6}
@@ -226,6 +234,14 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
   const queryClient = useQueryClient();
   const toast = useToast();
   const [openingTossie, setOpeningTossie] = useState<number | null>(null);
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [currentTossieType, setCurrentTossieType] = useState<string | null>(
+    null
+  );
+  const [selectedTossie, setSelectedTossie] = useState<{
+    type: string;
+    count: number;
+  } | null>(null);
 
   // Get all tossie types for random selection
   const allTossieTypes = Object.keys(tossieTypeMap);
@@ -249,19 +265,40 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
   const mutation = useMutation({
     mutationFn: openTossie,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["tossieReceipts"] });
-      refreshTossies();
+      // Save the tossie type for animation
+      const tossieType = data.tossie_type || "unknown";
+      setCurrentTossieType(tossieType);
 
-      // Get the tossie rarity info for the toast message
-      const tossieType = data.tossie_type;
-      const tossieInfo = getTossieInfo(tossieType);
+      // Show animation after successful tossie opening
+      setShowAnimation(true);
+
+      // After animation completes, these actions will be performed in handleAnimationComplete
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to open tossie. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setOpeningTossie(null);
+    },
+  });
+
+  // Handle animation completion
+  const handleAnimationComplete = () => {
+    // Get the tossie info for toast
+    if (currentTossieType) {
+      const tossieInfo = getTossieInfo(currentTossieType);
       const rarityInfo = getRarityLabel(tossieInfo.rarity);
 
+      // Show toast notification
       toast({
         title: (
           <Flex align="center">
             <Image
-              src={`/images/tossie-types/${tossieType}.png`}
+              src={`/images/tossie-types/${currentTossieType}.png`}
               alt={tossieInfo.title}
               boxSize="32px"
               objectFit="contain"
@@ -277,20 +314,21 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
         duration: 5000,
         isClosable: true,
       });
+    }
 
-      setOpeningTossie(null);
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to open tossie. Please try again.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      setOpeningTossie(null);
-    },
-  });
+    // Reset states and refresh data
+    setShowAnimation(false);
+    setOpeningTossie(null);
+
+    // Refresh data using the provided function
+    queryClient.invalidateQueries({ queryKey: ["tossieReceipts"] });
+    refreshTossies();
+  };
+
+  const handleOpenTossie = (tossieId: number) => {
+    setOpeningTossie(tossieId);
+    mutation.mutate(tossieId);
+  };
 
   const unopenedTossies = tossieReceipts.filter((tossie) => !tossie.is_opened);
   const openedTossies = tossieReceipts.filter((tossie) => tossie.is_opened);
@@ -308,11 +346,6 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
     }
     return acc;
   }, {} as Record<string, GroupedTossie>);
-
-  const handleOpenTossie = (tossieId: number) => {
-    setOpeningTossie(tossieId);
-    mutation.mutate(tossieId);
-  };
 
   // Group tossies by their categories from tossies.ts
   const tossiesByCategory = Object.values(TOSSIE_CATEGORIES).reduce(
@@ -350,8 +383,30 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
   // Category order based on the new structure
   const categoryOrder = Object.values(TOSSIE_CATEGORIES);
 
+  // Handle click on a collected tossie to show details
+  const handleTossieClick = (type: string, count: number) => {
+    setSelectedTossie({ type, count });
+  };
+
   return (
     <VStack spacing={6} align="stretch" w="100%">
+      {/* Tossie Opening Animation */}
+      <TossieOpeningAnimation
+        isActive={showAnimation}
+        tossieType={currentTossieType}
+        onAnimationComplete={handleAnimationComplete}
+      />
+
+      {/* Tossie Details Modal */}
+      {selectedTossie && (
+        <TossieDetailsModal
+          isOpen={!!selectedTossie}
+          onClose={() => setSelectedTossie(null)}
+          tossieType={selectedTossie.type}
+          count={selectedTossie.count}
+        />
+      )}
+
       {unopenedTossies.length > 0 && (
         <Box>
           <Heading size="md" mb={4}>
@@ -474,6 +529,12 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
                       definition={definition}
                       count={count}
                       isCollected={isCollected}
+                      isLoading={false}
+                      onClick={
+                        isCollected
+                          ? () => handleTossieClick(type, count)
+                          : undefined
+                      }
                     />
                   ))}
                 </VStack>

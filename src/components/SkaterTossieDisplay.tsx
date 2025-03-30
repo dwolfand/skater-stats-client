@@ -4,15 +4,8 @@ import {
   SimpleGrid,
   Heading,
   Text,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
   Flex,
   Badge,
-  Divider,
   HStack,
   Tooltip,
   Card,
@@ -26,6 +19,7 @@ import {
   TOSSIE_CATEGORIES,
   getCategoryInfo,
 } from "../types/tossies";
+import { TossieDetailsModal } from "./TossieDetailsModal";
 
 interface SkaterTossieDisplayProps {
   tossies: TossieReceipt[] | undefined;
@@ -51,8 +45,6 @@ export default function SkaterTossieDisplay({
 }: SkaterTossieDisplayProps) {
   const [selectedTossie, setSelectedTossie] = useState<{
     type: string;
-    definition: TossieTypeDefinition;
-    category: string;
     count: number;
   } | null>(null);
 
@@ -89,11 +81,8 @@ export default function SkaterTossieDisplay({
 
   // Handle opening the tossie detail modal
   const handleTossieClick = (tossie: GroupedTossie) => {
-    const category = tossie.definition.category || "";
     setSelectedTossie({
       type: tossie.type,
-      definition: tossie.definition,
-      category,
       count: tossie.count,
     });
   };
@@ -176,66 +165,12 @@ export default function SkaterTossieDisplay({
       </Card>
 
       {selectedTossie && (
-        <Modal
+        <TossieDetailsModal
           isOpen={!!selectedTossie}
           onClose={() => setSelectedTossie(null)}
-        >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>
-              <Flex align="center">
-                <Image
-                  src={`/images/tossie-types/${selectedTossie.type}.png`}
-                  alt={selectedTossie.definition.title}
-                  boxSize="50px"
-                  objectFit="contain"
-                  mr={3}
-                />
-                <Text>{selectedTossie.definition.title}</Text>
-              </Flex>
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              <Box mb={4}>
-                <Text color="gray.700">
-                  {selectedTossie.definition.description}
-                </Text>
-                {selectedTossie.count > 1 && (
-                  <Text mt={2} fontWeight="bold">
-                    Received {selectedTossie.count} times
-                  </Text>
-                )}
-              </Box>
-
-              <Divider my={3} />
-
-              <Box>
-                <Flex justify="space-between" align="center" mb={2}>
-                  <HStack>
-                    <Text fontSize="md" color="gray.600">
-                      Category:
-                    </Text>
-                    <Text fontWeight="medium">{selectedTossie.category}</Text>
-                  </HStack>
-                  <Badge
-                    colorScheme={
-                      getRarityLabel(
-                        selectedTossie.definition.rarity
-                      ).color.split(".")[0]
-                    }
-                  >
-                    {getRarityLabel(selectedTossie.definition.rarity).label}
-                  </Badge>
-                </Flex>
-
-                <Text fontSize="sm" color="gray.500">
-                  {getCategoryInfo()[selectedTossie.category]?.description ||
-                    ""}
-                </Text>
-              </Box>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+          tossieType={selectedTossie.type}
+          count={selectedTossie.count}
+        />
       )}
     </Box>
   );

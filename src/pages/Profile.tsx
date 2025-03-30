@@ -20,7 +20,7 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   requestSkaterLink,
   getTossieReceipts,
@@ -132,6 +132,7 @@ export const Profile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const tossieBasketRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const { data: tossieReceipts, isLoading: tossiesLoading } = useQuery({
     queryKey: ["tossieReceipts"],
