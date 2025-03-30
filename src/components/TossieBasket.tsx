@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Heading,
@@ -13,6 +13,7 @@ import {
   Tooltip,
   Spinner,
   Divider,
+  Image,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { TossieReceipt } from "../api/client";
@@ -24,6 +25,8 @@ import {
   getRarityLabel,
   getTossieInfo,
   TossieTypeDefinition,
+  TOSSIE_CATEGORIES,
+  getCategoryInfo,
 } from "../types/tossies";
 
 interface TossieRowProps {
@@ -93,39 +96,105 @@ const TossieRow: React.FC<TossieRowProps> = ({
         align="center"
         justify="center"
         mr={4}
-        fontSize="2xl"
-        width="50px"
-        height="50px"
+        width="60px"
+        height="60px"
         bg={isCollected ? "blue.50" : "gray.50"}
-        borderRadius="full"
+        borderRadius="md"
         flexShrink={0}
+        overflow="hidden"
       >
         {isLoading ? (
           <Spinner size="md" color="blue.500" />
+        ) : isCollected ? (
+          <Image
+            src={`/images/tossie-types/${type}.png`}
+            alt={definition.title}
+            boxSize="50px"
+            objectFit="contain"
+          />
         ) : (
-          <Text>{isCollected ? definition.emoji : "🔒"}</Text>
+          <Box
+            position="relative"
+            width="50px"
+            height="50px"
+            filter="blur(5px)"
+            opacity={0.5}
+          >
+            <Image
+              src={`/images/tossie-types/${type}.png`}
+              alt="Locked"
+              boxSize="50px"
+              objectFit="contain"
+            />
+            <Box
+              position="absolute"
+              top="50%"
+              left="50%"
+              transform="translate(-50%, -50%)"
+              zIndex={2}
+              fontSize="xl"
+              color="gray.800"
+            >
+              <Text>🔒</Text>
+            </Box>
+          </Box>
         )}
       </Flex>
 
       {/* Content in the middle */}
       <Flex direction="column" flex="1">
-        <Flex justify="space-between" align="center">
-          <Text fontWeight="bold" color={isCollected ? "inherit" : "gray.500"}>
-            {definition.title}
-          </Text>
+        <Flex justify="space-between" align="center" width="100%">
+          <Box position="relative" width="100%">
+            <Text
+              fontWeight="bold"
+              color={isCollected ? "inherit" : "gray.500"}
+              filter={isCollected ? "none" : "blur(3px)"}
+            >
+              {definition.title}
+            </Text>
+
+            {!isCollected && (
+              <Text
+                position="absolute"
+                top="0"
+                left="0"
+                fontWeight="medium"
+                color="gray.500"
+              >
+                Uncollected Tossie
+              </Text>
+            )}
+          </Box>
+
           {count > 1 && (
-            <Badge colorScheme="blue" borderRadius="full">
+            <Badge colorScheme="blue" borderRadius="full" ml={2} flexShrink={0}>
               x{count}
             </Badge>
           )}
         </Flex>
-        <Text
-          fontSize="sm"
-          color={isCollected ? "gray.600" : "gray.400"}
-          noOfLines={1}
-        >
-          {definition.description}
-        </Text>
+
+        <Box position="relative">
+          <Text
+            fontSize="sm"
+            color={isCollected ? "gray.600" : "gray.400"}
+            noOfLines={1}
+            filter={isCollected ? "none" : "blur(3px)"}
+          >
+            {definition.description}
+          </Text>
+
+          {!isCollected && (
+            <Text
+              position="absolute"
+              top="0"
+              left="0"
+              fontSize="sm"
+              color="gray.500"
+            >
+              Unlock to reveal details
+            </Text>
+          )}
+        </Box>
       </Flex>
 
       {/* Badge on the right */}
@@ -158,6 +227,25 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
   const toast = useToast();
   const [openingTossie, setOpeningTossie] = useState<number | null>(null);
 
+  // Get all tossie types for random selection
+  const allTossieTypes = Object.keys(tossieTypeMap);
+
+  // Function to get a random tossie type
+  const getRandomTossieType = () => {
+    const randomIndex = Math.floor(Math.random() * allTossieTypes.length);
+    return allTossieTypes[randomIndex];
+  };
+
+  // Assign a random tossie type to each unopened tossie
+  const unopenedTossieTypes = useMemo(() => {
+    return tossieReceipts
+      .filter((tossie) => !tossie.is_opened)
+      .reduce((acc, tossie) => {
+        acc[tossie.id] = getRandomTossieType();
+        return acc;
+      }, {} as Record<number, string>);
+  }, [tossieReceipts, allTossieTypes]);
+
   const mutation = useMutation({
     mutationFn: openTossie,
     onSuccess: (data) => {
@@ -170,7 +258,18 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
       const rarityInfo = getRarityLabel(tossieInfo.rarity);
 
       toast({
-        title: `${tossieInfo.emoji} ${tossieInfo.title}!`,
+        title: (
+          <Flex align="center">
+            <Image
+              src={`/images/tossie-types/${tossieType}.png`}
+              alt={tossieInfo.title}
+              boxSize="32px"
+              objectFit="contain"
+              mr={2}
+            />
+            <Text>{tossieInfo.title}!</Text>
+          </Flex>
+        ),
         description: `You found a ${rarityInfo.label.toLowerCase()} tossie: ${
           tossieInfo.description
         }`,
@@ -215,36 +314,23 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
     mutation.mutate(tossieId);
   };
 
-  // Group all tossie types by their functional categories (from the comments in tossies.ts)
-  const tossieCategories = {
-    "Encouragement & Motivation": [
-      "you-got-grit",
-      "clean-skate-energy",
-      "main-character",
-    ],
-    "Humor & Whimsy": ["zamboni-zen", "rink-rat", "coach-said-again"],
-    "Nostalgia & Personality": [
-      "bedazzle-babe",
-      "tights-over-boots",
-      "first-competition",
-    ],
-    "Music & Artistic Inspiration": ["program-idea", "drama", "free-leg-flare"],
-    "Recognition & Affirmation": [
-      "golden-toe-pick",
-      "get-back-up",
-      "fan-favorite",
-    ],
-  };
+  // Group tossies by their categories from tossies.ts
+  const tossiesByCategory = Object.values(TOSSIE_CATEGORIES).reduce(
+    (acc, category) => {
+      // Find all tossies belonging to this category
+      const tossiesInCategory = Object.entries(tossieTypeMap)
+        .filter(([_, definition]) => definition.category === category)
+        .map(([typeId, definition]) => ({
+          type: typeId,
+          definition,
+          isCollected: !!groupedOpenedTossies[typeId],
+          count: groupedOpenedTossies[typeId]?.count || 0,
+        }));
 
-  // Group tossies by category for display
-  const tossiesByCategory = Object.entries(tossieCategories).reduce(
-    (acc, [category, typeIds]) => {
-      acc[category] = typeIds.map((typeId) => ({
-        type: typeId,
-        definition: tossieTypeMap[typeId],
-        isCollected: !!groupedOpenedTossies[typeId],
-        count: groupedOpenedTossies[typeId]?.count || 0,
-      }));
+      if (tossiesInCategory.length > 0) {
+        acc[category] = tossiesInCategory;
+      }
+
       return acc;
     },
     {} as Record<
@@ -258,14 +344,11 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
     >
   );
 
-  // Category order
-  const categoryOrder = [
-    "Encouragement & Motivation",
-    "Humor & Whimsy",
-    "Nostalgia & Personality",
-    "Music & Artistic Inspiration",
-    "Recognition & Affirmation",
-  ];
+  // Get category info for display
+  const categoryInfo = getCategoryInfo();
+
+  // Category order based on the new structure
+  const categoryOrder = Object.values(TOSSIE_CATEGORIES);
 
   return (
     <VStack spacing={6} align="stretch" w="100%">
@@ -292,17 +375,46 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
                   align="center"
                   justify="center"
                   mr={4}
-                  fontSize="2xl"
-                  width="50px"
-                  height="50px"
+                  width="60px"
+                  height="60px"
                   bg="white"
-                  borderRadius="full"
+                  borderRadius="md"
                   flexShrink={0}
+                  overflow="hidden"
                 >
                   {openingTossie === tossie.id ? (
                     <Spinner size="md" color="blue.500" />
                   ) : (
-                    <Text>❓</Text>
+                    <Box position="relative" width="50px" height="50px">
+                      <Image
+                        src={`/images/tossie-types/${
+                          unopenedTossieTypes[tossie.id]
+                        }.png`}
+                        alt="Mystery Tossie"
+                        boxSize="50px"
+                        objectFit="contain"
+                        filter="blur(3px)"
+                        opacity={0.7}
+                        fallback={<Text>❓</Text>}
+                      />
+                      <Box
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                        fontSize="md"
+                        color="blue.600"
+                        bg="white"
+                        borderRadius="full"
+                        width="22px"
+                        height="22px"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Text>?</Text>
+                      </Box>
+                    </Box>
                   )}
                 </Flex>
 
@@ -341,12 +453,19 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
         <VStack spacing={4} align="stretch">
           {categoryOrder.map((category) => {
             const tossies = tossiesByCategory[category] || [];
+            const info = categoryInfo[category];
 
             return (
               <Box key={category}>
-                <Heading size="sm" mb={2} color="gray.600">
-                  {category}
-                </Heading>
+                <HStack mb={2}>
+                  <Text fontSize="xl">{info.emoji}</Text>
+                  <Heading size="sm" color="gray.600">
+                    {category}
+                  </Heading>
+                </HStack>
+                <Text fontSize="sm" color="gray.500" mb={3}>
+                  {info.description}
+                </Text>
                 <VStack spacing={2} align="stretch">
                   {tossies.map(({ type, definition, isCollected, count }) => (
                     <TossieRow

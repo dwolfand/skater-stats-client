@@ -372,9 +372,6 @@ export const Profile: React.FC = () => {
         {/* Tossie Basket - replace the old Received Tossies section */}
         {profile?.status === "approved" && (
           <CardWithRef ref={tossieBasketRef}>
-            <Heading size="md" mb={4}>
-              Tossie Basket
-            </Heading>
             {tossiesLoading ? (
               <Center py={4}>
                 <Spinner />
