@@ -574,6 +574,8 @@ export interface TossieReceipt {
   ijsId: string;
   results_url: string;
   resultType: "event" | "six_event";
+  is_opened: boolean;
+  tossie_type?: string;
 }
 
 export const submitTossie = async (data: TossieRequest) => {

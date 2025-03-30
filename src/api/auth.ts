@@ -116,3 +116,10 @@ export const handleImageUpload = async (
   // Return the final file URL
   return fileUrl;
 };
+
+export const openTossie = async (tossieId: number): Promise<TossieReceipt> => {
+  const { data } = await api.put<TossieReceipt>(
+    `/user/tossie-receipts/${tossieId}/open`
+  );
+  return data;
+};

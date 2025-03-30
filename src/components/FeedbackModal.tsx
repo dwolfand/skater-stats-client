@@ -23,10 +23,12 @@ import { submitFeedback } from "../api/client";
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
+  subject?: string;
+  initialMessage?: string;
 }
 
 interface FeedbackModalContextType {
-  openFeedbackModal: () => void;
+  openFeedbackModal: (subject?: string, initialMessage?: string) => void;
 }
 
 export const FeedbackModalContext = createContext<FeedbackModalContextType>({
@@ -38,12 +40,20 @@ export const useFeedbackModal = () => useContext(FeedbackModalContext);
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
   onClose,
+  subject,
+  initialMessage,
 }) => {
   const { isAuthenticated, user } = useAuth();
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState(initialMessage || "");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
+
+  React.useEffect(() => {
+    if (initialMessage) {
+      setFeedback(initialMessage);
+    }
+  }, [initialMessage]);
 
   const handleSubmit = async () => {
     if (!feedback.trim()) {
@@ -94,7 +104,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     <Modal isOpen={isOpen} onClose={handleClose} size="xl">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Provide Feedback</ModalHeader>
+        <ModalHeader>{subject || "Provide Feedback"}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4} align="stretch">
@@ -145,14 +155,30 @@ export const FeedbackModalProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [subject, setSubject] = useState<string | undefined>();
+  const [initialMessage, setInitialMessage] = useState<string | undefined>();
 
-  const openFeedbackModal = () => setIsOpen(true);
-  const onClose = () => setIsOpen(false);
+  const openFeedbackModal = (subject?: string, initialMessage?: string) => {
+    setSubject(subject);
+    setInitialMessage(initialMessage);
+    setIsOpen(true);
+  };
+
+  const onClose = () => {
+    setIsOpen(false);
+    setSubject(undefined);
+    setInitialMessage(undefined);
+  };
 
   return (
     <FeedbackModalContext.Provider value={{ openFeedbackModal }}>
       {children}
-      <FeedbackModal isOpen={isOpen} onClose={onClose} />
+      <FeedbackModal
+        isOpen={isOpen}
+        onClose={onClose}
+        subject={subject}
+        initialMessage={initialMessage}
+      />
     </FeedbackModalContext.Provider>
   );
 };
