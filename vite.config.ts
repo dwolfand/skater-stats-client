@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { copyFileSync } from "fs";
+import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -30,13 +32,28 @@ export default defineConfig(({ mode }) => {
           return html.replace("%ENV_GOOGLE_ANALYTICS%", gaScript);
         },
       },
+      // Copy _headers file to build directory
+      {
+        name: "copy-files",
+        closeBundle() {
+          try {
+            copyFileSync(
+              resolve(__dirname, "public/_headers"),
+              resolve(__dirname, "dist/_headers")
+            );
+            console.log("_headers file copied to build output");
+          } catch (error) {
+            console.error("Error copying _headers file:", error);
+          }
+        },
+      },
       VitePWA({
         registerType: "autoUpdate",
         includeAssets: ["favicon.ico", "logo192.png", "logo512.png"],
         manifest: {
           name: "Skater Stats",
           short_name: "Skater Stats",
-          description: "Figure Skating Score History and Live Results",
+          description: "See your past scores and get live updates",
           theme_color: "#2B6CB0",
           background_color: "#ffffff",
           display: "standalone",
@@ -55,40 +72,6 @@ export default defineConfig(({ mode }) => {
               src: "logo512.png",
               type: "image/png",
               sizes: "512x512",
-            },
-          ],
-        },
-        workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg}"],
-          skipWaiting: true,
-          clientsClaim: true,
-          navigateFallbackDenylist: [/^\/api\//],
-          runtimeCaching: [
-            {
-              urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
-              handler: "NetworkOnly",
-            },
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: "CacheFirst",
-              options: {
-                cacheName: "google-fonts-cache",
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
-                },
-              },
-            },
-            {
-              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-              handler: "CacheFirst",
-              options: {
-                cacheName: "gstatic-fonts-cache",
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
-                },
-              },
             },
           ],
         },
