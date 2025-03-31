@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Box, Image, usePrefersReducedMotion } from "@chakra-ui/react";
 import { css, keyframes } from "@emotion/react";
 import { createPortal } from "react-dom";
@@ -39,35 +39,25 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
   onAnimationComplete,
 }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
-  // Simplified state - just track the current animation phase
-  const [animationPhase, setAnimationPhase] = useState<
-    "idle" | "entrance" | "fadeOut" | "fadeIn" | "exit"
-  >("idle");
+  const [showTossieBag, setShowTossieBag] = useState(false);
+  const [showTossieResult, setShowTossieResult] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
-  // For debugging - log state changes
+  // Clear all timeouts when component unmounts
   useEffect(() => {
-    console.log("Animation phase changed to:", animationPhase);
-  }, [animationPhase]);
+    return () => {
+      console.log("Cleaning up all timeouts");
+      timeoutsRef.current.forEach(clearTimeout);
+    };
+  }, []);
 
-  // Reset the animation
-  const resetAnimation = useCallback(() => {
-    console.log("Resetting animation");
-    setAnimationPhase("idle");
-    onAnimationComplete();
-  }, [onAnimationComplete]);
-
-  // Handle clicks to skip the animation
-  const handleSkip = useCallback(() => {
-    console.log("Animation skipped by user");
-    setAnimationPhase("exit");
-    setTimeout(resetAnimation, 600);
-  }, [resetAnimation]);
-
-  // Main animation controller
+  // Handle animation lifecycle
   useEffect(() => {
-    // Skip animation if not active or reduced motion
     if (!isActive) {
-      if (animationPhase !== "idle") resetAnimation();
+      setShowTossieBag(false);
+      setShowTossieResult(false);
+      setIsExiting(false);
       return;
     }
 
@@ -76,59 +66,61 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
       return;
     }
 
-    // Only start the animation if we're in the idle state
-    if (isActive && animationPhase === "idle") {
-      console.log("Starting animation sequence");
+    console.log("Starting animation sequence");
 
-      // Store all timeouts so we can clean them up
-      const timeouts: NodeJS.Timeout[] = [];
+    // First show the tossie bag
+    setShowTossieBag(true);
+    setShowTossieResult(false);
+    setIsExiting(false);
 
-      // Phase 1: Entrance - Start immediately
-      setAnimationPhase("entrance");
+    // After 1.5 seconds, transition to the tossie result
+    const timeout1 = setTimeout(() => {
+      console.log("Transitioning to tossie result");
+      setShowTossieBag(false);
 
-      // Phase 2: Fade out - Start after 1.5 seconds
-      timeouts.push(
-        setTimeout(() => {
-          console.log("Starting fade out");
-          setAnimationPhase("fadeOut");
-        }, 1500)
-      );
+      // Small delay before showing the result
+      const timeout2 = setTimeout(() => {
+        setShowTossieResult(true);
+      }, 500);
 
-      // Phase 3: Fade in - Start after 2 seconds (0.5s after fade out begins)
-      timeouts.push(
-        setTimeout(() => {
-          console.log("Starting fade in");
-          setAnimationPhase("fadeIn");
-        }, 2000)
-      );
+      timeoutsRef.current.push(timeout2);
+    }, 1500);
 
-      // Phase 4: Exit - Start after 3.5 seconds
-      timeouts.push(
-        setTimeout(() => {
-          console.log("Starting exit animation");
-          setAnimationPhase("exit");
-        }, 3500)
-      );
+    timeoutsRef.current.push(timeout1);
+  }, [isActive, prefersReducedMotion, onAnimationComplete]);
 
-      // Animation complete - After 4.1 seconds
-      timeouts.push(
-        setTimeout(() => {
-          console.log("Animation complete, resetting");
-          resetAnimation();
-        }, 4100)
-      );
+  // Handle click
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
 
-      // Clean up all timeouts if the component unmounts or animation is cancelled
-      return () => {
-        console.log("Cleaning up timeouts");
-        timeouts.forEach((timeout) => clearTimeout(timeout));
-      };
-    }
-  }, [isActive, animationPhase, prefersReducedMotion, resetAnimation]);
+      // If we're showing the tossie result, start exit
+      if (showTossieResult && !isExiting) {
+        console.log("User clicked to finish animation");
+        setIsExiting(true);
 
-  // Don't render anything if we're not animating
-  if (!isActive || animationPhase === "idle" || prefersReducedMotion)
-    return null;
+        // Complete animation after 600ms
+        const timeout = setTimeout(() => {
+          setShowTossieBag(false);
+          setShowTossieResult(false);
+          setIsExiting(false);
+          onAnimationComplete();
+        }, 600);
+
+        timeoutsRef.current.push(timeout);
+      }
+      // If we're in the entrance phase, skip to the result
+      else if (showTossieBag && !showTossieResult) {
+        console.log("User skipped to result");
+        setShowTossieBag(false);
+        setShowTossieResult(true);
+      }
+    },
+    [showTossieBag, showTossieResult, isExiting, onAnimationComplete]
+  );
+
+  // Don't render anything if not active
+  if (!isActive || prefersReducedMotion) return null;
 
   return createPortal(
     <Box
@@ -141,7 +133,7 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
       height="100vh"
       zIndex={9999}
       bg="rgba(0,0,0,0.8)"
-      onClick={handleSkip}
+      onClick={handleClick}
       cursor="pointer"
     >
       <Box
@@ -153,8 +145,8 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
         height="200px"
         zIndex={10000}
       >
-        {/* Entrance animation */}
-        {animationPhase === "entrance" && (
+        {/* Tossie bag entrance */}
+        {showTossieBag && (
           <Box
             width="100%"
             height="100%"
@@ -173,50 +165,39 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
           </Box>
         )}
 
-        {/* Fade out animation */}
-        {animationPhase === "fadeOut" && (
+        {/* Tossie result */}
+        {showTossieResult && tossieType && (
           <Box
             width="100%"
             height="100%"
             css={css`
-              animation: ${fadeOut} 0.5s ease-in forwards;
-              -webkit-animation: ${fadeOut} 0.5s ease-in forwards;
+              animation: ${isExiting ? exitAnim : fadeIn} 0.5s ease-out forwards;
+              -webkit-animation: ${isExiting ? exitAnim : fadeIn} 0.5s ease-out
+                forwards;
             `}
           >
             <Image
-              src="/images/tossie_filled.png"
-              alt="Tossie"
+              src={`/images/tossie-types/${tossieType}.png`}
+              alt="Tossie Type"
               boxSize="100%"
               objectFit="contain"
               draggable={false}
             />
+            {!isExiting && (
+              <Box
+                position="absolute"
+                bottom="-40px"
+                left="0"
+                right="0"
+                textAlign="center"
+                color="white"
+                fontSize="sm"
+              >
+                Click to continue
+              </Box>
+            )}
           </Box>
         )}
-
-        {/* Fade in animation */}
-        {(animationPhase === "fadeIn" || animationPhase === "exit") &&
-          tossieType && (
-            <Box
-              width="100%"
-              height="100%"
-              css={css`
-                animation: ${animationPhase === "fadeIn" ? fadeIn : exitAnim}
-                  0.5s ease-out forwards;
-                -webkit-animation: ${animationPhase === "fadeIn"
-                    ? fadeIn
-                    : exitAnim}
-                  0.5s ease-out forwards;
-              `}
-            >
-              <Image
-                src={`/images/tossie-types/${tossieType}.png`}
-                alt="Tossie Type"
-                boxSize="100%"
-                objectFit="contain"
-                draggable={false}
-              />
-            </Box>
-          )}
       </Box>
     </Box>,
     document.body
