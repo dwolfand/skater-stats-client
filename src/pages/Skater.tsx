@@ -943,7 +943,9 @@ export default function Skater() {
                 )}
 
               {/* Skating Info */}
-              {(stats.customization?.coach || stats.customization?.goals) && (
+              {(stats.customization?.coach ||
+                stats.customization?.homeRink ||
+                stats.customization?.goals) && (
                 <Card p={6} mb={6} bg="white">
                   <VStack spacing={4} align="stretch">
                     {stats.customization?.coach && (
@@ -952,6 +954,15 @@ export default function Skater() {
                           Coach
                         </Heading>
                         <Text>{stats.customization.coach}</Text>
+                      </Box>
+                    )}
+
+                    {stats.customization?.homeRink && (
+                      <Box>
+                        <Heading size="sm" mb={2}>
+                          Home Rink
+                        </Heading>
+                        <Text>{stats.customization.homeRink}</Text>
                       </Box>
                     )}
 

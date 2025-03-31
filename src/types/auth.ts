@@ -41,6 +41,7 @@ export interface ProfileCustomization {
 
   // Skating Info
   coach?: string;
+  homeRink?: string;
   achievements?: string[];
   goals?: string;
   canBeFeatured?: boolean;

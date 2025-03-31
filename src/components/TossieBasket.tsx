@@ -129,7 +129,7 @@ const TossieRow: React.FC<TossieRowProps> = ({
             opacity={0.5}
           >
             <Image
-              src={`/images/tossie-types/${type}.png`}
+              src="/images/tossie-types/blank.png"
               alt="Locked"
               boxSize="50px"
               objectFit="contain"
@@ -158,7 +158,7 @@ const TossieRow: React.FC<TossieRowProps> = ({
               color={isCollected ? "inherit" : "gray.500"}
               filter={isCollected ? "none" : "blur(3px)"}
             >
-              {definition.title}
+              {isCollected ? definition.title : "Lorem ipsum dolor sit"}
             </Text>
 
             {!isCollected && (
@@ -188,7 +188,9 @@ const TossieRow: React.FC<TossieRowProps> = ({
             noOfLines={1}
             filter={isCollected ? "none" : "blur(3px)"}
           >
-            {definition.description}
+            {isCollected
+              ? definition.description
+              : "Lorem ipsum dolor sit amet, consectetur adipiscing elit."}
           </Text>
 
           {!isCollected && (
@@ -442,9 +444,7 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
                   ) : (
                     <Box position="relative" width="50px" height="50px">
                       <Image
-                        src={`/images/tossie-types/${
-                          unopenedTossieTypes[tossie.id]
-                        }.png`}
+                        src="/images/tossie-types/blank.png"
                         alt="Mystery Tossie"
                         boxSize="50px"
                         objectFit="contain"
