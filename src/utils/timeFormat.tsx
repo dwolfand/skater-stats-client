@@ -25,7 +25,24 @@ export function convertToIANATimezone(timezone: string): string {
     ADT: "America/Halifax",
     AST: "America/Halifax",
   };
-  return timezoneMap[timezone] || timezone;
+
+  // First try the direct mapping
+  if (timezoneMap[timezone]) {
+    return timezoneMap[timezone];
+  }
+
+  // Check if it's already a valid IANA timezone
+  try {
+    // This will throw if the timezone is invalid
+    Intl.DateTimeFormat(undefined, { timeZone: timezone });
+    return timezone;
+  } catch (e) {
+    // If we get here, the timezone is invalid
+    console.warn(
+      `Unknown timezone: ${timezone}, defaulting to America/New_York`
+    );
+    return "America/New_York"; // Default fallback
+  }
 }
 
 export function formatEventTime(
