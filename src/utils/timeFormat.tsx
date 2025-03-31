@@ -22,6 +22,8 @@ export function convertToIANATimezone(timezone: string): string {
     PDT: "America/Los_Angeles",
     PST: "America/Los_Angeles",
     PT: "America/Los_Angeles",
+    ADT: "America/Halifax",
+    AST: "America/Halifax",
   };
   return timezoneMap[timezone] || timezone;
 }
