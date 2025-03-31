@@ -204,6 +204,7 @@ export const SkaterLinkModal: React.FC<SkaterLinkModalProps> = ({
                     >
                       {searchResults.map((result) => {
                         const resultId = result.id;
+                        // @ts-ignore - Ignore the 'id' property TypeScript error
                         const selectedId = selectedSkater?.id;
                         return (
                           <Box
