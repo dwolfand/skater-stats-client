@@ -28,6 +28,7 @@ import { searchEvents } from "../api/client";
 import type { SearchResult } from "../api/client";
 import dayjs from "../utils/date";
 import { useAuth } from "../context/AuthContext";
+import HoverTooltip from "./shared/HoverTooltip";
 
 const SearchInput = ({
   isMobile,
@@ -237,28 +238,24 @@ export default function Header() {
             )}
             <FavoritesMenu />
             {isAuthenticated ? (
-              <Tooltip label="Your Profile">
-                <Link as={RouterLink} to="/profile">
-                  <Avatar
-                    size="sm"
-                    name={user?.name}
-                    src={profile?.customization?.profileImage || user?.picture}
-                    cursor="pointer"
-                  />
-                </Link>
-              </Tooltip>
+              <Link as={RouterLink} to="/profile">
+                <Avatar
+                  size="sm"
+                  name={user?.name}
+                  src={profile?.customization?.profileImage || user?.picture}
+                  cursor="pointer"
+                />
+              </Link>
             ) : (
-              <Tooltip label="Sign In">
-                <Link as={RouterLink} to="/profile">
-                  <IconButton
-                    aria-label="Profile"
-                    icon={<Icon as={FiUser} />}
-                    size="sm"
-                    variant="ghost"
-                    color="gray.500"
-                  />
-                </Link>
-              </Tooltip>
+              <Link as={RouterLink} to="/profile">
+                <IconButton
+                  aria-label="Profile"
+                  icon={<Icon as={FiUser} />}
+                  size="sm"
+                  variant="ghost"
+                  color="gray.500"
+                />
+              </Link>
             )}
           </HStack>
         </HStack>

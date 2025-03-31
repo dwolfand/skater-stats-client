@@ -17,7 +17,11 @@ import {
   FormHelperText,
   Textarea,
   useToast,
+  HStack,
+  IconButton,
+  Flex,
 } from "@chakra-ui/react";
+import { CloseIcon, EditIcon } from "@chakra-ui/icons";
 import { searchEvents } from "../api/client";
 import { requestSkaterLink } from "../api/auth";
 import { compareNames } from "../utils/nameComparison";
@@ -128,6 +132,16 @@ export const SkaterLinkModal: React.FC<SkaterLinkModalProps> = ({
     ? compareNames(selectedSkater.name, userName)
     : false;
 
+  const handleClearSelection = () => {
+    setSelectedSkater(null);
+    setSearchQuery("");
+  };
+
+  const handleEditSelection = () => {
+    setSearchQuery(selectedSkater?.name || "");
+    setSelectedSkater(null);
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
@@ -138,48 +152,87 @@ export const SkaterLinkModal: React.FC<SkaterLinkModalProps> = ({
           <VStack spacing={4} align="stretch">
             <FormControl>
               <FormLabel>Search for your skating profile</FormLabel>
-              <Input
-                placeholder="Enter your name as it appears in competitions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <FormHelperText>
-                Start typing to search for your competition profile
-              </FormHelperText>
-            </FormControl>
 
-            {searchResults.length > 0 && (
-              <Box
-                maxH="200px"
-                overflowY="auto"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-              >
-                {searchResults.map((result) => (
-                  <Box
-                    key={`${result.id}-${result.name}`}
-                    p={2}
-                    cursor="pointer"
-                    bg={
-                      selectedSkater?.id === result.id
-                        ? "blue.50"
-                        : "transparent"
-                    }
-                    _hover={{ bg: "gray.50" }}
-                    onClick={() => setSelectedSkater(result)}
-                    borderRadius="md"
-                  >
-                    <Text fontWeight="medium">{result.name}</Text>
-                    {result.club && (
-                      <Text fontSize="sm" color="gray.600">
-                        {result.club}
-                      </Text>
-                    )}
-                  </Box>
-                ))}
-              </Box>
-            )}
+              {selectedSkater ? (
+                <Box borderWidth={1} borderRadius="md" p={3}>
+                  <Flex justify="space-between" align="center">
+                    <Box>
+                      <Text fontWeight="medium">{selectedSkater.name}</Text>
+                      {selectedSkater.club && (
+                        <Text fontSize="sm" color="gray.600">
+                          {selectedSkater.club}
+                        </Text>
+                      )}
+                    </Box>
+                    <HStack>
+                      <IconButton
+                        icon={<EditIcon />}
+                        aria-label="Change selection"
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleEditSelection}
+                      />
+                      <IconButton
+                        icon={<CloseIcon />}
+                        aria-label="Clear selection"
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleClearSelection}
+                      />
+                    </HStack>
+                  </Flex>
+                </Box>
+              ) : (
+                <>
+                  <Input
+                    placeholder="Enter your name as it appears in competitions..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <FormHelperText>
+                    Start typing to search for your competition profile
+                  </FormHelperText>
+
+                  {searchResults.length > 0 && (
+                    <Box
+                      maxH="200px"
+                      overflowY="auto"
+                      borderWidth={1}
+                      borderRadius="md"
+                      p={2}
+                      mt={2}
+                    >
+                      {searchResults.map((result) => {
+                        const resultId = result.id;
+                        const selectedId = selectedSkater?.id;
+                        return (
+                          <Box
+                            key={`${resultId || ""}-${result.name}`}
+                            p={2}
+                            cursor="pointer"
+                            bg={
+                              selectedId === resultId
+                                ? "blue.50"
+                                : "transparent"
+                            }
+                            _hover={{ bg: "gray.50" }}
+                            onClick={() => setSelectedSkater(result)}
+                            borderRadius="md"
+                          >
+                            <Text fontWeight="medium">{result.name}</Text>
+                            {result.club && (
+                              <Text fontSize="sm" color="gray.600">
+                                {result.club}
+                              </Text>
+                            )}
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  )}
+                </>
+              )}
+            </FormControl>
 
             {selectedSkater && (
               <>
