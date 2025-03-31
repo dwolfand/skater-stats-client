@@ -509,6 +509,20 @@ export const ProfileCustomizationSection: React.FC<
                 </FormControl>
 
                 <FormControl>
+                  <FormLabel>Home Rink</FormLabel>
+                  <Input
+                    value={customization.homeRink}
+                    onChange={(e) =>
+                      setCustomization({
+                        ...customization,
+                        homeRink: e.target.value,
+                      })
+                    }
+                    placeholder="Your home rink..."
+                  />
+                </FormControl>
+
+                <FormControl>
                   <FormLabel>Goals</FormLabel>
                   <Textarea
                     value={customization.goals}

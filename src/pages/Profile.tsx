@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Box,
   Button,
@@ -20,7 +20,7 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   requestSkaterLink,
   getTossieReceipts,
@@ -39,6 +39,9 @@ import { Link as RouterLink } from "react-router-dom";
 import { useFeedbackModal } from "../components/FeedbackModal";
 import { AdminInfo } from "../components/AdminInfo";
 import { ProfileCustomizationSection } from "../components/ProfileCustomizationSection";
+import { TossieNotification } from "../components/TossieNotification";
+import { TossieBasket } from "../components/TossieBasket";
+import { FaSkating } from "react-icons/fa";
 
 const needSupportPrompt = `Need to combine profiles (e.g., maiden name or misspellings)? `;
 
@@ -46,6 +49,19 @@ function Card({ children }: { children: React.ReactNode }) {
   const styles = useStyleConfig("Box", { variant: "card" });
   return <Box __css={{ ...styles, p: { base: 4, md: 6 } }}>{children}</Box>;
 }
+
+// Create a version that forwards the ref
+const CardWithRef = React.forwardRef<
+  HTMLDivElement,
+  { children: React.ReactNode }
+>((props, ref) => {
+  const styles = useStyleConfig("Box", { variant: "card" });
+  return (
+    <Box ref={ref} __css={{ ...styles, p: { base: 4, md: 6 } }}>
+      {props.children}
+    </Box>
+  );
+});
 
 const statusColors: Record<UserStatus, string> = {
   pending: "yellow",
@@ -115,6 +131,8 @@ export const Profile: React.FC = () => {
   const { openFeedbackModal } = useFeedbackModal();
   const [error, setError] = useState<string | null>(null);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const tossieBasketRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const { data: tossieReceipts, isLoading: tossiesLoading } = useQuery({
     queryKey: ["tossieReceipts"],
@@ -147,6 +165,14 @@ export const Profile: React.FC = () => {
       throw error;
     }
   };
+
+  const scrollToTossieBasket = () => {
+    tossieBasketRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Filter unopened tossies
+  const unopenedTossies =
+    tossieReceipts?.filter((tossie) => !tossie.is_opened) || [];
 
   if (authLoading) {
     return (
@@ -250,109 +276,103 @@ export const Profile: React.FC = () => {
               <Text>
                 <strong>Email:</strong> {user?.email}
               </Text>
+              {profile?.skaterId && (
+                <Text>
+                  <strong>Linked Skater:</strong>{" "}
+                  <Link
+                    as={RouterLink}
+                    to={`/skater/id/${profile.skaterId}`}
+                    color="blue.500"
+                  >
+                    {profile.skaterName}
+                  </Link>{" "}
+                  {getStatusBadge()}
+                </Text>
+              )}
+              {profile?.status === "approved" &&
+                profile?.currentClub &&
+                profile?.clubHistory && (
+                  <Text>
+                    <strong>Current Club:</strong> {profile.currentClub}
+                  </Text>
+                )}
+
+              {!profile?.skaterId && !profile?.status && (
+                <Button
+                  colorScheme="blue"
+                  leftIcon={<Icon as={FaSkating} />}
+                  onClick={() => setIsLinkModalOpen(true)}
+                  mt={2}
+                >
+                  Link Your Skater Profile
+                </Button>
+              )}
+
+              {profile?.status === "rejected" && (
+                <HStack mt={2}>
+                  <Button
+                    colorScheme="blue"
+                    leftIcon={<Icon as={FaSkating} />}
+                    onClick={() => setIsLinkModalOpen(true)}
+                    size="sm"
+                  >
+                    Try Again
+                  </Button>
+                  <Button
+                    variant="outline"
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={() => {
+                      openFeedbackModal(
+                        "I need help linking my skating profile",
+                        `${needSupportPrompt} Skater name: ${user?.name}`
+                      );
+                    }}
+                  >
+                    Get Support
+                  </Button>
+                </HStack>
+              )}
+
+              {profile?.status === "pending" && (
+                <Box mt={2}>
+                  <Button
+                    variant="outline"
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={() => {
+                      openFeedbackModal(
+                        "I need help with my pending skater link",
+                        `${needSupportPrompt} Skater ID: ${profile.skaterId}`
+                      );
+                    }}
+                  >
+                    Need Help?
+                  </Button>
+                </Box>
+              )}
             </VStack>
           </Box>
         </Card>
 
-        <Card>
-          <HStack mb={4}>
-            <Heading size="md">Skater Profile</Heading>
-            {profile?.status && getStatusBadge()}
-          </HStack>
-          {profile?.skaterId ? (
-            <VStack align="stretch" spacing={4}>
-              <Text>
-                Linked to skater:{" "}
-                <Text as="span" fontWeight="medium">
-                  {profile.skaterName}
-                </Text>
-              </Text>
-              {profile.status === "pending" ? (
-                <Text color="gray.600">
-                  Your link request is being reviewed. We'll notify you once
-                  it's approved.
-                </Text>
-              ) : profile.status === "approved" ? (
-                <>
-                  <Divider />
-                  <Box>
-                    <HStack spacing={4} mb={4}>
-                      <Button
-                        variant="outline"
-                        onClick={() =>
-                          window.open(
-                            `/skater/id/${profile.skaterId}`,
-                            "_blank"
-                          )
-                        }
-                      >
-                        View Public Profile
-                      </Button>
-                    </HStack>
-                    <Text color="gray.600" mb={6}>
-                      Customize your profile below to make it unique! Add a bio,
-                      photos, achievements, and more.
-                    </Text>
-                  </Box>
-                  <ProfileCustomizationSection
-                    initialCustomization={profile?.customization}
-                    onSave={handleSaveCustomization}
-                    clubHistory={profile?.clubHistory}
-                    currentClub={profile?.currentClub}
-                  />
-                  <Text fontSize="sm" color="gray.600" mt={4}>
-                    {needSupportPrompt}
-                    <Link
-                      color="blue.500"
-                      onClick={openFeedbackModal}
-                      cursor="pointer"
-                      _hover={{ textDecoration: "underline" }}
-                    >
-                      Contact us
-                    </Link>
-                    .
-                  </Text>
-                </>
-              ) : (
-                <Text color="red.600">
-                  Your link request was rejected. Please contact support if you
-                  believe this was a mistake.
-                </Text>
-              )}
-            </VStack>
-          ) : (
-            <VStack align="stretch" spacing={4}>
-              <Text>
-                Link your account to your skating profile to manage your
-                information.
-              </Text>
-              <Button
-                colorScheme="blue"
-                onClick={() => setIsLinkModalOpen(true)}
-              >
-                Link Skating Profile
-              </Button>
-              <Text fontSize="sm" color="gray.600">
-                {needSupportPrompt}
-                <Link
-                  color="blue.500"
-                  onClick={openFeedbackModal}
-                  cursor="pointer"
-                  _hover={{ textDecoration: "underline" }}
-                >
-                  Contact us
-                </Link>
-                .
-              </Text>
-            </VStack>
-          )}
-        </Card>
+        {/* Tossie Notification - only show when there are unopened tossies */}
+        {profile?.status === "approved" && unopenedTossies.length > 0 && (
+          <TossieNotification
+            unopenedCount={unopenedTossies.length}
+            onViewTossies={scrollToTossieBasket}
+          />
+        )}
 
         {profile?.status === "approved" && (
-          <Card>
-            <Heading size="md" mb={4}>
-              Received Tossies
-            </Heading>
+          <ProfileCustomizationSection
+            initialCustomization={profile.customization || {}}
+            onSave={handleSaveCustomization}
+          />
+        )}
+
+        {/* Tossie Basket - replace the old Received Tossies section */}
+        {profile?.status === "approved" && (
+          <CardWithRef ref={tossieBasketRef}>
             {tossiesLoading ? (
               <Center py={4}>
                 <Spinner />
@@ -360,16 +380,12 @@ export const Profile: React.FC = () => {
             ) : !tossieReceipts?.length ? (
               <Text color="gray.600">No tossies received yet.</Text>
             ) : (
-              <VStack
-                align="stretch"
-                divider={<Box borderBottomWidth={1} borderColor="gray.200" />}
-              >
-                {tossieReceipts.map((receipt) => (
-                  <TossieReceiptItem key={receipt.id} receipt={receipt} />
-                ))}
-              </VStack>
+              <TossieBasket
+                tossieReceipts={tossieReceipts}
+                refreshTossies={() => refreshProfile()}
+              />
             )}
-          </Card>
+          </CardWithRef>
         )}
 
         {profile?.role === "admin" && (

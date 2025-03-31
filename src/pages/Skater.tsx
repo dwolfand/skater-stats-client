@@ -68,6 +68,7 @@ import FavoriteButton from "../components/FavoriteButton";
 import DownloadButton from "../components/DownloadButton";
 import { trackPageView } from "../utils/analytics";
 import TossieModal from "../components/TossieModal";
+import SkaterTossieDisplay from "../components/SkaterTossieDisplay";
 import {
   FaInstagram,
   FaTwitter,
@@ -930,8 +931,21 @@ export default function Skater() {
                 </Card>
               )}
 
+              {/* Tossie Collection - only show if there are tossies and not loading */}
+              {!isTossiesLoading &&
+                tossies &&
+                tossies.filter((t) => t.is_opened).length > 0 && (
+                  <SkaterTossieDisplay
+                    tossies={tossies}
+                    isLoading={false}
+                    themeColors={themeColors}
+                  />
+                )}
+
               {/* Skating Info */}
-              {(stats.customization?.coach || stats.customization?.goals) && (
+              {(stats.customization?.coach ||
+                stats.customization?.homeRink ||
+                stats.customization?.goals) && (
                 <Card p={6} mb={6} bg="white">
                   <VStack spacing={4} align="stretch">
                     {stats.customization?.coach && (
@@ -940,6 +954,15 @@ export default function Skater() {
                           Coach
                         </Heading>
                         <Text>{stats.customization.coach}</Text>
+                      </Box>
+                    )}
+
+                    {stats.customization?.homeRink && (
+                      <Box>
+                        <Heading size="sm" mb={2}>
+                          Home Rink
+                        </Heading>
+                        <Text>{stats.customization.homeRink}</Text>
                       </Box>
                     )}
 
