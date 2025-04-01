@@ -29,6 +29,7 @@ import type { SearchResult } from "../api/client";
 import dayjs from "../utils/date";
 import { useAuth } from "../context/AuthContext";
 import HoverTooltip from "./shared/HoverTooltip";
+import { getImageUrl } from "../utils/images";
 
 const SearchInput = ({
   isMobile,
@@ -242,7 +243,10 @@ export default function Header() {
                 <Avatar
                   size="sm"
                   name={user?.name}
-                  src={profile?.customization?.profileImage || user?.picture}
+                  src={
+                    getImageUrl(profile?.customization?.profileImage) ||
+                    user?.picture
+                  }
                   cursor="pointer"
                 />
               </Link>

@@ -35,13 +35,14 @@ import {
 import { TossieReceipt } from "../api/client";
 import { LoginModalContext } from "../components/LoginModal";
 import { SkaterLinkModal } from "../components/SkaterLinkModal";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useFeedbackModal } from "../components/FeedbackModal";
 import { AdminInfo } from "../components/AdminInfo";
 import { ProfileCustomizationSection } from "../components/ProfileCustomizationSection";
 import { TossieNotification } from "../components/TossieNotification";
 import { TossieBasket } from "../components/TossieBasket";
 import { FaSkating } from "react-icons/fa";
+import { getImageUrl } from "../utils/images";
 
 const needSupportPrompt = `Need to combine profiles (e.g., maiden name or misspellings)? `;
 
@@ -245,7 +246,7 @@ export const Profile: React.FC = () => {
             <VStack spacing={4}>
               {profile?.customization?.profileImage ? (
                 <Image
-                  src={profile.customization.profileImage}
+                  src={getImageUrl(profile.customization.profileImage)}
                   alt={user?.name}
                   borderRadius="full"
                   boxSize="100px"
