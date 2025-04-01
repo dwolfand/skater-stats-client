@@ -124,9 +124,6 @@ export const handleImageUpload = async (
   // Upload the file directly to S3
   await uploadImageToS3(file, uploadUrl);
 
-  // We don't need to flag here since it's better to handle at the component level
-  // where we're actually using the image data
-
   // Return the final file URL and thumbnail URLs
   return { fileUrl, thumbnailUrls };
 };

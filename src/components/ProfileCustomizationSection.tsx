@@ -178,9 +178,24 @@ export const ProfileCustomizationSection: React.FC<
       };
 
       if (type === "gallery") {
+        // When updating gallery images, make a fresh copy of the array
+        const galleryImages = [...(customization.galleryImages || [])];
+
+        // If updating an existing image (edit mode)
+        if (
+          typeof index === "number" &&
+          index >= 0 &&
+          index < galleryImages.length
+        ) {
+          galleryImages[index] = imageData;
+        } else {
+          // Otherwise add a new image
+          galleryImages.push(imageData);
+        }
+
         setCustomization({
           ...customization,
-          galleryImages: [...(customization.galleryImages || []), imageData],
+          galleryImages,
         });
       } else {
         setCustomization({
@@ -684,6 +699,7 @@ export const ProfileCustomizationSection: React.FC<
                         alt="Profile"
                         boxSize="150px"
                         objectFit="cover"
+                        style={{ imageOrientation: "from-image" }}
                       />
                     ) : (
                       <VStack
@@ -763,6 +779,7 @@ export const ProfileCustomizationSection: React.FC<
                         objectFit="cover"
                         w="100%"
                         h="100%"
+                        style={{ imageOrientation: "from-image" }}
                       />
                     ) : (
                       <VStack
@@ -815,6 +832,7 @@ export const ProfileCustomizationSection: React.FC<
                           objectFit="cover"
                           aspectRatio={1}
                           borderRadius="md"
+                          style={{ imageOrientation: "from-image" }}
                         />
                         <IconButton
                           aria-label="Remove image"

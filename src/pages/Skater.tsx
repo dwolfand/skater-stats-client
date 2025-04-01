@@ -646,6 +646,7 @@ export default function Skater() {
                       borderRadius="full"
                       boxSize="120px"
                       objectFit="cover"
+                      style={{ imageOrientation: "from-image" }}
                     />
                   </Box>
                 ) : (
@@ -1356,6 +1357,7 @@ export default function Skater() {
                 h="auto"
                 maxH="90vh"
                 objectFit="contain"
+                style={{ imageOrientation: "from-image" }}
               />
             </ModalBody>
           </ModalContent>

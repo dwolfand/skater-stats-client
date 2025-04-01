@@ -356,10 +356,10 @@ export default function Home() {
                               {imageUrl ? (
                                 <Image
                                   src={imageUrl}
-                                  alt={skater.name}
                                   borderRadius="full"
-                                  boxSize={{ base: "100px", md: "120px" }}
+                                  boxSize="100px"
                                   objectFit="cover"
+                                  style={{ imageOrientation: "from-image" }}
                                 />
                               ) : (
                                 <Avatar

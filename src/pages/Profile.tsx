@@ -251,6 +251,7 @@ export const Profile: React.FC = () => {
                   borderRadius="full"
                   boxSize="100px"
                   objectFit="cover"
+                  style={{ imageOrientation: "from-image" }}
                 />
               ) : user?.picture ? (
                 <Image
@@ -259,6 +260,7 @@ export const Profile: React.FC = () => {
                   borderRadius="full"
                   boxSize="100px"
                   objectFit="cover"
+                  style={{ imageOrientation: "from-image" }}
                 />
               ) : (
                 <Avatar size="xl" name={user?.name} />

@@ -85,6 +85,7 @@ export default function Featured() {
                         borderRadius="full"
                         boxSize={{ base: "120px", md: "150px" }}
                         objectFit="cover"
+                        style={{ imageOrientation: "from-image" }}
                       />
                     ) : (
                       <Avatar

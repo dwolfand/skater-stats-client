@@ -43,8 +43,8 @@ export const getImageUrl = (
   image: string | ImageData | undefined
 ): string | undefined => {
   if (!image) return undefined;
-  if (typeof image === "string") return image;
-  return image.url;
+  if (typeof image === "string") return addImageOptionsToUrl(image);
+  return addImageOptionsToUrl(image.url);
 };
 
 /**
@@ -58,16 +58,41 @@ export const getThumbnailUrl = (
   size: "small" | "medium"
 ): string | undefined => {
   if (!image) return undefined;
-  if (typeof image === "string") return image;
+  if (typeof image === "string") return addImageOptionsToUrl(image);
 
   // For recently uploaded images, use the original URL while thumbnails are generating
   if (isRecentlyUploaded(image.url)) {
-    return image.url;
+    return addImageOptionsToUrl(image.url);
   }
 
   // Use thumbnail when available, otherwise fall back to full URL
   if (image.thumbnails && image.thumbnails[size]) {
-    return image.thumbnails[size];
+    return addImageOptionsToUrl(image.thumbnails[size]);
   }
-  return image.url;
+  return addImageOptionsToUrl(image.url);
 };
+
+/**
+ * Adds options to force proper orientation and prevent caching
+ * @param url - The original image URL
+ * @returns The URL with additional parameters
+ */
+function addImageOptionsToUrl(url: string): string {
+  // Parse the URL to add a cache-busting timestamp and orientation fix
+  try {
+    const urlObj = new URL(url);
+
+    // Add a timestamp to prevent caching (for recently uploaded images)
+    if (isRecentlyUploaded(url)) {
+      urlObj.searchParams.set("_t", Date.now().toString());
+    }
+
+    // The auto parameter tells some CDNs (like Cloudinary) to respect orientation
+    urlObj.searchParams.set("auto", "format,compress,enhance,orient");
+
+    return urlObj.toString();
+  } catch (e) {
+    // If the URL can't be parsed, return the original
+    return url;
+  }
+}
