@@ -1090,7 +1090,7 @@ export default function Skater() {
                 )}
 
               {/* Profile Song */}
-              {stats.customization?.profileSong && (
+              {stats.customization?.profileSong?.title && (
                 <Card p={6} mb={0} bg="white" fontFamily={themeColors.font}>
                   <Heading size="sm" mb={4}>
                     My Song
