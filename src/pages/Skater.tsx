@@ -81,6 +81,8 @@ import { Icon } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "../styles/markdown.css";
+import { ImageData } from "../types/auth";
+import { getImageUrl, getThumbnailUrl } from "../utils/images";
 
 type SkaterHistoryEntry = SkaterStats["history"][0];
 
@@ -626,15 +628,20 @@ export default function Skater() {
                   <Box
                     as="button"
                     onClick={() => {
-                      const imageUrl = stats.customization?.profileImage;
-                      setSelectedImage(imageUrl ? imageUrl : null);
+                      const imageUrl = getImageUrl(
+                        stats.customization?.profileImage
+                      );
+                      if (imageUrl) setSelectedImage(imageUrl);
                     }}
                     cursor="pointer"
                     transition="transform 0.2s"
                     _hover={{ transform: "scale(1.02)" }}
                   >
                     <Image
-                      src={stats.customization.profileImage}
+                      src={getThumbnailUrl(
+                        stats.customization.profileImage,
+                        "medium"
+                      )}
                       alt={stats.name}
                       borderRadius="full"
                       boxSize="120px"
@@ -1003,24 +1010,29 @@ export default function Skater() {
                       Gallery
                     </Heading>
                     <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={4}>
-                      {stats.customization.galleryImages.map((image, index) => (
-                        <Box
-                          key={index}
-                          as="button"
-                          onClick={() => setSelectedImage(image)}
-                          cursor="pointer"
-                          transition="transform 0.2s"
-                          _hover={{ transform: "scale(1.02)" }}
-                        >
-                          <Image
-                            src={image}
-                            alt={`Gallery ${index + 1}`}
-                            borderRadius="md"
-                            objectFit="cover"
-                            aspectRatio={1}
-                          />
-                        </Box>
-                      ))}
+                      {stats.customization.galleryImages.map((image, index) => {
+                        const imageUrl = getImageUrl(image);
+                        return (
+                          <Box
+                            key={index}
+                            as="button"
+                            onClick={() =>
+                              imageUrl && setSelectedImage(imageUrl)
+                            }
+                            cursor="pointer"
+                            transition="transform 0.2s"
+                            _hover={{ transform: "scale(1.02)" }}
+                          >
+                            <Image
+                              src={getThumbnailUrl(image, "small")}
+                              alt={`Gallery ${index + 1}`}
+                              borderRadius="md"
+                              objectFit="cover"
+                              aspectRatio={1}
+                            />
+                          </Box>
+                        );
+                      })}
                     </SimpleGrid>
                   </Card>
                 )}
