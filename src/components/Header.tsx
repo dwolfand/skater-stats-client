@@ -242,7 +242,7 @@ export default function Header() {
     >
       <VStack spacing={2}>
         <HStack justify="space-between" align="center" w="100%">
-          {!isHomePage ? (
+          {isPWA && !isHomePage ? (
             <HStack spacing={2}>
               <IconButton
                 aria-label="Go back"
