@@ -97,13 +97,14 @@ export default function SkaterTossieDisplay({
 
   return (
     <Box mb={6}>
-      <Card p={6} border="none" bg="white" fontFamily={themeColors.font}>
-        <Heading
-          size="sm"
-          mb={4}
-          color={themeColors.accent}
-          fontFamily={themeColors.font}
-        >
+      <Card
+        p={6}
+        border="none"
+        bg="white"
+        fontFamily={themeColors.font}
+        borderWidth="0"
+      >
+        <Heading size="sm" mb={4} fontFamily={themeColors.font}>
           Tossie Collection
           <Text
             as="span"

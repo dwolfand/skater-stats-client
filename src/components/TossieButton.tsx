@@ -27,7 +27,7 @@ export default function TossieButton({
   const { openLoginModal } = React.useContext(LoginModalContext);
   const toast = useToast();
 
-  // Hide button if event date is null or if event is more than 60 days old
+  // Hide button if event date is null or if event is more than 90 days old
   if (!eventDate) {
     return null;
   }
@@ -35,7 +35,7 @@ export default function TossieButton({
   const eventDay = dayjs(eventDate);
   const today = dayjs();
   const daysSinceEvent = today.diff(eventDay, "day");
-  if (daysSinceEvent > 60) {
+  if (daysSinceEvent > 90) {
     return null;
   }
 
