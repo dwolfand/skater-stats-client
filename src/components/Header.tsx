@@ -252,15 +252,23 @@ export default function Header() {
                 onClick={handleBack}
               />
               <Link as={RouterLink} to="/" _hover={{ textDecoration: "none" }}>
-                <Heading size="md" color="blue.600">
-                  Skater Stats
+                <Heading
+                  size="md"
+                  bgGradient="linear(to-r, blue.500, purple.500)"
+                  bgClip="text"
+                >
+                  SkaterStats
                 </Heading>
               </Link>
             </HStack>
           ) : (
             <Link as={RouterLink} to="/" _hover={{ textDecoration: "none" }}>
-              <Heading size="md" color="blue.600">
-                Skater Stats
+              <Heading
+                size="md"
+                bgGradient="linear(to-r, blue.500, purple.500)"
+                bgClip="text"
+              >
+                SkaterStats
               </Heading>
             </Link>
           )}
