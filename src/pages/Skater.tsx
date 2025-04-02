@@ -914,9 +914,15 @@ export default function Skater() {
                   aria-label="Toggle skater information"
                   icon={
                     isOpen ? (
-                      <ChevronUpIcon boxSize={6} />
+                      <ChevronUpIcon
+                        boxSize={6}
+                        color={themeColors.accent || undefined}
+                      />
                     ) : (
-                      <ChevronDownIcon boxSize={6} />
+                      <ChevronDownIcon
+                        boxSize={6}
+                        color={themeColors.accent || undefined}
+                      />
                     )
                   }
                   variant="ghost"
