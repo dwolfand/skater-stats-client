@@ -56,16 +56,8 @@ import {
   AddIcon,
 } from "@chakra-ui/icons";
 import { FiFilter } from "react-icons/fi";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
 import JudgeCard from "../components/JudgeCard";
 import SixJudgeCard from "../components/SixJudgeCard";
 import { useEffect, useState, useMemo } from "react";
@@ -88,6 +80,7 @@ import remarkGfm from "remark-gfm";
 import "../styles/markdown.css";
 import { ImageData } from "../types/auth";
 import { getImageUrl, getThumbnailUrl } from "../utils/images";
+import ScoreHistoryChart from "../components/ScoreHistoryChart";
 
 type SkaterHistoryEntry = SkaterStats["history"][0];
 
@@ -464,21 +457,37 @@ export default function Skater() {
 
   // Memoize chart data
   const chartData = useMemo(() => {
+    if (!filteredHistory.length) return { series: [], categories: [] };
+
+    // Get unique event types
     const eventTypes = Array.from(
       new Set(filteredHistory.map((h) => h.eventType))
     );
-    return eventTypes.map((eventType) => {
+
+    // Group data by event type
+    const series = eventTypes.map((eventType) => {
       const eventData = filteredHistory
         .filter((h) => h.eventType === eventType)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .map((h) => ({
           date: new Date(h.date).getTime(),
-          [eventType]: getEffectiveScore(h),
+          y: getEffectiveScore(h),
+          event: h.event,
+          competition: h.competition,
         }));
+
       return {
-        eventType,
+        name: eventType,
         data: eventData,
       };
     });
+
+    return {
+      series,
+      categories: filteredHistory
+        .map((h) => h.date)
+        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime()),
+    };
   }, [filteredHistory]);
 
   // Memoize personal best calculation
@@ -1312,77 +1321,13 @@ export default function Skater() {
           </Card>
 
           {/* Score History Chart */}
-          <Box mb={6}>
-            <Card
-              p={6}
-              border="none"
-              bg="white"
-              fontFamily={themeColors.font}
-              borderWidth="0"
-            >
-              <Box h="400px">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    margin={{
-                      top: 5,
-                      right: 5,
-                      left: isMobile ? 0 : 20,
-                      bottom: 5,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="date"
-                      type="number"
-                      domain={["dataMin", "dataMax"]}
-                      tickFormatter={(timestamp) =>
-                        dayjs(timestamp).format("MMM D, YYYY")
-                      }
-                      scale="time"
-                    />
-                    <YAxis
-                      domain={["auto", "auto"]}
-                      width={isMobile ? 30 : 45}
-                    />
-                    <Tooltip
-                      labelFormatter={(timestamp) =>
-                        dayjs(timestamp).format("MMM D, YYYY")
-                      }
-                      formatter={(value: any, name: string) => [
-                        Number(value).toFixed(2),
-                        name,
-                      ]}
-                      itemSorter={(item: any) => -item.value}
-                    />
-                    <Legend />
-                    {chartData.map(({ eventType, data }, index) => (
-                      <Line
-                        key={eventType}
-                        type="monotone"
-                        data={data}
-                        dataKey={eventType}
-                        name={eventType}
-                        stroke={
-                          [
-                            "#319795", // teal.500
-                            "#4299E1", // blue.400
-                            "#9F7AEA", // purple.400
-                            "#00B5D8", // cyan.500
-                            "#667EEA", // indigo.400
-                            "#B794F4", // purple.300
-                          ][index % 6]
-                        }
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                        activeDot={{ r: 6 }}
-                        connectNulls
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </Box>
-            </Card>
-          </Box>
+          {filteredHistory.length > 0 && (
+            <ScoreHistoryChart
+              filteredHistory={filteredHistory}
+              themeColors={themeColors}
+              isMobile={isMobile}
+            />
+          )}
 
           {/* All Results */}
           <Box>
