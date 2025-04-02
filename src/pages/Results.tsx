@@ -32,7 +32,6 @@ import FavoriteButton from "../components/FavoriteButton";
 import TossieButton from "../components/TossieButton";
 import { formatEventTime, convertToIANATimezone } from "../utils/timeFormat";
 import dayjs, { DATE_FORMATS } from "../utils/date";
-import { useAdmin } from "../hooks/useAdmin";
 import { FiExternalLink } from "react-icons/fi";
 import { trackPageView } from "../utils/analytics";
 
@@ -196,7 +195,6 @@ export default function Results() {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const toast = useToast();
   const prevDataRef = React.useRef<EventResults>();
-  const isAdmin = useAdmin();
 
   const { data, isLoading, refetch } = useQuery<EventResults>({
     queryKey: ["results", year, ijsId, eventId],
@@ -378,7 +376,7 @@ export default function Results() {
                   {formatEventTime(data.date, data.time, data.timezone)}
                 </Text>
               )}
-              {isAdmin && data?.results?.[0]?.resultsUrl && (
+              {data?.results?.[0]?.resultsUrl && (
                 <Link
                   href={`https://ijs.usfigureskating.org/leaderboard/${
                     data.results[0].competitionType === "ijs_nonqual"
@@ -391,7 +389,7 @@ export default function Results() {
                   display="flex"
                   alignItems="center"
                 >
-                  <Text>View on IJS*</Text>
+                  <Text>View official results</Text>
                   <Icon as={FiExternalLink} ml={1} />
                 </Link>
               )}

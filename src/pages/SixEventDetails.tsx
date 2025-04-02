@@ -21,7 +21,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getCompetitionData, getSixEventDetails } from "../api/client";
 import TossieButton from "../components/TossieButton";
 import { FiExternalLink } from "react-icons/fi";
-import { useAdmin } from "../hooks/useAdmin";
 
 interface Official {
   function: string;
@@ -64,7 +63,6 @@ export default function SixEventDetails() {
     ijsId: string;
     resultsUrl: string;
   }>();
-  const isAdmin = useAdmin();
 
   const { data: competitionData, isLoading: isCompetitionLoading } = useQuery({
     queryKey: ["competition", year, ijsId],
@@ -132,23 +130,21 @@ export default function SixEventDetails() {
               Segment: {eventDetails.segment}
               {eventDetails.status && ` • Status: ${eventDetails.status}`}
             </Text>
-            {isAdmin && (
-              <Link
-                href={`https://ijs.usfigureskating.org/leaderboard/${
-                  eventDetails.type === "ijs_nonqual"
-                    ? "nonqual_results"
-                    : "results"
-                }/${year}/${ijsId}/${eventDetails.resultsUrl}`}
-                isExternal
-                color="gray.500"
-                fontSize="sm"
-                display="flex"
-                alignItems="center"
-              >
-                <Text>View on IJS*</Text>
-                <Icon as={FiExternalLink} ml={1} />
-              </Link>
-            )}
+            <Link
+              href={`https://ijs.usfigureskating.org/leaderboard/${
+                eventDetails.type === "ijs_nonqual"
+                  ? "nonqual_results"
+                  : "results"
+              }/${year}/${ijsId}/${eventDetails.resultsUrl}`}
+              isExternal
+              color="gray.500"
+              fontSize="sm"
+              display="flex"
+              alignItems="center"
+            >
+              <Text>View official results</Text>
+              <Icon as={FiExternalLink} ml={1} />
+            </Link>
           </VStack>
         </HStack>
       </VStack>
