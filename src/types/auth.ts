@@ -64,6 +64,9 @@ export interface ProfileCustomization {
     artist?: string;
     url?: string;
   };
+
+  // Preferences
+  unsubscribeFromEmail?: boolean;
 }
 
 export interface UserProfile {
