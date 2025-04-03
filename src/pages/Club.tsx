@@ -38,6 +38,7 @@ import {
   FaEdit,
 } from "react-icons/fa";
 import ClubCustomizationModal from "../components/ClubCustomizationModal";
+import { getThumbnailUrl } from "../utils/images";
 
 const PAGE_SIZES = [10, 25, 50, 100];
 
@@ -129,16 +130,15 @@ export default function Club() {
             <Stack direction={["column", "row"]} spacing={6} align="flex-start">
               {clubStats.customization.profileImage && (
                 <Image
-                  src={
-                    typeof clubStats.customization.profileImage === "string"
-                      ? clubStats.customization.profileImage
-                      : clubStats.customization.profileImage.url
-                  }
+                  src={getThumbnailUrl(
+                    clubStats.customization.profileImage,
+                    "medium"
+                  )}
                   alt={`${clubStats.name} logo`}
                   boxSize={["120px", "150px"]}
                   objectFit="contain"
                   borderRadius="md"
-                  fallbackSrc="https://via.placeholder.com/150?text=Club+Logo"
+                  style={{ imageOrientation: "from-image" }}
                 />
               )}
 
