@@ -264,6 +264,18 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
                   {result.tieBreaker}
                 </Text>
               )}
+              {result.placement && (
+                <Text
+                  fontSize="sm"
+                  color="gray.600"
+                  display={{ base: "block", md: "none" }}
+                >
+                  {result.placement}
+                  <Text as="sup" fontSize="xs" ml={0.5}>
+                    {getOrdinalSuffix(result.placement)}
+                  </Text>
+                </Text>
+              )}
               {showScoringSystem && (
                 <Badge
                   colorScheme={result.isSixEvent ? "purple" : "blue"}
@@ -292,6 +304,18 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
                     {result.score.toFixed(2)}
                   </Text>
                 )}
+              {result.placement && (
+                <Text
+                  fontSize="sm"
+                  color="gray.600"
+                  display={{ base: "block", md: "none" }}
+                >
+                  {result.placement}
+                  <Text as="sup" fontSize="xs" ml={0.5}>
+                    {getOrdinalSuffix(result.placement)}
+                  </Text>
+                </Text>
+              )}
               {showScoringSystem && (
                 <Badge
                   colorScheme={result.isSixEvent ? "purple" : "blue"}
