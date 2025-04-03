@@ -608,8 +608,8 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
           >
             <Map
               center={getMapCenter()}
-              zoom={locations.length > 0 ? 5 : 3}
-              markers={locations}
+              zoom={allLocations.length > 0 ? 5 : 3}
+              markers={allLocations}
             />
           </Box>
         );
