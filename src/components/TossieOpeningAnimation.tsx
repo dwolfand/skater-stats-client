@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import {
   Box,
   Image,
@@ -13,6 +19,8 @@ import { css, keyframes } from "@emotion/react";
 import { createPortal } from "react-dom";
 import dayjs from "../utils/date";
 import { getTossieInfo } from "../types/tossies";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
 interface TossieOpeningAnimationProps {
   isActive: boolean;
@@ -61,7 +69,20 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
   const [showTossieBag, setShowTossieBag] = useState(false);
   const [showTossieResult, setShowTossieResult] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [activeConfetti, setActiveConfetti] = useState(true);
   const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  // For confetti
+  const { width, height } = useWindowSize();
+
+  // Calculate number of confetti pieces based on screen width
+  const numberOfConfettiPieces = useMemo(() => {
+    if (width < 480) return 150; // Mobile phones
+    if (width < 768) return 200; // Tablets
+    if (width < 1024) return 250; // Small laptops
+    return 300; // Larger screens
+  }, [width]);
 
   // Get tossie info including name
   const tossieInfo = tossieType ? getTossieInfo(tossieType) : null;
@@ -74,12 +95,35 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
     };
   }, []);
 
+  // Handle confetti display and timing
+  useEffect(() => {
+    if (showTossieResult && !isExiting) {
+      setShowConfetti(true);
+      setActiveConfetti(true);
+
+      // Stop generating new confetti after 5 seconds
+      const confettiTimeout = setTimeout(() => {
+        setActiveConfetti(false);
+      }, 5000);
+
+      timeoutsRef.current.push(confettiTimeout);
+
+      return () => {
+        clearTimeout(confettiTimeout);
+      };
+    } else {
+      setShowConfetti(false);
+      setActiveConfetti(true);
+    }
+  }, [showTossieResult, isExiting]);
+
   // Handle animation lifecycle
   useEffect(() => {
     if (!isActive) {
       setShowTossieBag(false);
       setShowTossieResult(false);
       setIsExiting(false);
+      setShowConfetti(false);
       return;
     }
 
@@ -158,6 +202,34 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
       onClick={handleClick}
       cursor="pointer"
     >
+      {/* Confetti effect */}
+      {showConfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          recycle={activeConfetti}
+          run={true}
+          numberOfPieces={numberOfConfettiPieces}
+          gravity={0.03}
+          tweenDuration={10000}
+          colors={[
+            "#FFC700",
+            "#FF0000",
+            "#2E3191",
+            "#41BBC7",
+            "#9F24B4",
+            "#FF8F2B",
+          ]}
+          initialVelocityY={0.5}
+          confettiSource={{
+            x: 0,
+            y: 0,
+            w: width,
+            h: 0,
+          }}
+        />
+      )}
+
       <Box
         position="fixed"
         top="50%"
