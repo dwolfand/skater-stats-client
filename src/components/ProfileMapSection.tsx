@@ -810,28 +810,35 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
                       {getEmojiForType(location.type)}
                     </Box>
                     <Box flex="1">
-                      <HStack mb={1} spacing={2}>
+                      <VStack align="start" spacing={1} mb={1}>
                         <Text fontWeight="bold">{location.name}</Text>
-                        <Badge
-                          colorScheme={
-                            LOCATION_TYPES.find(
-                              (t) => t.value === location.type
-                            )?.badgeColor || "gray"
-                          }
+                        <Flex
+                          width="100%"
+                          direction={{ base: "column", md: "row" }}
+                          gap={2}
+                          align={{ base: "start", md: "center" }}
                         >
-                          {getTypeLabel(location.type)}
-                        </Badge>
-                        {location.readOnly && (
-                          <Tooltip label="This location is automatically added from your competition history and cannot be removed">
-                            <Badge colorScheme="blue" variant="outline">
-                              <HStack spacing={1}>
-                                <FaLock size="0.6em" />
-                                <Text>Competition History</Text>
-                              </HStack>
-                            </Badge>
-                          </Tooltip>
-                        )}
-                      </HStack>
+                          <Badge
+                            colorScheme={
+                              LOCATION_TYPES.find(
+                                (t) => t.value === location.type
+                              )?.badgeColor || "gray"
+                            }
+                          >
+                            {getTypeLabel(location.type)}
+                          </Badge>
+                          {location.readOnly && (
+                            <Tooltip label="This location is automatically added from your competition history and cannot be removed">
+                              <Badge colorScheme="blue" variant="outline">
+                                <HStack spacing={1}>
+                                  <FaLock size="0.6em" />
+                                  <Text>Competition History</Text>
+                                </HStack>
+                              </Badge>
+                            </Tooltip>
+                          )}
+                        </Flex>
+                      </VStack>
                       <Text fontSize="sm" color="gray.600" noOfLines={1}>
                         {location.address}
                       </Text>
