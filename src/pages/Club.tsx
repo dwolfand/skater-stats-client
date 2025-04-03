@@ -49,7 +49,11 @@ export default function Club() {
   const { profile } = useAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { data: clubStats, isLoading } = useQuery({
+  const {
+    data: clubStats,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["club", clubId],
     queryFn: async () => {
       const data = await getClubStats(clubId!);
@@ -64,6 +68,12 @@ export default function Club() {
   // Check if the current user belongs to this club
   const isUserMemberOfClub =
     profile?.currentClubId === Number(clubId) || profile?.role === "admin";
+
+  // Handle modal close and refresh data
+  const handleModalClose = () => {
+    refetch();
+    onClose();
+  };
 
   if (isLoading) {
     return (
@@ -93,58 +103,77 @@ export default function Club() {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={8} align="stretch">
-        <Box>
-          <Flex justify="space-between" align="flex-start">
-            <Box>
-              <Heading size="lg" mb={2}>
-                {clubStats.name}
-              </Heading>
-              <Text color="gray.600">
-                {clubStats.totalSkaters} skaters · {clubStats.totalCompetitions}{" "}
-                competitions
-              </Text>
-            </Box>
+        {/* Combined club info and customization box */}
+        <Box
+          borderWidth="1px"
+          borderRadius="lg"
+          overflow="hidden"
+          p={5}
+          bg="white"
+          shadow="sm"
+        >
+          {/* Club header with logo + name layout */}
+          <HStack
+            justify="space-between"
+            align="start"
+            spacing={{ base: 3, md: 6 }}
+            mb={4}
+          >
+            <HStack spacing={{ base: 3, md: 6 }} align="start" flex="1">
+              {clubStats.customization?.profileImage && (
+                <Box
+                  flexShrink={0}
+                  width={{ base: "60px", md: "100px" }}
+                  height={{ base: "60px", md: "100px" }}
+                  display="flex"
+                  alignItems="center"
+                >
+                  <Image
+                    src={getThumbnailUrl(
+                      clubStats.customization.profileImage,
+                      "medium"
+                    )}
+                    alt={`${clubStats.name} logo`}
+                    width="100%"
+                    height="100%"
+                    objectFit="contain"
+                    borderRadius="md"
+                    style={{ imageOrientation: "from-image" }}
+                  />
+                </Box>
+              )}
+
+              <Box>
+                <Heading size={{ base: "md", md: "lg" }} mb={2}>
+                  {clubStats.name}
+                </Heading>
+                <Text color="gray.600" fontSize={{ base: "sm", md: "md" }}>
+                  {clubStats.totalSkaters} skaters ·{" "}
+                  {clubStats.totalCompetitions} competitions
+                </Text>
+              </Box>
+            </HStack>
+
             {isUserMemberOfClub && (
               <Button
                 leftIcon={<FaEdit />}
                 colorScheme="blue"
                 size="sm"
                 onClick={onOpen}
+                flexShrink={0}
               >
-                Edit Club Info
+                Edit
               </Button>
             )}
-          </Flex>
-        </Box>
+          </HStack>
 
-        {/* Display club customization if available */}
-        {clubStats.customization && (
-          <Box
-            borderWidth="1px"
-            borderRadius="lg"
-            overflow="hidden"
-            p={5}
-            bg="white"
-            shadow="sm"
-          >
-            <Stack direction={["column", "row"]} spacing={6} align="flex-start">
-              {clubStats.customization.profileImage && (
-                <Image
-                  src={getThumbnailUrl(
-                    clubStats.customization.profileImage,
-                    "medium"
-                  )}
-                  alt={`${clubStats.name} logo`}
-                  boxSize={["120px", "150px"]}
-                  objectFit="contain"
-                  borderRadius="md"
-                  style={{ imageOrientation: "from-image" }}
-                />
-              )}
-
-              <Stack flex="1" spacing={4}>
+          {/* Customization content if available */}
+          {clubStats.customization && (
+            <>
+              <Divider my={4} />
+              <Box>
                 {clubStats.customization.description && (
-                  <Text>{clubStats.customization.description}</Text>
+                  <Text mb={4}>{clubStats.customization.description}</Text>
                 )}
 
                 <Stack spacing={2}>
@@ -204,10 +233,10 @@ export default function Club() {
                     </Flex>
                   )}
                 </Stack>
-              </Stack>
-            </Stack>
-          </Box>
-        )}
+              </Box>
+            </>
+          )}
+        </Box>
 
         <Box>
           <HStack justify="space-between" mb={4}>
@@ -298,7 +327,7 @@ export default function Club() {
       {/* Edit Club Modal */}
       <ClubCustomizationModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleModalClose}
         clubId={clubId || ""}
         currentCustomization={clubStats.customization}
       />

@@ -121,7 +121,7 @@ const ClubCustomizationModal: React.FC<ClubCustomizationModalProps> = ({
         duration: 3000,
         isClosable: true,
       });
-      queryClient.invalidateQueries({ queryKey: ["club", clubId] });
+      // Parent component will handle the refresh
       onClose();
     },
     onError: (error) => {
