@@ -523,6 +523,24 @@ export interface ClubStats {
   name: string;
   totalSkaters: number;
   totalCompetitions: number;
+  customization?: {
+    location?: string;
+    website?: string;
+    description?: string;
+    socialLinks?: {
+      instagram?: string;
+      facebook?: string;
+    };
+    profileImage?:
+      | {
+          url: string;
+          thumbnails?: {
+            small: string;
+            medium: string;
+          };
+        }
+      | string;
+  };
   competitions: Array<{
     name: string;
     date: string;
@@ -684,4 +702,77 @@ export const changeSkaterClub = async (clubId: string) => {
     clubId,
   });
   return data;
+};
+
+export const updateClubCustomization = async (
+  clubId: string,
+  customization: ClubStats["customization"]
+) => {
+  const { data } = await api.post(`/club/${clubId}/customization`, {
+    customization,
+  });
+  return data;
+};
+
+export interface ImageUploadResponse {
+  uploadUrl: string;
+  fileUrl: string;
+  thumbnailUrls?: {
+    small: string;
+    medium: string;
+  };
+}
+
+export const getImageUploadUrl = async (
+  entityType: "user" | "club" | "skater" | "competition",
+  entityId: string,
+  file: File,
+  imageType: "profile" | "cover" | "gallery" | "logo"
+): Promise<ImageUploadResponse> => {
+  const { data } = await api.post<ImageUploadResponse>(
+    `/generate-upload-url/${entityType}/${entityId}`,
+    {
+      fileName: file.name,
+      contentType: file.type,
+      imageType,
+    }
+  );
+  return data;
+};
+
+export const uploadImageToS3 = async (
+  file: File,
+  uploadUrl: string
+): Promise<void> => {
+  await fetch(uploadUrl, {
+    method: "PUT",
+    body: file,
+    headers: {
+      "content-type": file.type,
+    },
+  });
+};
+
+export const handleImageUpload = async (
+  entityType: "user" | "club" | "skater" | "competition",
+  entityId: string,
+  file: File,
+  imageType: "profile" | "cover" | "gallery" | "logo"
+): Promise<{
+  fileUrl: string;
+  thumbnailUrls?: { small: string; medium: string };
+}> => {
+  // Get the pre-signed URL
+  const { uploadUrl, fileUrl, thumbnailUrls } = await getImageUploadUrl(
+    entityType,
+    entityId,
+    file,
+    imageType
+  );
+
+  // Upload the file directly to S3
+  await uploadImageToS3(file, uploadUrl);
+
+  // Return the final file URL and thumbnail URLs
+  return { fileUrl, thumbnailUrls };
 };

@@ -109,6 +109,7 @@ export interface UserProfile {
   usfsNumber?: string;
   skaterName?: string;
   currentClub?: string;
+  currentClubId?: number;
   clubHistory?: Club[];
   competitionLocations?: Array<{
     id: number;

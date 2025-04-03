@@ -9,6 +9,10 @@ import {
   AdminTossieReceipt,
 } from "../types/auth";
 import { flagRecentlyUploaded } from "../utils/images";
+import {
+  uploadImageToS3,
+  handleImageUpload as genericHandleImageUpload,
+} from "./client";
 
 export const googleLogin = async (idToken: string): Promise<AuthResponse> => {
   const { data } = await api.post<AuthResponse>("/auth/google", { idToken });
@@ -71,6 +75,14 @@ export const saveProfileCustomization = async (
   return data;
 };
 
+export const openTossie = async (tossieId: number): Promise<TossieReceipt> => {
+  const { data } = await api.put<TossieReceipt>(
+    `/user/tossie-receipts/${tossieId}/open`
+  );
+  return data;
+};
+
+// Legacy direct user image upload functions for backward compatibility
 export interface ImageUploadResponse {
   uploadUrl: string;
   fileUrl: string;
@@ -95,19 +107,6 @@ export const getImageUploadUrl = async (
   return data;
 };
 
-export const uploadImageToS3 = async (
-  file: File,
-  uploadUrl: string
-): Promise<void> => {
-  await fetch(uploadUrl, {
-    method: "PUT",
-    body: file,
-    headers: {
-      "content-type": file.type,
-    },
-  });
-};
-
 export const handleImageUpload = async (
   file: File,
   imageType: "profile" | "cover" | "gallery"
@@ -126,11 +125,4 @@ export const handleImageUpload = async (
 
   // Return the final file URL and thumbnail URLs
   return { fileUrl, thumbnailUrls };
-};
-
-export const openTossie = async (tossieId: number): Promise<TossieReceipt> => {
-  const { data } = await api.put<TossieReceipt>(
-    `/user/tossie-receipts/${tossieId}/open`
-  );
-  return data;
 };

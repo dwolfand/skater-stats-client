@@ -1,98 +1,92 @@
 import { ImageData } from "../types/auth";
 
-// Cache to store the timestamps of recently uploaded images
-// Format: { imageUrl: timestamp }
-const recentlyUploadedImages: Record<string, number> = {};
+// Key for recently uploaded images in localStorage
+const RECENTLY_UPLOADED_KEY = "recently_uploaded_images";
 
 /**
- * Flag an image as recently uploaded so we can use the original URL
- * while thumbnails are being generated
- * @param imageUrl - The URL of the uploaded image
- * @param timeoutMs - How long to use the original URL (defaults to 60000ms = 1 min)
+ * Cache the fact that an image was just uploaded
+ * This is used to prefer the main image URL for recently uploaded images
+ * while CloudFront thumbnail distribution is still in progress
  */
-export const flagRecentlyUploaded = (
-  imageUrl: string,
-  timeoutMs: number = 60000
-): void => {
-  recentlyUploadedImages[imageUrl] = Date.now() + timeoutMs;
-
-  // Set a timeout to clean up the cache entry after the specified time
-  setTimeout(() => {
-    delete recentlyUploadedImages[imageUrl];
-  }, timeoutMs + 1000); // Add 1 second buffer
-};
-
-/**
- * Checks if an image was recently uploaded and is still within the timeout period
- * @param imageUrl - The URL of the image to check
- * @returns true if the image is recently uploaded and within timeout period
- */
-const isRecentlyUploaded = (imageUrl: string): boolean => {
-  const expiryTime = recentlyUploadedImages[imageUrl];
-  if (!expiryTime) return false;
-
-  return Date.now() < expiryTime;
-};
-
-/**
- * Returns the image URL from either a string or ImageData object
- * @param image - The image source (string URL or ImageData object)
- * @returns The image URL or undefined if image is not provided
- */
-export const getImageUrl = (
-  image: string | ImageData | undefined
-): string | undefined => {
-  if (!image) return undefined;
-  if (typeof image === "string") return addImageOptionsToUrl(image);
-  return addImageOptionsToUrl(image.url);
-};
-
-/**
- * Returns the thumbnail URL from ImageData object or original URL for string
- * @param image - The image source (string URL or ImageData object)
- * @param size - Thumbnail size ("small" or "medium")
- * @returns The thumbnail URL or original URL if thumbnail is not available
- */
-export const getThumbnailUrl = (
-  image: string | ImageData | undefined,
-  size: "small" | "medium"
-): string | undefined => {
-  if (!image) return undefined;
-  if (typeof image === "string") return addImageOptionsToUrl(image);
-
-  // For recently uploaded images, use the original URL while thumbnails are generating
-  if (isRecentlyUploaded(image.url)) {
-    return addImageOptionsToUrl(image.url);
-  }
-
-  // Use thumbnail when available, otherwise fall back to full URL
-  if (image.thumbnails && image.thumbnails[size]) {
-    return addImageOptionsToUrl(image.thumbnails[size]);
-  }
-  return addImageOptionsToUrl(image.url);
-};
-
-/**
- * Adds options to force proper orientation and prevent caching
- * @param url - The original image URL
- * @returns The URL with additional parameters
- */
-function addImageOptionsToUrl(url: string): string {
-  // Parse the URL to add a cache-busting timestamp and orientation fix
+export function flagRecentlyUploaded(imageUrl: string): void {
   try {
-    const urlObj = new URL(url);
+    // Store image URLs with a timestamp
+    const recentlyUploaded = getRecentlyUploaded();
+    recentlyUploaded[imageUrl] = Date.now();
 
-    // Add a timestamp to prevent caching (for recently uploaded images)
-    if (isRecentlyUploaded(url)) {
-      urlObj.searchParams.set("_t", Date.now().toString());
+    // Prune old entries (older than 1 hour)
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    for (const url in recentlyUploaded) {
+      if (recentlyUploaded[url] < oneHourAgo) {
+        delete recentlyUploaded[url];
+      }
     }
 
-    // The auto parameter tells some CDNs (like Cloudinary) to respect orientation
-    urlObj.searchParams.set("auto", "format,compress,enhance,orient");
-
-    return urlObj.toString();
+    localStorage.setItem(
+      RECENTLY_UPLOADED_KEY,
+      JSON.stringify(recentlyUploaded)
+    );
   } catch (e) {
-    // If the URL can't be parsed, return the original
-    return url;
+    // Ignore errors with localStorage
+    console.warn("Failed to save recently uploaded image", e);
   }
+}
+
+/**
+ * Get the map of recently uploaded images
+ */
+function getRecentlyUploaded(): Record<string, number> {
+  try {
+    const stored = localStorage.getItem(RECENTLY_UPLOADED_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+/**
+ * Check if an image was recently uploaded
+ */
+function isRecentlyUploaded(imageUrl: string): boolean {
+  const recentlyUploaded = getRecentlyUploaded();
+  return !!recentlyUploaded[imageUrl];
+}
+
+/**
+ * Get image URL, preferring the full image for recently uploaded images
+ * and the thumbnail otherwise
+ */
+export function getImageUrl(imageData: ImageData | undefined): string {
+  if (!imageData) return "";
+  return imageData.url;
+}
+
+/**
+ * Get thumbnail URL for an image, falling back to the full image
+ * if thumbnails aren't available or if the image was recently uploaded
+ */
+export function getThumbnailUrl(
+  imageData: ImageData | string | undefined | null,
+  size: "small" | "medium"
+): string {
+  if (!imageData) return "";
+
+  // If imageData is a string, return it directly
+  if (typeof imageData === "string") {
+    return imageData;
+  }
+
+  // If this is a recently uploaded image, use the full URL
+  // This is because CloudFront distribution of thumbnails may take some time
+  if (isRecentlyUploaded(imageData.url)) {
+    return imageData.url;
+  }
+
+  // Otherwise use the thumbnail if available
+  if (imageData.thumbnails && imageData.thumbnails[size]) {
+    return imageData.thumbnails[size];
+  }
+
+  // Fall back to the full image
+  return imageData.url;
 }
