@@ -80,6 +80,8 @@ import "../styles/markdown.css";
 import { ImageData } from "../types/auth";
 import { getImageUrl, getThumbnailUrl } from "../utils/images";
 import ScoreHistoryChart from "../components/ScoreHistoryChart";
+import SkaterMapDisplay from "../components/SkaterMapDisplay";
+import { MapLocationType } from "../types/auth";
 
 type SkaterHistoryEntry = SkaterStats["history"][0];
 
@@ -415,6 +417,9 @@ export default function Skater() {
   const [stats, setStats] = useState<SkaterStats | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
+
+  // Get your Google Maps API key from environment or config
+  // const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "";
 
   useEffect(() => {
     const handleResize = () => {
@@ -1171,6 +1176,31 @@ export default function Skater() {
                             </SimpleGrid>
                           </Card>
                         )}
+
+                      {/* Insert the map display component after the customization section or where gallery ends */}
+                      {((stats.customization?.mapLocations &&
+                        stats.customization.mapLocations.length > 0) ||
+                        (stats.competitionLocations &&
+                          stats.competitionLocations.length > 0)) && (
+                        <SkaterMapDisplay
+                          locations={[
+                            ...(stats.customization?.mapLocations || []),
+                            ...(stats.competitionLocations
+                              ? stats.competitionLocations.map((loc) => ({
+                                  id: `competition-${loc.id}`,
+                                  name: loc.name,
+                                  lat: loc.lat,
+                                  lng: loc.lng,
+                                  address: loc.address,
+                                  type: "competition" as MapLocationType,
+                                  description: loc.description,
+                                  readOnly: true,
+                                }))
+                              : []),
+                          ]}
+                          themeColors={themeColors}
+                        />
+                      )}
 
                       {/* Featured Video */}
                       {stats.customization.featuredVideo && (

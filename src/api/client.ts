@@ -292,6 +292,15 @@ export interface SkaterStats {
       deductions: any[];
     };
   }[];
+  competitionLocations?: Array<{
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+    address: string;
+    type: string;
+    description?: string;
+  }>;
 }
 
 export const getSkaterStats = async (params: {

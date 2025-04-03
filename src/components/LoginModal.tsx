@@ -14,20 +14,6 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { trackLogin } from "../utils/analytics";
 
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: any) => void;
-          renderButton: (element: HTMLElement, config: any) => void;
-          prompt: () => void;
-        };
-      };
-    };
-  }
-}
-
 const GOOGLE_CLIENT_ID =
   "968418043401-c0nnio4ubtfruq0n0733891a0o3252uv.apps.googleusercontent.com";
 
@@ -67,7 +53,14 @@ export function LoginModal({ isOpen, onClose, message }: LoginModalProps) {
   useEffect(() => {
     if (isOpen) {
       const initializeGoogleSignIn = () => {
-        if (!window.google) return;
+        if (
+          !window.google ||
+          !window.google.accounts ||
+          !window.google.accounts.id
+        ) {
+          console.error("Google accounts API not available");
+          return;
+        }
 
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
@@ -85,7 +78,12 @@ export function LoginModal({ isOpen, onClose, message }: LoginModalProps) {
         });
 
         const buttonElement = document.getElementById(buttonId);
-        if (buttonElement) {
+        if (
+          buttonElement &&
+          window.google &&
+          window.google.accounts &&
+          window.google.accounts.id
+        ) {
           window.google.accounts.id.renderButton(buttonElement, {
             theme: "outline",
             size: "large",

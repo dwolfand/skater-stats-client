@@ -31,6 +31,27 @@ export interface ImageData {
   };
 }
 
+// Map location types
+export type MapLocationType =
+  | "hometown"
+  | "current"
+  | "training"
+  | "competition"
+  | "visited"
+  | "performance"
+  | "other";
+
+export interface MapLocation {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  type: MapLocationType;
+  address: string;
+  description?: string;
+  readOnly?: boolean;
+}
+
 export interface ProfileCustomization {
   // Theme & Layout
   accentColor?: string;
@@ -55,9 +76,9 @@ export interface ProfileCustomization {
   canBeFeatured?: boolean;
 
   // Media
-  profileImage?: string | ImageData;
-  coverImage?: string | ImageData;
-  galleryImages?: (string | ImageData)[];
+  profileImage?: ImageData;
+  coverImage?: ImageData;
+  galleryImages?: ImageData[];
   featuredVideo?: string;
   profileSong?: {
     title?: string;
@@ -67,23 +88,38 @@ export interface ProfileCustomization {
 
   // Preferences
   unsubscribeFromEmail?: boolean;
+
+  // Map Locations
+  mapLocations?: MapLocation[];
+}
+
+export interface Club {
+  id: number;
+  name: string;
 }
 
 export interface UserProfile {
   id: string;
-  email: string;
   name: string;
-  picture?: string;
-  skaterId?: number;
-  status: UserStatus;
-  skaterName?: string;
+  email: string;
+  picture: string;
   role?: UserRole;
-  customization?: ProfileCustomization;
+  status?: UserStatus;
+  skaterId?: number;
+  usfsNumber?: string;
+  skaterName?: string;
   currentClub?: string;
-  clubHistory?: Array<{
+  clubHistory?: Club[];
+  competitionLocations?: Array<{
     id: number;
     name: string;
+    lat: number;
+    lng: number;
+    address: string;
+    type: string;
+    description?: string;
   }>;
+  customization?: ProfileCustomization;
 }
 
 export interface TossieReceipt {

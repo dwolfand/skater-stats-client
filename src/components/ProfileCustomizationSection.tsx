@@ -31,6 +31,9 @@ import {
   Switch,
   FormHelperText,
   Divider,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react";
 import {
   FaInstagram,
@@ -41,7 +44,7 @@ import {
   FaUpload,
 } from "react-icons/fa";
 import { HexColorPicker } from "react-colorful";
-import { ProfileCustomization, ImageData } from "../types/auth";
+import { ProfileCustomization, ImageData, MapLocation } from "../types/auth";
 import { handleImageUpload } from "../api/auth";
 import { api, changeSkaterClub } from "../api/client";
 import {
@@ -49,6 +52,7 @@ import {
   getThumbnailUrl,
   flagRecentlyUploaded,
 } from "../utils/images";
+import ProfileMapSection from "./ProfileMapSection";
 
 interface UploadingImageState {
   type: "profile" | "cover" | "gallery";
@@ -70,6 +74,15 @@ interface ProfileCustomizationSectionProps {
   onSave: (customization: ProfileCustomization) => Promise<void>;
   clubHistory?: Club[];
   currentClub?: string;
+  competitionLocations?: Array<{
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+    address: string;
+    type: string;
+    description?: string;
+  }>;
 }
 
 const FONT_OPTIONS = [
@@ -82,7 +95,13 @@ const FONT_OPTIONS = [
 
 export const ProfileCustomizationSection: React.FC<
   ProfileCustomizationSectionProps
-> = ({ initialCustomization = {}, onSave, clubHistory = [], currentClub }) => {
+> = ({
+  initialCustomization = {},
+  onSave,
+  clubHistory = [],
+  currentClub,
+  competitionLocations = [],
+}) => {
   const [customization, setCustomization] = useState<ProfileCustomization>(
     initialCustomization || {}
   );
@@ -954,6 +973,40 @@ export const ProfileCustomizationSection: React.FC<
                     />
                   </VStack>
                 </FormControl>
+              </VStack>
+            </AccordionPanel>
+          </AccordionItem>
+
+          {/* Map Section */}
+          <AccordionItem border={0}>
+            <h2>
+              <AccordionButton
+                py={3}
+                _hover={{ bg: "gray.50" }}
+                borderRadius="md"
+              >
+                <Box as="span" flex="1" textAlign="left" fontWeight="medium">
+                  Skating Map
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel pb={4}>
+              <VStack spacing={4} align="stretch">
+                <Text>
+                  Add locations where you've skated, trained, or competed to
+                  create your personal skating map.
+                </Text>
+                <ProfileMapSection
+                  locations={customization.mapLocations || []}
+                  onChange={(locations: MapLocation[]) =>
+                    setCustomization({
+                      ...customization,
+                      mapLocations: locations,
+                    })
+                  }
+                  competitionLocations={competitionLocations}
+                />
               </VStack>
             </AccordionPanel>
           </AccordionItem>
