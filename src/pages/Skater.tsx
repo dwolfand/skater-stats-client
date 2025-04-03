@@ -48,6 +48,7 @@ import {
   ModalContent,
   ModalBody,
   ModalCloseButton,
+  Center,
 } from "@chakra-ui/react";
 import {
   ChevronDownIcon,
@@ -606,18 +607,29 @@ export default function Skater() {
 
   if (isLoading) {
     return (
-      <Container maxW="container.xl" py={8}>
-        <Text>Loading...</Text>
-      </Container>
+      <Box
+        minH="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Center>
+          <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+        </Center>
+      </Box>
     );
   }
 
-  if (!stats) {
+  if (!statsData) {
     return (
       <Container maxW="container.xl" py={8}>
         <Text>No data found for this skater.</Text>
       </Container>
     );
+  }
+
+  if (!stats) {
+    return null;
   }
 
   const filename = stats.name?.replace(/\s+/g, "_") + "_stats";
