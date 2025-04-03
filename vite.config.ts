@@ -49,7 +49,14 @@ export default defineConfig(({ mode }) => {
       },
       VitePWA({
         registerType: "autoUpdate",
-        includeAssets: ["favicon.ico", "logo192.png", "logo512.png"],
+        includeAssets: [
+          "favicon.ico?v=2",
+          "favicon-16x16.png?v=2",
+          "favicon-32x32.png?v=2",
+          "apple-touch-icon.png?v=2",
+          "logo192.png?v=2",
+          "logo512.png?v=2",
+        ],
         manifest: {
           name: "Skater Stats",
           short_name: "Skater Stats",
@@ -59,17 +66,33 @@ export default defineConfig(({ mode }) => {
           display: "standalone",
           icons: [
             {
-              src: "favicon.ico",
+              src: "favicon.ico?v=2",
               sizes: "64x64 32x32 24x24 16x16",
               type: "image/x-icon",
             },
             {
-              src: "logo192.png",
+              src: "favicon-16x16.png?v=2",
+              sizes: "16x16",
+              type: "image/png",
+            },
+            {
+              src: "favicon-32x32.png?v=2",
+              sizes: "32x32",
+              type: "image/png",
+            },
+            {
+              src: "apple-touch-icon.png?v=2",
+              sizes: "180x180",
+              type: "image/png",
+              purpose: "apple touch icon",
+            },
+            {
+              src: "logo192.png?v=2",
               type: "image/png",
               sizes: "192x192",
             },
             {
-              src: "logo512.png",
+              src: "logo512.png?v=2",
               type: "image/png",
               sizes: "512x512",
             },
