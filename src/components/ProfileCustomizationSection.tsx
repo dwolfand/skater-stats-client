@@ -74,6 +74,15 @@ interface ProfileCustomizationSectionProps {
   onSave: (customization: ProfileCustomization) => Promise<void>;
   clubHistory?: Club[];
   currentClub?: string;
+  competitionLocations?: Array<{
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+    address: string;
+    type: string;
+    description?: string;
+  }>;
 }
 
 const FONT_OPTIONS = [
@@ -86,7 +95,13 @@ const FONT_OPTIONS = [
 
 export const ProfileCustomizationSection: React.FC<
   ProfileCustomizationSectionProps
-> = ({ initialCustomization = {}, onSave, clubHistory = [], currentClub }) => {
+> = ({
+  initialCustomization = {},
+  onSave,
+  clubHistory = [],
+  currentClub,
+  competitionLocations = [],
+}) => {
   const [customization, setCustomization] = useState<ProfileCustomization>(
     initialCustomization || {}
   );
@@ -990,6 +1005,7 @@ export const ProfileCustomizationSection: React.FC<
                       mapLocations: locations,
                     })
                   }
+                  competitionLocations={competitionLocations}
                 />
               </VStack>
             </AccordionPanel>

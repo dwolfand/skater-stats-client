@@ -64,6 +64,13 @@ const LOCATION_TYPES: {
     emoji: "🏆",
   },
   {
+    label: "Performance",
+    value: "performance",
+    color: "#00B5D8", // cyan.500
+    badgeColor: "cyan",
+    emoji: "🎭",
+  },
+  {
     label: "Visited Rink",
     value: "visited",
     color: "#D53F8C", // pink.500
@@ -112,6 +119,8 @@ function getIconComponentName(type: MapLocationType): string {
       return "FaSkating";
     case "competition":
       return "FaTrophy";
+    case "performance":
+      return "FaTheaterMasks";
     case "visited":
       return "FaIcicles";
     case "other":
@@ -139,61 +148,33 @@ function getSvgPathForType(type: MapLocationType): string {
   }
 }
 
-// Create an SVG marker icon with emojis
-function createSvgMarker(type: MapLocationType): {
-  url: string;
-  scaledSize: google.maps.Size;
-} {
-  // Get the color from the badge color for consistency
-  const locationType = LOCATION_TYPES.find((t) => t.value === type);
-  let color = "#3182CE"; // Default blue
+// Create SVG marker icon
+function createSvgMarker(
+  type: MapLocationType,
+  isReadOnly: boolean = false
+): google.maps.Icon {
+  const color = getColorForType(type);
 
-  if (locationType) {
-    switch (locationType.badgeColor) {
-      case "green":
-        color = "#38A169"; // green.500
-        break;
-      case "blue":
-        color = "#3182CE"; // blue.500
-        break;
-      case "purple":
-        color = "#805AD5"; // purple.500
-        break;
-      case "orange":
-        color = "#DD6B20"; // orange.500
-        break;
-      case "pink":
-        color = "#D53F8C"; // pink.500
-        break;
-      case "gray":
-        color = "#718096"; // gray.500
-        break;
-      default:
-        color = "#3182CE"; // Default to blue
-    }
-  }
-
-  // Get emoji for icon type
-  const emoji = getEmojiForType(type);
-
-  // Create SVG content with emoji text
+  // Create SVG with emoji centered using foreignObject for better alignment
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="40" height="40">
-      <circle cx="27" cy="27" r="22" fill="${color}" stroke="white" stroke-width="2"></circle>
-      <foreignObject x="7" y="7" width="40" height="40">
-        <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:white; font-size:22px;">
-          ${emoji}
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="16" fill="${color}" stroke="white" stroke-width="2" />
+      <foreignObject x="2" y="2" width="36" height="36">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+          ${getEmojiForType(type)}
         </div>
       </foreignObject>
     </svg>
   `;
 
-  // Convert SVG to data URL
-  const url = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+  // Use a larger marker for competition history markers to make them stand out
+  const scale = isReadOnly ? 1.1 : 1.0;
 
   return {
-    url,
-    scaledSize: new window.google.maps.Size(40, 40),
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new google.maps.Size(40 * scale, 40 * scale),
+    anchor: new google.maps.Point(20 * scale, 20 * scale),
+    origin: new google.maps.Point(0, 0),
   };
 }
 
@@ -208,6 +189,8 @@ function getEmojiForType(type: MapLocationType): string {
       return "⛸️"; // Ice skate emoji
     case "competition":
       return "🏆"; // Trophy emoji
+    case "performance":
+      return "🎭"; // Theater masks emoji
     case "visited":
       return "❄️"; // Snowflake emoji
     case "other":
@@ -283,7 +266,7 @@ const Map: React.FC<{
 
       markers.forEach((location) => {
         // Create SVG marker icon
-        const markerIcon = createSvgMarker(location.type);
+        const markerIcon = createSvgMarker(location.type, location.readOnly);
 
         // Set marker with icon
         const marker = new window.google.maps.Marker({

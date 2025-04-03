@@ -38,6 +38,7 @@ export type MapLocationType =
   | "training"
   | "competition"
   | "visited"
+  | "performance"
   | "other";
 
 export interface MapLocation {
@@ -48,6 +49,7 @@ export interface MapLocation {
   type: MapLocationType;
   address: string;
   description?: string;
+  readOnly?: boolean;
 }
 
 export interface ProfileCustomization {
@@ -91,21 +93,33 @@ export interface ProfileCustomization {
   mapLocations?: MapLocation[];
 }
 
+export interface Club {
+  id: number;
+  name: string;
+}
+
 export interface UserProfile {
   id: string;
-  email: string;
   name: string;
-  picture?: string;
-  skaterId?: number;
-  status: UserStatus;
-  skaterName?: string;
+  email: string;
+  picture: string;
   role?: UserRole;
-  customization?: ProfileCustomization;
+  status?: UserStatus;
+  skaterId?: number;
+  usfsNumber?: string;
+  skaterName?: string;
   currentClub?: string;
-  clubHistory?: Array<{
+  clubHistory?: Club[];
+  competitionLocations?: Array<{
     id: number;
     name: string;
+    lat: number;
+    lng: number;
+    address: string;
+    type: string;
+    description?: string;
   }>;
+  customization?: ProfileCustomization;
 }
 
 export interface TossieReceipt {

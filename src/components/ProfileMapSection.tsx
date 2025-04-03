@@ -16,14 +16,25 @@ import {
   Alert,
   AlertIcon,
   AlertDescription,
+  Tooltip,
+  Flex,
 } from "@chakra-ui/react";
-import { FaTrash, FaPlus } from "react-icons/fa";
+import { FaTrash, FaPlus, FaLock } from "react-icons/fa";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { MapLocation, MapLocationType } from "../types/auth";
 
 interface ProfileMapSectionProps {
   locations: MapLocation[];
   onChange: (locations: MapLocation[]) => void;
+  competitionLocations?: Array<{
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+    address: string;
+    type: string;
+    description?: string;
+  }>;
 }
 
 // Get Google Maps API key from environment variables
@@ -66,6 +77,13 @@ const LOCATION_TYPES: {
     emoji: "🏆",
   },
   {
+    label: "Performance",
+    value: "performance",
+    color: "cyan.500",
+    badgeColor: "cyan",
+    emoji: "🎭",
+  },
+  {
     label: "Visited Rink",
     value: "visited",
     color: "pink.500",
@@ -80,6 +98,30 @@ const LOCATION_TYPES: {
     emoji: "📌",
   },
 ];
+
+// Helper function to create map location objects from API competition locations
+function convertCompetitionLocationsToMapLocations(
+  apiLocations: Array<{
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+    address: string;
+    type: string;
+    description?: string;
+  }> = []
+): MapLocation[] {
+  return apiLocations.map((loc) => ({
+    id: `competition-${loc.id}`,
+    name: loc.name,
+    lat: loc.lat,
+    lng: loc.lng,
+    address: loc.address,
+    type: "competition" as MapLocationType,
+    description: loc.description,
+    readOnly: true, // Add this property to indicate it can't be removed
+  }));
+}
 
 // Map component
 const Map: React.FC<{
@@ -226,31 +268,13 @@ function getIconComponentName(type: MapLocationType): string {
       return "FaSkating";
     case "competition":
       return "FaTrophy";
+    case "performance":
+      return "FaTheaterMasks";
     case "visited":
       return "FaIcicles";
     case "other":
     default:
       return "FaMapPin";
-  }
-}
-
-// Convert icon name to corresponding Unicode
-function iconToUnicode(iconName: string): string {
-  switch (iconName) {
-    case "FaLocationArrow":
-      return "\uf124"; // FaLocationArrow Unicode
-    case "FaHome":
-      return "\uf015"; // FaHome Unicode
-    case "FaSkating":
-      return "\uf7c5"; // FaSkating Unicode
-    case "FaTrophy":
-      return "\uf091"; // FaTrophy Unicode
-    case "FaIcicles":
-      return "\uf7ad"; // FaIcicles Unicode
-    case "FaMapPin":
-      return "\uf276"; // FaMapPin Unicode
-    default:
-      return "\uf276"; // Default to FaMapPin
   }
 }
 
@@ -323,6 +347,8 @@ function getEmojiForType(type: MapLocationType): string {
       return "⛸️"; // Ice skate emoji
     case "competition":
       return "🏆"; // Trophy emoji
+    case "performance":
+      return "🎭"; // Theater masks emoji
     case "visited":
       return "❄️"; // Snowflake emoji
     case "other":
@@ -376,6 +402,7 @@ function getBadgeColorForType(type: MapLocationType): string {
 export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
   locations = [],
   onChange,
+  competitionLocations = [],
 }) => {
   const [newLocation, setNewLocation] = useState<Partial<MapLocation>>({
     type: "other",
@@ -390,6 +417,11 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
   const [placesService, setPlacesService] =
     useState<google.maps.places.PlacesService | null>(null);
   const toast = useToast();
+
+  // Convert API competition locations to MapLocation objects and merge with user locations
+  const competitionMapLocations =
+    convertCompetitionLocationsToMapLocations(competitionLocations);
+  const allLocations = [...locations, ...competitionMapLocations];
 
   // Initialize geocoder
   useEffect(() => {
@@ -513,20 +545,23 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
     setSelectedPlaceId(null);
   };
 
-  // Remove a location
+  // Remove a location - only allow if it's not from competition history
   const removeLocation = (id: string) => {
-    onChange(locations.filter((loc) => loc.id !== id));
+    // Only remove if it's not a competition location (readOnly is not set)
+    if (!allLocations.find((loc) => loc.id === id)?.readOnly) {
+      onChange(locations.filter((loc) => loc.id !== id));
+    }
   };
 
-  // Find map center based on locations or default to US center
+  // Find map center based on all locations or default to US center
   const getMapCenter = (): google.maps.LatLngLiteral => {
-    if (locations.length > 0) {
+    if (allLocations.length > 0) {
       // Use the average of all locations
-      const sumLat = locations.reduce((sum, loc) => sum + loc.lat, 0);
-      const sumLng = locations.reduce((sum, loc) => sum + loc.lng, 0);
+      const sumLat = allLocations.reduce((sum, loc) => sum + loc.lat, 0);
+      const sumLng = allLocations.reduce((sum, loc) => sum + loc.lng, 0);
       return {
-        lat: sumLat / locations.length,
-        lng: sumLng / locations.length,
+        lat: sumLat / allLocations.length,
+        lng: sumLng / allLocations.length,
       };
     }
 
@@ -744,68 +779,81 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
       </Box>
 
       {/* List of existing locations */}
-      {locations.length > 0 && (
+      {allLocations.length > 0 && (
         <Box>
           <Text fontWeight="medium" mb={3}>
             Your Locations:
           </Text>
           <VStack spacing={2} align="stretch">
-            {locations.map((location) => (
-              <HStack
+            {allLocations.map((location) => (
+              <Box
                 key={location.id}
                 p={3}
-                bg="white"
+                borderWidth="1px"
                 borderRadius="md"
-                boxShadow="sm"
-                justify="space-between"
+                borderColor="gray.200"
+                _hover={{ borderColor: "gray.300" }}
               >
-                <HStack spacing={3} align="center">
-                  <Box
-                    bg={getBadgeColorForType(location.type)}
-                    w="32px"
-                    h="32px"
-                    borderRadius="full"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Text color="white" fontSize="lg">
-                      {LOCATION_TYPES.find((t) => t.value === location.type)
-                        ?.emoji || "📌"}
-                    </Text>
-                  </Box>
-                  <VStack spacing={0} align="start">
-                    <Text fontWeight="medium">{location.name}</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {location.address}
-                    </Text>
-                    {location.description && (
-                      <Text fontSize="sm" color="gray.600" fontStyle="italic">
-                        "{location.description}"
+                <Flex justifyContent="space-between" alignItems="center">
+                  <HStack spacing={3} flex="1">
+                    <Box
+                      bg={getColorForType(location.type)}
+                      w="36px"
+                      h="36px"
+                      borderRadius="full"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      color="white"
+                      fontSize="20px"
+                    >
+                      {getEmojiForType(location.type)}
+                    </Box>
+                    <Box flex="1">
+                      <HStack mb={1} spacing={2}>
+                        <Text fontWeight="bold">{location.name}</Text>
+                        <Badge
+                          colorScheme={
+                            LOCATION_TYPES.find(
+                              (t) => t.value === location.type
+                            )?.badgeColor || "gray"
+                          }
+                        >
+                          {getTypeLabel(location.type)}
+                        </Badge>
+                        {location.readOnly && (
+                          <Tooltip label="This location is automatically added from your competition history and cannot be removed">
+                            <Badge colorScheme="blue" variant="outline">
+                              <HStack spacing={1}>
+                                <FaLock size="0.6em" />
+                                <Text>Competition History</Text>
+                              </HStack>
+                            </Badge>
+                          </Tooltip>
+                        )}
+                      </HStack>
+                      <Text fontSize="sm" color="gray.600" noOfLines={1}>
+                        {location.address}
                       </Text>
-                    )}
-                  </VStack>
-                </HStack>
-                <HStack>
-                  <Badge
-                    colorScheme={
-                      LOCATION_TYPES.find((t) => t.value === location.type)
-                        ?.badgeColor || "blue"
-                    }
-                    variant="solid"
-                  >
-                    {getTypeLabel(location.type)}
-                  </Badge>
-                  <IconButton
-                    aria-label="Remove location"
-                    icon={<FaTrash />}
-                    size="sm"
-                    variant="ghost"
-                    colorScheme="red"
-                    onClick={() => removeLocation(location.id)}
-                  />
-                </HStack>
-              </HStack>
+                      {location.description && (
+                        <Text fontSize="sm" fontStyle="italic" mt={1}>
+                          "{location.description}"
+                        </Text>
+                      )}
+                    </Box>
+                  </HStack>
+                  {!location.readOnly && (
+                    <IconButton
+                      aria-label="Remove location"
+                      icon={<FaTrash />}
+                      size="sm"
+                      colorScheme="red"
+                      variant="ghost"
+                      onClick={() => removeLocation(location.id)}
+                    />
+                  )}
+                </Flex>
+              </Box>
             ))}
           </VStack>
         </Box>
