@@ -565,6 +565,7 @@ export interface TossieReceipt {
   fromUserId: string;
   fromUserName: string;
   fromUserPicture?: string;
+  customProfileImage?: any;
   fromSkaterId?: number;
   fromSkaterName?: string;
   created_at: string;

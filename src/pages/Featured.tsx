@@ -17,6 +17,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getFeaturedSkaters, FeaturedSkater } from "../api/client";
 import { trackEvent } from "../utils/analytics";
+import { ImageData, ProfileCustomization } from "../types/auth";
+import { getImageUrl, getThumbnailUrl } from "../utils/images";
 
 function Card({ children }: { children: React.ReactNode }) {
   const styles = useStyleConfig("Box", { variant: "card" });
@@ -60,67 +62,52 @@ export default function Featured() {
         </Box>
 
         <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={6}>
-          {featuredSkaters?.map((skater) => (
-            <Link
-              key={skater.id}
-              as={RouterLink}
-              to={`/skater/id/${skater.id}`}
-              _hover={{ textDecoration: "none" }}
-            >
-              <Card>
-                <VStack spacing={4} align="center">
-                  {skater.profileImage ? (
-                    <Image
-                      src={skater.profileImage}
-                      alt={skater.name}
-                      borderRadius="full"
-                      boxSize={{ base: "120px", md: "150px" }}
-                      objectFit="cover"
-                    />
-                  ) : (
-                    <Avatar
-                      size={{ base: "2xl", md: "2xl" }}
-                      name={skater.name}
-                    />
-                  )}
-                  <VStack spacing={1}>
-                    <Text
-                      fontWeight="medium"
-                      fontSize="lg"
-                      textAlign="center"
-                      noOfLines={1}
-                    >
-                      {skater.name}
-                    </Text>
-                    {skater.club && (
-                      <Text
-                        fontSize="sm"
-                        color="gray.600"
-                        textAlign="center"
-                        noOfLines={1}
-                      >
-                        {skater.club}
-                      </Text>
+          {featuredSkaters?.map((skater) => {
+            const imageUrl = getThumbnailUrl(
+              skater.customization?.profileImage ||
+                skater.profileImage ||
+                undefined,
+              "medium"
+            );
+            return (
+              <Link
+                key={skater.id}
+                as={RouterLink}
+                to={`/skater/id/${skater.id}`}
+                _hover={{ textDecoration: "none" }}
+              >
+                <Card>
+                  <VStack spacing={4} align="center">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={skater.name}
+                        borderRadius="full"
+                        boxSize={{ base: "120px", md: "150px" }}
+                        objectFit="cover"
+                        style={{ imageOrientation: "from-image" }}
+                      />
+                    ) : (
+                      <Avatar
+                        size={{ base: "2xl", md: "2xl" }}
+                        name={skater.name}
+                      />
                     )}
-                    {skater.customization?.bio && (
-                      <Text
-                        fontSize="sm"
-                        color="gray.600"
-                        textAlign="center"
-                        noOfLines={2}
-                        mt={2}
-                        maxW="100%"
-                        overflow="hidden"
-                        wordBreak="break-word"
-                      >
-                        {skater.customization.bio}
+                    <VStack spacing={0} align="center">
+                      <Text fontWeight="bold" textAlign="center">
+                        {skater.name}
                       </Text>
-                    )}
+                      {skater.club && (
+                        <Text fontSize="sm" color="gray.600" textAlign="center">
+                          {skater.club}
+                        </Text>
+                      )}
+                    </VStack>
                   </VStack>
-                </VStack>
-              </Card>
-            </Link>
-          ))}
+                </Card>
+              </Link>
+            );
+          })}
         </SimpleGrid>
       </VStack>
     </Container>

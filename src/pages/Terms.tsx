@@ -237,7 +237,7 @@ export default function Terms() {
           </Heading>
           <Text>
             For questions about these Terms of Service, please contact us
-            through the Report an Issue form at the bottom of the page.
+            through the Feedback form at the bottom of the page.
           </Text>
         </Box>
       </VStack>

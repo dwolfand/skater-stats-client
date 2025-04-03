@@ -41,9 +41,24 @@ import {
   FaUpload,
 } from "react-icons/fa";
 import { HexColorPicker } from "react-colorful";
-import { ProfileCustomization } from "../types/auth";
+import { ProfileCustomization, ImageData } from "../types/auth";
 import { handleImageUpload } from "../api/auth";
 import { api, changeSkaterClub } from "../api/client";
+import {
+  getImageUrl,
+  getThumbnailUrl,
+  flagRecentlyUploaded,
+} from "../utils/images";
+
+interface UploadingImageState {
+  type: "profile" | "cover" | "gallery";
+  index?: number;
+}
+
+interface SocialLink {
+  platform: string;
+  url: string;
+}
 
 interface Club {
   id: number;
@@ -67,15 +82,13 @@ const FONT_OPTIONS = [
 
 export const ProfileCustomizationSection: React.FC<
   ProfileCustomizationSectionProps
-> = ({ initialCustomization, onSave, clubHistory = [], currentClub }) => {
+> = ({ initialCustomization = {}, onSave, clubHistory = [], currentClub }) => {
   const [customization, setCustomization] = useState<ProfileCustomization>(
     initialCustomization || {}
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState<{
-    type: "profile" | "cover" | "gallery";
-    index?: number;
-  } | null>(null);
+  const [uploadingImage, setUploadingImage] =
+    useState<UploadingImageState | null>(null);
   const [selectedClubId, setSelectedClubId] = useState<string>("");
   const [changingClub, setChangingClub] = useState(false);
   const toast = useToast();
@@ -154,17 +167,40 @@ export const ProfileCustomizationSection: React.FC<
 
     setUploadingImage({ type, index });
     try {
-      const fileUrl = await handleImageUpload(file, type);
+      const { fileUrl, thumbnailUrls } = await handleImageUpload(file, type);
+
+      // Flag the image as recently uploaded so we use the original URL while thumbnails generate
+      flagRecentlyUploaded(fileUrl);
+
+      const imageData: ImageData = {
+        url: fileUrl,
+        thumbnails: thumbnailUrls,
+      };
 
       if (type === "gallery") {
+        // When updating gallery images, make a fresh copy of the array
+        const galleryImages = [...(customization.galleryImages || [])];
+
+        // If updating an existing image (edit mode)
+        if (
+          typeof index === "number" &&
+          index >= 0 &&
+          index < galleryImages.length
+        ) {
+          galleryImages[index] = imageData;
+        } else {
+          // Otherwise add a new image
+          galleryImages.push(imageData);
+        }
+
         setCustomization({
           ...customization,
-          galleryImages: [...(customization.galleryImages || []), fileUrl],
+          galleryImages,
         });
       } else {
         setCustomization({
           ...customization,
-          [type === "profile" ? "profileImage" : "coverImage"]: fileUrl,
+          [type === "profile" ? "profileImage" : "coverImage"]: imageData,
         });
       }
 
@@ -656,10 +692,14 @@ export const ProfileCustomizationSection: React.FC<
                   >
                     {customization.profileImage ? (
                       <Image
-                        src={customization.profileImage}
+                        src={getThumbnailUrl(
+                          customization.profileImage,
+                          "medium"
+                        )}
                         alt="Profile"
                         boxSize="150px"
                         objectFit="cover"
+                        style={{ imageOrientation: "from-image" }}
                       />
                     ) : (
                       <VStack
@@ -731,11 +771,15 @@ export const ProfileCustomizationSection: React.FC<
                   >
                     {customization.coverImage ? (
                       <Image
-                        src={customization.coverImage}
+                        src={getThumbnailUrl(
+                          customization.coverImage,
+                          "medium"
+                        )}
                         alt="Cover"
                         objectFit="cover"
                         w="100%"
                         h="100%"
+                        style={{ imageOrientation: "from-image" }}
                       />
                     ) : (
                       <VStack
@@ -783,11 +827,12 @@ export const ProfileCustomizationSection: React.FC<
                     {(customization.galleryImages || []).map((image, index) => (
                       <Box key={index} position="relative">
                         <Image
-                          src={image}
+                          src={getThumbnailUrl(image, "small")}
                           alt={`Gallery ${index + 1}`}
                           objectFit="cover"
                           aspectRatio={1}
                           borderRadius="md"
+                          style={{ imageOrientation: "from-image" }}
                         />
                         <IconButton
                           aria-label="Remove image"

@@ -58,7 +58,7 @@ export default function Layout({ children }: LayoutProps) {
                 _hover={{ textDecoration: "underline", cursor: "pointer" }}
                 fontSize={{ base: "sm", md: "md" }}
               >
-                🐛 Report an Issue
+                💡 Feedback
               </ChakraLink>
               <HStack spacing={4} display={{ base: "none", md: "flex" }}>
                 <ChakraLink

@@ -8,6 +8,7 @@ import {
   ProfileCustomization,
   AdminTossieReceipt,
 } from "../types/auth";
+import { flagRecentlyUploaded } from "../utils/images";
 
 export const googleLogin = async (idToken: string): Promise<AuthResponse> => {
   const { data } = await api.post<AuthResponse>("/auth/google", { idToken });
@@ -73,6 +74,10 @@ export const saveProfileCustomization = async (
 export interface ImageUploadResponse {
   uploadUrl: string;
   fileUrl: string;
+  thumbnailUrls?: {
+    small: string;
+    medium: string;
+  };
 }
 
 export const getImageUploadUrl = async (
@@ -106,15 +111,21 @@ export const uploadImageToS3 = async (
 export const handleImageUpload = async (
   file: File,
   imageType: "profile" | "cover" | "gallery"
-): Promise<string> => {
+): Promise<{
+  fileUrl: string;
+  thumbnailUrls?: { small: string; medium: string };
+}> => {
   // Get the pre-signed URL
-  const { uploadUrl, fileUrl } = await getImageUploadUrl(file, imageType);
+  const { uploadUrl, fileUrl, thumbnailUrls } = await getImageUploadUrl(
+    file,
+    imageType
+  );
 
   // Upload the file directly to S3
   await uploadImageToS3(file, uploadUrl);
 
-  // Return the final file URL
-  return fileUrl;
+  // Return the final file URL and thumbnail URLs
+  return { fileUrl, thumbnailUrls };
 };
 
 export const openTossie = async (tossieId: number): Promise<TossieReceipt> => {

@@ -183,7 +183,7 @@ export default function Privacy() {
           </Heading>
           <Text>
             If you have any questions about this Privacy Policy, please contact
-            us through the Report an Issue form at the bottom of the page.
+            us through the Feedback form at the bottom of the page.
           </Text>
         </Box>
       </VStack>

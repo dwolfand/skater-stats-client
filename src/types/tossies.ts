@@ -29,16 +29,16 @@ export const tossieTypeMap: Record<string, TossieTypeDefinition> = {
     rarity: 8,
     category: TOSSIE_CATEGORIES.INNER_DRIVE,
   },
-  "clean-skate-energy": {
+  "clean-skate-vibes": {
     emoji: "✨",
-    title: "Clean Skate Energy",
+    title: "Clean Skate Vibes",
     description: "Sending perfect program vibes.",
     rarity: 9,
     category: TOSSIE_CATEGORIES.INNER_DRIVE,
   },
   "main-character": {
     emoji: "👑",
-    title: "You're the Main Character",
+    title: "Main Character Energy",
     description: "This week's skate = your story arc.",
     rarity: 7,
     category: TOSSIE_CATEGORIES.INNER_DRIVE,

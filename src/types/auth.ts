@@ -23,6 +23,14 @@ export interface SocialLinks {
   youtube?: string;
 }
 
+export interface ImageData {
+  url: string;
+  thumbnails?: {
+    small: string;
+    medium: string;
+  };
+}
+
 export interface ProfileCustomization {
   // Theme & Layout
   accentColor?: string;
@@ -47,15 +55,18 @@ export interface ProfileCustomization {
   canBeFeatured?: boolean;
 
   // Media
-  profileImage?: string;
-  coverImage?: string;
-  galleryImages?: string[];
+  profileImage?: string | ImageData;
+  coverImage?: string | ImageData;
+  galleryImages?: (string | ImageData)[];
   featuredVideo?: string;
   profileSong?: {
     title?: string;
     artist?: string;
     url?: string;
   };
+
+  // Preferences
+  unsubscribeFromEmail?: boolean;
 }
 
 export interface UserProfile {

@@ -19,6 +19,7 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 import dayjs from "../utils/date";
 import { TossieReceipt } from "../api/client";
+import { getImageUrl, getThumbnailUrl } from "../utils/images";
 
 interface TossieModalProps {
   isOpen: boolean;
@@ -37,13 +38,15 @@ const TossieReceiptItem: React.FC<{
       ? `/competition/${receipt.eventYear}/${receipt.ijsId}/six-event/${receipt.results_url}`
       : `/competition/${receipt.eventYear}/${receipt.ijsId}/event/${receipt.results_url}`;
 
+  // Prefer customProfileImage over fromUserPicture
+  // Pass customProfileImage directly to getThumbnailUrl if it exists
+  const profileImage = receipt.customProfileImage
+    ? getThumbnailUrl(receipt.customProfileImage, "small")
+    : receipt.fromUserPicture;
+
   return (
     <HStack spacing={3} py={2} align="start">
-      <Avatar
-        size="sm"
-        src={receipt.fromUserPicture}
-        name={receipt.fromUserName}
-      />
+      <Avatar size="sm" src={profileImage} name={receipt.fromUserName} />
       <Box flex={1}>
         <HStack spacing={2} flexWrap="wrap">
           {receipt.fromSkaterId ? (

@@ -1,0 +1,4 @@
+/* Fix for image orientation based on EXIF data */
+img {
+  image-orientation: from-image;  /* This tells browsers to use the EXIF orientation data */
+} 

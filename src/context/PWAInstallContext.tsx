@@ -54,6 +54,12 @@ const browserSupportsPWA = (): boolean => {
   const webkit = !!ua.match(/WebKit/i);
   const iOSSafari = iOS && webkit && !ua.match(/CriOS/i) && !ua.match(/FxiOS/i);
 
+  // Check if it's Chrome on iOS - which doesn't properly support PWA installation
+  const isChromeOnIOS = iOS && !!ua.match(/CriOS/i);
+
+  // Don't show banner for Chrome on iOS since it can't properly install PWAs
+  if (isChromeOnIOS) return false;
+
   // iOS Safari supports "Add to Home Screen" but doesn't support beforeinstallprompt
   if (iOSSafari) return true;
 

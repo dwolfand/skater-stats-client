@@ -49,6 +49,21 @@ export function LoginModal({ isOpen, onClose, message }: LoginModalProps) {
     return "other";
   };
 
+  // Format message to preserve line breaks
+  const formattedMessage = message ? (
+    message
+      .split("\n")
+      .map((line, index) =>
+        line === "" ? (
+          <Box key={index} h="10px" />
+        ) : (
+          <Text key={index}>{line}</Text>
+        )
+      )
+  ) : (
+    <Text>Please sign in to continue</Text>
+  );
+
   useEffect(() => {
     if (isOpen) {
       const initializeGoogleSignIn = () => {
@@ -100,7 +115,7 @@ export function LoginModal({ isOpen, onClose, message }: LoginModalProps) {
         <ModalCloseButton />
         <ModalBody pb={6}>
           <VStack spacing={4} align="stretch">
-            <Text>{message || "Please sign in to continue"}</Text>
+            {formattedMessage}
             <Box id={buttonId} />
           </VStack>
         </ModalBody>

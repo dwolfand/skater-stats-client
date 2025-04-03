@@ -25,7 +25,6 @@ import dayjs, { DATE_FORMATS } from "../utils/date";
 import FavoriteButton from "../components/FavoriteButton";
 import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import { formatEventTime } from "../utils/timeFormat";
-import { useAdmin } from "../hooks/useAdmin";
 import { FiExternalLink } from "react-icons/fi";
 import { trackPageView } from "../utils/analytics";
 
@@ -67,7 +66,6 @@ function Card({ children }: { children: React.ReactNode }) {
 export default function Competition() {
   const { year, ijsId } = useParams<{ year: string; ijsId: string }>();
   const [searchQuery, setSearchQuery] = useState("");
-  const isAdmin = useAdmin();
 
   const {
     data: competition,
@@ -180,28 +178,26 @@ export default function Competition() {
                     .filter(Boolean)
                     .join(", ")}
                 </Text>
-                {isAdmin && (
-                  <Link
-                    href={`https://ijs.usfigureskating.org/leaderboard/${
-                      competition.type === "ijs_nonqual"
-                        ? "nonqual_results"
-                        : "results"
-                    }/${year}/${ijsId}/${
-                      competition.type === "ijs_nonqual"
-                        ? "index.html"
-                        : "index.asp"
-                    }`}
-                    isExternal
-                    color="gray.500"
-                    fontSize="sm"
-                    display="flex"
-                    alignItems="center"
-                    mt={1}
-                  >
-                    <Text>View on IJS*</Text>
-                    <Icon as={FiExternalLink} ml={1} />
-                  </Link>
-                )}
+                <Link
+                  href={`https://ijs.usfigureskating.org/leaderboard/${
+                    competition.type === "ijs_nonqual"
+                      ? "nonqual_results"
+                      : "results"
+                  }/${year}/${ijsId}/${
+                    competition.type === "ijs_nonqual"
+                      ? "index.html"
+                      : "index.asp"
+                  }`}
+                  isExternal
+                  color="gray.500"
+                  fontSize="sm"
+                  display="flex"
+                  alignItems="center"
+                  mt={1}
+                >
+                  <Text>View official results</Text>
+                  <Icon as={FiExternalLink} ml={1} />
+                </Link>
               </Box>
             </Box>
           </HStack>

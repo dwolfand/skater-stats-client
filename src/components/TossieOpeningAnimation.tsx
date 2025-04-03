@@ -1,12 +1,35 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Box, Image, usePrefersReducedMotion } from "@chakra-ui/react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import {
+  Box,
+  Image,
+  usePrefersReducedMotion,
+  VStack,
+  Text,
+  Button,
+  Flex,
+  Heading,
+} from "@chakra-ui/react";
 import { css, keyframes } from "@emotion/react";
 import { createPortal } from "react-dom";
+import dayjs from "../utils/date";
+import { getTossieInfo } from "../types/tossies";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
 interface TossieOpeningAnimationProps {
   isActive: boolean;
   tossieType: string | null;
   onAnimationComplete: () => void;
+  fromName?: string;
+  description?: string;
+  eventName?: string;
+  eventDate?: string;
 }
 
 // Define keyframes for the fly-in animation
@@ -37,12 +60,32 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
   isActive,
   tossieType,
   onAnimationComplete,
+  fromName,
+  description,
+  eventName,
+  eventDate,
 }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [showTossieBag, setShowTossieBag] = useState(false);
   const [showTossieResult, setShowTossieResult] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [activeConfetti, setActiveConfetti] = useState(true);
   const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  // For confetti
+  const { width, height } = useWindowSize();
+
+  // Calculate number of confetti pieces based on screen width
+  const numberOfConfettiPieces = useMemo(() => {
+    if (width < 480) return 150; // Mobile phones
+    if (width < 768) return 200; // Tablets
+    if (width < 1024) return 250; // Small laptops
+    return 300; // Larger screens
+  }, [width]);
+
+  // Get tossie info including name
+  const tossieInfo = tossieType ? getTossieInfo(tossieType) : null;
 
   // Clear all timeouts when component unmounts
   useEffect(() => {
@@ -52,12 +95,35 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
     };
   }, []);
 
+  // Handle confetti display and timing
+  useEffect(() => {
+    if (showTossieResult && !isExiting) {
+      setShowConfetti(true);
+      setActiveConfetti(true);
+
+      // Stop generating new confetti after 5 seconds
+      const confettiTimeout = setTimeout(() => {
+        setActiveConfetti(false);
+      }, 5000);
+
+      timeoutsRef.current.push(confettiTimeout);
+
+      return () => {
+        clearTimeout(confettiTimeout);
+      };
+    } else {
+      setShowConfetti(false);
+      setActiveConfetti(true);
+    }
+  }, [showTossieResult, isExiting]);
+
   // Handle animation lifecycle
   useEffect(() => {
     if (!isActive) {
       setShowTossieBag(false);
       setShowTossieResult(false);
       setIsExiting(false);
+      setShowConfetti(false);
       return;
     }
 
@@ -136,20 +202,50 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
       onClick={handleClick}
       cursor="pointer"
     >
+      {/* Confetti effect */}
+      {showConfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          recycle={activeConfetti}
+          run={true}
+          numberOfPieces={numberOfConfettiPieces}
+          gravity={0.03}
+          tweenDuration={10000}
+          colors={[
+            "#FFC700",
+            "#FF0000",
+            "#2E3191",
+            "#41BBC7",
+            "#9F24B4",
+            "#FF8F2B",
+          ]}
+          initialVelocityY={0.5}
+          confettiSource={{
+            x: 0,
+            y: 0,
+            w: width,
+            h: 0,
+          }}
+        />
+      )}
+
       <Box
         position="fixed"
         top="50%"
         left="50%"
         transform="translate(-50%, -50%)"
-        width="200px"
-        height="200px"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
         zIndex={10000}
       >
         {/* Tossie bag entrance */}
         {showTossieBag && (
           <Box
-            width="100%"
-            height="100%"
+            width="200px"
+            height="200px"
             css={css`
               animation: ${flyIn} 1s ease-out forwards;
               -webkit-animation: ${flyIn} 1s ease-out forwards;
@@ -167,36 +263,83 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
 
         {/* Tossie result */}
         {showTossieResult && tossieType && (
-          <Box
-            width="100%"
-            height="100%"
+          <Flex
+            direction="column"
+            alignItems="center"
             css={css`
               animation: ${isExiting ? exitAnim : fadeIn} 0.5s ease-out forwards;
               -webkit-animation: ${isExiting ? exitAnim : fadeIn} 0.5s ease-out
                 forwards;
             `}
           >
-            <Image
-              src={`/images/tossie-types/${tossieType}.png`}
-              alt="Tossie Type"
-              boxSize="100%"
-              objectFit="contain"
-              draggable={false}
-            />
             {!isExiting && (
-              <Box
-                position="absolute"
-                bottom="-40px"
-                left="0"
-                right="0"
+              <VStack
                 textAlign="center"
                 color="white"
-                fontSize="sm"
+                spacing={4}
+                width="350px"
+                bg="rgba(0,0,0,0.75)"
+                p={5}
+                borderRadius="20px"
+                boxShadow="0 4px 8px rgba(0,0,0,0.2)"
               >
-                Click to continue
-              </Box>
+                {/* Tossie image inside the box */}
+                <Box width="180px" height="180px" mt={2} mb={2}>
+                  <Image
+                    src={`/images/tossie-types/${tossieType}.png`}
+                    alt={tossieInfo?.title || "Tossie Type"}
+                    boxSize="100%"
+                    objectFit="contain"
+                    draggable={false}
+                  />
+                </Box>
+
+                {/* Tossie name as header */}
+                {tossieInfo?.title && (
+                  <Heading size="md" fontWeight="bold" color="white">
+                    {tossieInfo.title}
+                  </Heading>
+                )}
+
+                {/* Description with better readability */}
+                {description && (
+                  <Text fontSize="md" color="white" fontWeight="medium">
+                    {description}
+                  </Text>
+                )}
+
+                <Flex direction="column" alignItems="center" w="100%">
+                  {fromName && (
+                    <Text fontSize="sm" color="white">
+                      {fromName} gave you a tossie
+                    </Text>
+                  )}
+
+                  {eventName && (
+                    <Text fontSize="sm" color="gray.200">
+                      at {eventName}
+                    </Text>
+                  )}
+
+                  {eventDate && (
+                    <Text fontSize="xs" color="gray.300" mt={1}>
+                      {dayjs(eventDate).format("MMM D, YYYY h:mm A")}
+                    </Text>
+                  )}
+                </Flex>
+
+                <Button
+                  colorScheme="blue"
+                  size="md"
+                  onClick={handleClick}
+                  mt={2}
+                  width="120px"
+                >
+                  Continue
+                </Button>
+              </VStack>
             )}
-          </Box>
+          </Flex>
         )}
       </Box>
     </Box>,

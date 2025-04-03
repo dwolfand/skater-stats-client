@@ -19,7 +19,7 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
-import { Search2Icon, CloseIcon, Icon } from "@chakra-ui/icons";
+import { Search2Icon, CloseIcon, Icon, ArrowBackIcon } from "@chakra-ui/icons";
 import { FiUser } from "react-icons/fi";
 import FavoritesMenu from "./FavoritesMenu";
 import { useEffect, useState } from "react";
@@ -28,6 +28,8 @@ import { searchEvents } from "../api/client";
 import type { SearchResult } from "../api/client";
 import dayjs from "../utils/date";
 import { useAuth } from "../context/AuthContext";
+import HoverTooltip from "./shared/HoverTooltip";
+import { getImageUrl } from "../utils/images";
 
 const SearchInput = ({
   isMobile,
@@ -158,10 +160,19 @@ const SearchInput = ({
   );
 };
 
+// Function to check if app is running in standalone mode (PWA)
+const isPWAMode = (): boolean => {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as any).standalone === true
+  );
+};
+
 export default function Header() {
   const [isVisible, setIsVisible] = useState(true);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAuthenticated, user, profile } = useAuth();
   const {
     isOpen: isMobileSearchOpen,
@@ -170,6 +181,23 @@ export default function Header() {
   } = useDisclosure();
   const isMobile = useBreakpointValue({ base: true, md: false });
   const isHomePage = location.pathname === "/";
+  const [isPWA, setIsPWA] = useState(false);
+
+  // Check if app is running as PWA on mount
+  useEffect(() => {
+    setIsPWA(isPWAMode());
+    // Add event listener for display mode changes
+    const handleDisplayModeChange = (e: MediaQueryListEvent) => {
+      setIsPWA(e.matches || (window.navigator as any).standalone === true);
+    };
+
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+    mediaQuery.addEventListener("change", handleDisplayModeChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleDisplayModeChange);
+    };
+  }, []);
 
   // Close mobile search when screen size changes to desktop
   useEffect(() => {
@@ -191,6 +219,10 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollPos]);
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <Box
       as="header"
@@ -210,11 +242,36 @@ export default function Header() {
     >
       <VStack spacing={2}>
         <HStack justify="space-between" align="center" w="100%">
-          <Link as={RouterLink} to="/" _hover={{ textDecoration: "none" }}>
-            <Heading size="md" color="blue.600">
-              Skater Stats
-            </Heading>
-          </Link>
+          {isPWA && !isHomePage ? (
+            <HStack spacing={2}>
+              <IconButton
+                aria-label="Go back"
+                icon={<ArrowBackIcon />}
+                size="sm"
+                variant="ghost"
+                onClick={handleBack}
+              />
+              <Link as={RouterLink} to="/" _hover={{ textDecoration: "none" }}>
+                <Heading
+                  size="md"
+                  bgGradient="linear(to-r, blue.500, purple.500)"
+                  bgClip="text"
+                >
+                  SkaterStats
+                </Heading>
+              </Link>
+            </HStack>
+          ) : (
+            <Link as={RouterLink} to="/" _hover={{ textDecoration: "none" }}>
+              <Heading
+                size="md"
+                bgGradient="linear(to-r, blue.500, purple.500)"
+                bgClip="text"
+              >
+                SkaterStats
+              </Heading>
+            </Link>
+          )}
 
           {/* Desktop Search */}
           {!isHomePage && (
@@ -237,28 +294,27 @@ export default function Header() {
             )}
             <FavoritesMenu />
             {isAuthenticated ? (
-              <Tooltip label="Your Profile">
-                <Link as={RouterLink} to="/profile">
-                  <Avatar
-                    size="sm"
-                    name={user?.name}
-                    src={profile?.customization?.profileImage || user?.picture}
-                    cursor="pointer"
-                  />
-                </Link>
-              </Tooltip>
+              <Link as={RouterLink} to="/profile">
+                <Avatar
+                  size="sm"
+                  name={user?.name}
+                  src={
+                    getImageUrl(profile?.customization?.profileImage) ||
+                    user?.picture
+                  }
+                  cursor="pointer"
+                />
+              </Link>
             ) : (
-              <Tooltip label="Sign In">
-                <Link as={RouterLink} to="/profile">
-                  <IconButton
-                    aria-label="Profile"
-                    icon={<Icon as={FiUser} />}
-                    size="sm"
-                    variant="ghost"
-                    color="gray.500"
-                  />
-                </Link>
-              </Tooltip>
+              <Link as={RouterLink} to="/profile">
+                <IconButton
+                  aria-label="Profile"
+                  icon={<Icon as={FiUser} />}
+                  size="sm"
+                  variant="ghost"
+                  color="gray.500"
+                />
+              </Link>
             )}
           </HStack>
         </HStack>

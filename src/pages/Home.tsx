@@ -55,6 +55,8 @@ import FavoriteButton from "../components/FavoriteButton";
 import { formatNumber } from "../utils/math";
 import { CompetitionCard } from "../components/CompetitionCard";
 import { trackPageView } from "../utils/analytics";
+import { ImageData, ProfileCustomization } from "../types/auth";
+import { getImageUrl, getThumbnailUrl } from "../utils/images";
 
 type EventFilter = "all" | "upcoming" | "recent";
 
@@ -331,58 +333,53 @@ export default function Home() {
                     WebkitOverflowScrolling: "touch",
                   }}
                 >
-                  {overallStats.featuredSkaters.map((skater) => (
-                    <Box
-                      key={skater.id}
-                      minW={{ base: "150px", md: "200px" }}
-                      flexShrink={0}
-                    >
-                      <Link
-                        as={RouterLink}
-                        to={`/skater/id/${skater.id}`}
-                        _hover={{ textDecoration: "none" }}
+                  {overallStats.featuredSkaters.map((skater) => {
+                    const imageUrl = getThumbnailUrl(
+                      skater.customization?.profileImage ||
+                        skater.profileImage ||
+                        undefined,
+                      "medium"
+                    );
+                    return (
+                      <Box
+                        key={skater.id}
+                        minW={{ base: "150px", md: "200px" }}
+                        flexShrink={0}
                       >
-                        <Card>
-                          <VStack spacing={3} align="center">
-                            {skater.profileImage ? (
-                              <Image
-                                src={skater.profileImage}
-                                alt={skater.name}
-                                borderRadius="full"
-                                boxSize={{ base: "100px", md: "120px" }}
-                                objectFit="cover"
-                              />
-                            ) : (
-                              <Avatar
-                                size={{ base: "xl", md: "2xl" }}
-                                name={skater.name}
-                              />
-                            )}
-                            <VStack spacing={1}>
+                        <Link
+                          as={RouterLink}
+                          to={`/skater/id/${skater.id}`}
+                          _hover={{ textDecoration: "none" }}
+                        >
+                          <Card>
+                            <VStack spacing={3} align="center">
+                              {imageUrl ? (
+                                <Image
+                                  src={imageUrl}
+                                  borderRadius="full"
+                                  boxSize="100px"
+                                  objectFit="cover"
+                                  style={{ imageOrientation: "from-image" }}
+                                />
+                              ) : (
+                                <Avatar
+                                  size={{ base: "xl", md: "2xl" }}
+                                  name={skater.name}
+                                />
+                              )}
                               <Text
                                 fontWeight="medium"
-                                fontSize={{ base: "sm", md: "md" }}
                                 textAlign="center"
                                 noOfLines={1}
                               >
                                 {skater.name}
                               </Text>
-                              {skater.club && (
-                                <Text
-                                  fontSize={{ base: "xs", md: "sm" }}
-                                  color="gray.600"
-                                  textAlign="center"
-                                  noOfLines={1}
-                                >
-                                  {skater.club}
-                                </Text>
-                              )}
                             </VStack>
-                          </VStack>
-                        </Card>
-                      </Link>
-                    </Box>
-                  ))}
+                          </Card>
+                        </Link>
+                      </Box>
+                    );
+                  })}
                 </Box>
               </Box>
             </Box>

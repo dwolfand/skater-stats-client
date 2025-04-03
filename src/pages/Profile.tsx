@@ -35,13 +35,14 @@ import {
 import { TossieReceipt } from "../api/client";
 import { LoginModalContext } from "../components/LoginModal";
 import { SkaterLinkModal } from "../components/SkaterLinkModal";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useFeedbackModal } from "../components/FeedbackModal";
 import { AdminInfo } from "../components/AdminInfo";
 import { ProfileCustomizationSection } from "../components/ProfileCustomizationSection";
 import { TossieNotification } from "../components/TossieNotification";
 import { TossieBasket } from "../components/TossieBasket";
 import { FaSkating } from "react-icons/fa";
+import { getImageUrl } from "../utils/images";
 
 const needSupportPrompt = `Need to combine profiles (e.g., maiden name or misspellings)? `;
 
@@ -245,11 +246,12 @@ export const Profile: React.FC = () => {
             <VStack spacing={4}>
               {profile?.customization?.profileImage ? (
                 <Image
-                  src={profile.customization.profileImage}
+                  src={getImageUrl(profile.customization.profileImage)}
                   alt={user?.name}
                   borderRadius="full"
                   boxSize="100px"
                   objectFit="cover"
+                  style={{ imageOrientation: "from-image" }}
                 />
               ) : user?.picture ? (
                 <Image
@@ -258,6 +260,7 @@ export const Profile: React.FC = () => {
                   borderRadius="full"
                   boxSize="100px"
                   objectFit="cover"
+                  style={{ imageOrientation: "from-image" }}
                 />
               ) : (
                 <Avatar size="xl" name={user?.name} />
@@ -396,6 +399,85 @@ export const Profile: React.FC = () => {
             <AdminInfo />
           </Card>
         )}
+
+        <Card>
+          <VStack spacing={4} align="stretch">
+            <Heading size="md" mb={2}>
+              Email Preferences
+            </Heading>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Text>Unsubscribe from email notifications</Text>
+              <Box
+                as="label"
+                display="inline-flex"
+                alignItems="center"
+                cursor="pointer"
+              >
+                <input
+                  type="checkbox"
+                  defaultChecked={
+                    profile?.customization?.unsubscribeFromEmail === true
+                  }
+                  onChange={async (e) => {
+                    try {
+                      await saveProfileCustomization({
+                        ...profile?.customization,
+                        unsubscribeFromEmail: e.target.checked,
+                      });
+                      await refreshProfile();
+                    } catch (error) {
+                      console.error(
+                        "Failed to update email preferences",
+                        error
+                      );
+                    }
+                  }}
+                  style={{
+                    position: "absolute",
+                    opacity: 0,
+                    width: 0,
+                    height: 0,
+                  }}
+                />
+                <Box
+                  width="40px"
+                  height="20px"
+                  bg={
+                    profile?.customization?.unsubscribeFromEmail === true
+                      ? "blue.500"
+                      : "gray.300"
+                  }
+                  borderRadius="full"
+                  position="relative"
+                  transition="background-color 0.2s"
+                >
+                  <Box
+                    position="absolute"
+                    top="2px"
+                    left={
+                      profile?.customization?.unsubscribeFromEmail === true
+                        ? "22px"
+                        : "2px"
+                    }
+                    width="16px"
+                    height="16px"
+                    bg="white"
+                    borderRadius="full"
+                    transition="left 0.2s"
+                  />
+                </Box>
+              </Box>
+            </Box>
+            <Text fontSize="sm" color="gray.500">
+              Opt out of feature announcements and event notification emails.
+              You'll still receive important account-related emails.
+            </Text>
+          </VStack>
+        </Card>
 
         <Box display="flex" justifyContent="center">
           <Button
