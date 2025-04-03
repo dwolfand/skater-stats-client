@@ -1,7 +1,15 @@
 /// <reference types="@types/google.maps" />
 
 interface Window {
-  google: typeof google;
+  google: typeof google & {
+    accounts?: {
+      id: {
+        initialize: (config: any) => void;
+        renderButton: (element: HTMLElement, config: any) => void;
+        prompt: () => void;
+      };
+    };
+  };
 }
 
 declare module "@googlemaps/react-wrapper" {
