@@ -367,15 +367,13 @@ export const Profile: React.FC = () => {
         )}
 
         {profile?.status === "approved" && (
-          <Card>
-            <ProfileCustomizationSection
-              initialCustomization={profile.customization}
-              onSave={handleSaveCustomization}
-              clubHistory={profile.clubHistory}
-              currentClub={profile.currentClub}
-              competitionLocations={profile.competitionLocations}
-            />
-          </Card>
+          <ProfileCustomizationSection
+            initialCustomization={profile.customization}
+            onSave={handleSaveCustomization}
+            clubHistory={profile.clubHistory}
+            currentClub={profile.currentClub}
+            competitionLocations={profile.competitionLocations}
+          />
         )}
 
         {/* Tossie Basket - replace the old Received Tossies section */}

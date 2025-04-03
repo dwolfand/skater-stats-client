@@ -239,7 +239,7 @@ export const ProfileCustomizationSection: React.FC<
   };
 
   return (
-    <Card p={{ base: 3, md: 6 }}>
+    <Card p={{ base: 3, md: 6 }} borderWidth="0">
       <VStack spacing={6} align="stretch">
         <Accordion allowMultiple>
           {/* Theme Section */}
