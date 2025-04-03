@@ -456,12 +456,7 @@ const SkaterMapDisplay: React.FC<SkaterMapDisplayProps> = ({
   return (
     <Card p={6} mb={6} bg="white" fontFamily={themeColors.font} borderWidth="0">
       <VStack spacing={4} align="stretch">
-        <Heading
-          size="sm"
-          mb={2}
-          color={themeColors.accent || undefined}
-          fontFamily={themeColors.font || undefined}
-        >
+        <Heading size="sm" mb={2} fontFamily={themeColors.font || undefined}>
           Skating Map
         </Heading>
 
