@@ -57,8 +57,6 @@ import {
   AddIcon,
 } from "@chakra-ui/icons";
 import { FiFilter } from "react-icons/fi";
-import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
 import JudgeCard from "../components/JudgeCard";
 import SixJudgeCard from "../components/SixJudgeCard";
 import { useEffect, useState, useMemo } from "react";
@@ -921,328 +919,356 @@ export default function Skater() {
           </Box>
 
           {/* Customization */}
-          {stats.customization && (
-            <Box>
-              <HStack mb={4} onClick={() => onToggle()} cursor="pointer">
-                <Heading
-                  size="md"
-                  color={themeColors.accent}
-                  fontFamily={themeColors.font}
-                >
-                  Skater Information
-                </Heading>
-                <IconButton
-                  aria-label="Toggle skater information"
-                  icon={
-                    isOpen ? (
-                      <ChevronUpIcon
-                        boxSize={6}
-                        color={themeColors.accent || undefined}
-                      />
-                    ) : (
-                      <ChevronDownIcon
-                        boxSize={6}
-                        color={themeColors.accent || undefined}
-                      />
-                    )
-                  }
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggle();
-                  }}
-                />
-              </HStack>
+          {stats.customization &&
+            (() => {
+              // Check if there's any actual content to display
+              const hasContent = !!(
+                stats.customization.coverImage ||
+                stats.customization.bio ||
+                stats.customization.favoriteQuote ||
+                (tossies && tossies.filter((t) => t.is_opened).length > 0) ||
+                stats.customization.coach ||
+                stats.customization.homeRink ||
+                stats.customization.goals ||
+                (stats.customization.achievements &&
+                  stats.customization.achievements.length > 0) ||
+                (stats.customization.galleryImages &&
+                  stats.customization.galleryImages.length > 0) ||
+                stats.customization.featuredVideo ||
+                (stats.customization.socialLinks &&
+                  Object.values(stats.customization.socialLinks).some(
+                    Boolean
+                  )) ||
+                (stats.customization.profileSong &&
+                  stats.customization.profileSong.title)
+              );
 
-              <Collapse in={isOpen} animateOpacity>
+              // Only render this section if there's actual content
+              return hasContent ? (
                 <Box>
-                  {/* Cover Image */}
-                  {stats.customization.coverImage && (
-                    <Box
-                      h="200px"
-                      mb={6}
-                      bgImage={`url(${stats.customization.coverImage})`}
-                      bgSize="cover"
-                      bgPosition="center"
-                      borderRadius="lg"
+                  <HStack mb={4} onClick={() => onToggle()} cursor="pointer">
+                    <Heading
+                      size="md"
+                      color={themeColors.accent}
+                      fontFamily={themeColors.font}
+                    >
+                      Skater Information
+                    </Heading>
+                    <IconButton
+                      aria-label="Toggle skater information"
+                      icon={
+                        isOpen ? (
+                          <ChevronUpIcon
+                            boxSize={6}
+                            color={themeColors.accent || undefined}
+                          />
+                        ) : (
+                          <ChevronDownIcon
+                            boxSize={6}
+                            color={themeColors.accent || undefined}
+                          />
+                        )
+                      }
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggle();
+                      }}
                     />
-                  )}
+                  </HStack>
 
-                  {/* Bio and Quote */}
-                  {(stats.customization?.bio ||
-                    stats.customization?.favoriteQuote) && (
-                    <Card
-                      p={6}
-                      mb={6}
-                      bg="white"
-                      fontFamily={themeColors.font}
-                      borderWidth="0"
-                    >
-                      <VStack spacing={4} align="stretch">
-                        {stats.customization?.bio && (
-                          <Box>
-                            <Heading
-                              size="sm"
-                              mb={2}
-                              fontFamily={themeColors.font}
-                            >
-                              About Me
-                            </Heading>
-                            <Text whiteSpace="pre-wrap">
-                              {stats.customization.bio}
-                            </Text>
-                          </Box>
-                        )}
-
-                        {stats.customization?.favoriteQuote && (
-                          <Box>
-                            <Text
-                              fontSize="lg"
-                              fontStyle="italic"
-                              fontFamily={themeColors.font}
-                            >
-                              "{stats.customization.favoriteQuote}"
-                            </Text>
-                          </Box>
-                        )}
-                      </VStack>
-                    </Card>
-                  )}
-
-                  {/* Tossie Collection - only show if there are tossies and not loading */}
-                  {!isTossiesLoading &&
-                    tossies &&
-                    tossies.filter((t) => t.is_opened).length > 0 && (
-                      <SkaterTossieDisplay
-                        tossies={tossies}
-                        isLoading={false}
-                        themeColors={themeColors}
-                      />
-                    )}
-
-                  {/* Skating Info */}
-                  {(stats.customization?.coach ||
-                    stats.customization?.homeRink ||
-                    stats.customization?.goals) && (
-                    <Card p={6} mb={6} bg="white" borderWidth="0">
-                      <VStack spacing={4} align="stretch">
-                        {stats.customization?.coach && (
-                          <Box>
-                            <Heading size="sm" mb={2}>
-                              Coach
-                            </Heading>
-                            <Text>{stats.customization.coach}</Text>
-                          </Box>
-                        )}
-
-                        {stats.customization?.homeRink && (
-                          <Box>
-                            <Heading size="sm" mb={2}>
-                              Home Rink
-                            </Heading>
-                            <Text>{stats.customization.homeRink}</Text>
-                          </Box>
-                        )}
-
-                        {stats.customization?.goals && (
-                          <Box>
-                            <Heading size="sm" mb={2}>
-                              Goals
-                            </Heading>
-                            <Text>{stats.customization.goals}</Text>
-                          </Box>
-                        )}
-                      </VStack>
-                    </Card>
-                  )}
-
-                  {/* Achievements */}
-                  {stats.customization?.achievements &&
-                    stats.customization.achievements.length > 0 && (
-                      <Card
-                        p={6}
-                        mb={6}
-                        bg="white"
-                        fontFamily={themeColors.font}
-                        borderWidth="0"
-                      >
-                        <Heading size="sm" mb={4}>
-                          Achievements
-                        </Heading>
-                        <VStack spacing={2} align="stretch">
-                          {stats.customization.achievements.map(
-                            (achievement, index) => (
-                              <Text key={index}>{achievement}</Text>
-                            )
-                          )}
-                        </VStack>
-                      </Card>
-                    )}
-
-                  {/* Gallery */}
-                  {stats.customization.galleryImages &&
-                    stats.customization.galleryImages.length > 0 && (
-                      <Card
-                        p={6}
-                        mb={6}
-                        bg="white"
-                        fontFamily={themeColors.font}
-                        borderWidth="0"
-                      >
-                        <Heading size="sm" mb={4}>
-                          Gallery
-                        </Heading>
-                        <SimpleGrid
-                          columns={{ base: 2, md: 3, lg: 4 }}
-                          spacing={4}
-                        >
-                          {stats.customization.galleryImages.map(
-                            (image, index) => {
-                              const imageUrl = getImageUrl(image);
-                              return (
-                                <Box
-                                  key={index}
-                                  as="button"
-                                  onClick={() =>
-                                    imageUrl && setSelectedImage(imageUrl)
-                                  }
-                                  cursor="pointer"
-                                  transition="transform 0.2s"
-                                  _hover={{ transform: "scale(1.02)" }}
-                                >
-                                  <Image
-                                    src={getThumbnailUrl(image, "small")}
-                                    alt={`Gallery ${index + 1}`}
-                                    borderRadius="md"
-                                    objectFit="cover"
-                                    aspectRatio={1}
-                                  />
-                                </Box>
-                              );
-                            }
-                          )}
-                        </SimpleGrid>
-                      </Card>
-                    )}
-
-                  {/* Featured Video */}
-                  {stats.customization.featuredVideo && (
-                    <Card
-                      p={6}
-                      mb={6}
-                      bg="white"
-                      fontFamily={themeColors.font}
-                      borderWidth="0"
-                    >
-                      <Heading size="sm" mb={4}>
-                        Featured Video
-                      </Heading>
-                      <AspectRatio ratio={16 / 9}>
-                        <iframe
-                          src={getEmbedUrl(stats.customization.featuredVideo)}
-                          title="Featured Video"
-                          allowFullScreen
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          style={{ border: 0 }}
+                  <Collapse in={isOpen} animateOpacity>
+                    <Box>
+                      {/* Cover Image */}
+                      {stats.customization.coverImage && (
+                        <Box
+                          h="200px"
+                          mb={6}
+                          bgImage={`url(${stats.customization.coverImage})`}
+                          bgSize="cover"
+                          bgPosition="center"
+                          borderRadius="lg"
                         />
-                      </AspectRatio>
-                    </Card>
-                  )}
+                      )}
 
-                  {/* Social Links */}
-                  {stats.customization.socialLinks &&
-                    Object.values(stats.customization.socialLinks).some(
-                      Boolean
-                    ) && (
-                      <Card
-                        p={6}
-                        mb={6}
-                        bg="white"
-                        fontFamily={themeColors.font}
-                        borderWidth="0"
-                      >
-                        <Heading size="sm" mb={4}>
-                          Connect With Me
-                        </Heading>
-                        <HStack spacing={4}>
-                          {stats.customization.socialLinks.instagram && (
-                            <Link
-                              href={`https://instagram.com/${stats.customization.socialLinks.instagram}`}
-                              isExternal
-                            >
-                              <Icon as={FaInstagram} boxSize={6} />
-                            </Link>
-                          )}
-                          {stats.customization.socialLinks.twitter && (
-                            <Link
-                              href={`https://twitter.com/${stats.customization.socialLinks.twitter}`}
-                              isExternal
-                            >
-                              <Icon as={FaTwitter} boxSize={6} />
-                            </Link>
-                          )}
-                          {stats.customization.socialLinks.tiktok && (
-                            <Link
-                              href={`https://tiktok.com/@${stats.customization.socialLinks.tiktok}`}
-                              isExternal
-                            >
-                              <Icon as={FaTiktok} boxSize={6} />
-                            </Link>
-                          )}
-                          {stats.customization.socialLinks.youtube && (
-                            <Link
-                              href={stats.customization.socialLinks.youtube}
-                              isExternal
-                            >
-                              <Icon as={FaYoutube} boxSize={6} />
-                            </Link>
-                          )}
-                        </HStack>
-                      </Card>
-                    )}
+                      {/* Bio and Quote */}
+                      {(stats.customization?.bio ||
+                        stats.customization?.favoriteQuote) && (
+                        <Card
+                          p={6}
+                          mb={6}
+                          bg="white"
+                          fontFamily={themeColors.font}
+                          borderWidth="0"
+                        >
+                          <VStack spacing={4} align="stretch">
+                            {stats.customization?.bio && (
+                              <Box>
+                                <Heading
+                                  size="sm"
+                                  mb={2}
+                                  fontFamily={themeColors.font}
+                                >
+                                  About Me
+                                </Heading>
+                                <Text whiteSpace="pre-wrap">
+                                  {stats.customization.bio}
+                                </Text>
+                              </Box>
+                            )}
 
-                  {/* Profile Song */}
-                  {stats.customization?.profileSong?.title && (
-                    <Card
-                      p={6}
-                      mb={0}
-                      bg="white"
-                      fontFamily={themeColors.font}
-                      borderWidth="0"
-                    >
-                      <Heading size="sm" mb={4}>
-                        My Song
-                      </Heading>
-                      <HStack spacing={4}>
-                        <Icon as={FaMusic} boxSize={6} />
-                        <VStack align="start" spacing={0}>
-                          <Text fontWeight="medium">
-                            {stats.customization.profileSong.title}
-                          </Text>
-                          <Text color="gray.600">
-                            {stats.customization.profileSong.artist}
-                          </Text>
-                        </VStack>
-                        {stats.customization?.profileSong?.url && (
-                          <IconButton
-                            aria-label="Play song"
-                            icon={<FaPlay />}
-                            onClick={() =>
-                              window.open(
-                                stats.customization?.profileSong?.url || "",
-                                "_blank"
-                              )
-                            }
-                            ml="auto"
+                            {stats.customization?.favoriteQuote && (
+                              <Box>
+                                <Text
+                                  fontSize="lg"
+                                  fontStyle="italic"
+                                  fontFamily={themeColors.font}
+                                >
+                                  "{stats.customization.favoriteQuote}"
+                                </Text>
+                              </Box>
+                            )}
+                          </VStack>
+                        </Card>
+                      )}
+
+                      {/* Tossie Collection - only show if there are tossies and not loading */}
+                      {!isTossiesLoading &&
+                        tossies &&
+                        tossies.filter((t) => t.is_opened).length > 0 && (
+                          <SkaterTossieDisplay
+                            tossies={tossies}
+                            isLoading={false}
+                            themeColors={themeColors}
                           />
                         )}
-                      </HStack>
-                    </Card>
-                  )}
+
+                      {/* Skating Info */}
+                      {(stats.customization?.coach ||
+                        stats.customization?.homeRink ||
+                        stats.customization?.goals) && (
+                        <Card p={6} mb={6} bg="white" borderWidth="0">
+                          <VStack spacing={4} align="stretch">
+                            {stats.customization?.coach && (
+                              <Box>
+                                <Heading size="sm" mb={2}>
+                                  Coach
+                                </Heading>
+                                <Text>{stats.customization.coach}</Text>
+                              </Box>
+                            )}
+
+                            {stats.customization?.homeRink && (
+                              <Box>
+                                <Heading size="sm" mb={2}>
+                                  Home Rink
+                                </Heading>
+                                <Text>{stats.customization.homeRink}</Text>
+                              </Box>
+                            )}
+
+                            {stats.customization?.goals && (
+                              <Box>
+                                <Heading size="sm" mb={2}>
+                                  Goals
+                                </Heading>
+                                <Text>{stats.customization.goals}</Text>
+                              </Box>
+                            )}
+                          </VStack>
+                        </Card>
+                      )}
+
+                      {/* Achievements */}
+                      {stats.customization?.achievements &&
+                        stats.customization.achievements.length > 0 && (
+                          <Card
+                            p={6}
+                            mb={6}
+                            bg="white"
+                            fontFamily={themeColors.font}
+                            borderWidth="0"
+                          >
+                            <Heading size="sm" mb={4}>
+                              Achievements
+                            </Heading>
+                            <VStack spacing={2} align="stretch">
+                              {stats.customization.achievements.map(
+                                (achievement, index) => (
+                                  <Text key={index}>{achievement}</Text>
+                                )
+                              )}
+                            </VStack>
+                          </Card>
+                        )}
+
+                      {/* Gallery */}
+                      {stats.customization.galleryImages &&
+                        stats.customization.galleryImages.length > 0 && (
+                          <Card
+                            p={6}
+                            mb={6}
+                            bg="white"
+                            fontFamily={themeColors.font}
+                            borderWidth="0"
+                          >
+                            <Heading size="sm" mb={4}>
+                              Gallery
+                            </Heading>
+                            <SimpleGrid
+                              columns={{ base: 2, md: 3, lg: 4 }}
+                              spacing={4}
+                            >
+                              {stats.customization.galleryImages.map(
+                                (image, index) => {
+                                  const imageUrl = getImageUrl(image);
+                                  return (
+                                    <Box
+                                      key={index}
+                                      as="button"
+                                      onClick={() =>
+                                        imageUrl && setSelectedImage(imageUrl)
+                                      }
+                                      cursor="pointer"
+                                      transition="transform 0.2s"
+                                      _hover={{ transform: "scale(1.02)" }}
+                                    >
+                                      <Image
+                                        src={getThumbnailUrl(image, "small")}
+                                        alt={`Gallery ${index + 1}`}
+                                        borderRadius="md"
+                                        objectFit="cover"
+                                        aspectRatio={1}
+                                      />
+                                    </Box>
+                                  );
+                                }
+                              )}
+                            </SimpleGrid>
+                          </Card>
+                        )}
+
+                      {/* Featured Video */}
+                      {stats.customization.featuredVideo && (
+                        <Card
+                          p={6}
+                          mb={6}
+                          bg="white"
+                          fontFamily={themeColors.font}
+                          borderWidth="0"
+                        >
+                          <Heading size="sm" mb={4}>
+                            Featured Video
+                          </Heading>
+                          <AspectRatio ratio={16 / 9}>
+                            <iframe
+                              src={getEmbedUrl(
+                                stats.customization.featuredVideo
+                              )}
+                              title="Featured Video"
+                              allowFullScreen
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              style={{ border: 0 }}
+                            />
+                          </AspectRatio>
+                        </Card>
+                      )}
+
+                      {/* Social Links */}
+                      {stats.customization.socialLinks &&
+                        Object.values(stats.customization.socialLinks).some(
+                          Boolean
+                        ) && (
+                          <Card
+                            p={6}
+                            mb={6}
+                            bg="white"
+                            fontFamily={themeColors.font}
+                            borderWidth="0"
+                          >
+                            <Heading size="sm" mb={4}>
+                              Connect With Me
+                            </Heading>
+                            <HStack spacing={4}>
+                              {stats.customization.socialLinks.instagram && (
+                                <Link
+                                  href={`https://instagram.com/${stats.customization.socialLinks.instagram}`}
+                                  isExternal
+                                >
+                                  <Icon as={FaInstagram} boxSize={6} />
+                                </Link>
+                              )}
+                              {stats.customization.socialLinks.twitter && (
+                                <Link
+                                  href={`https://twitter.com/${stats.customization.socialLinks.twitter}`}
+                                  isExternal
+                                >
+                                  <Icon as={FaTwitter} boxSize={6} />
+                                </Link>
+                              )}
+                              {stats.customization.socialLinks.tiktok && (
+                                <Link
+                                  href={`https://tiktok.com/@${stats.customization.socialLinks.tiktok}`}
+                                  isExternal
+                                >
+                                  <Icon as={FaTiktok} boxSize={6} />
+                                </Link>
+                              )}
+                              {stats.customization.socialLinks.youtube && (
+                                <Link
+                                  href={stats.customization.socialLinks.youtube}
+                                  isExternal
+                                >
+                                  <Icon as={FaYoutube} boxSize={6} />
+                                </Link>
+                              )}
+                            </HStack>
+                          </Card>
+                        )}
+
+                      {/* Profile Song */}
+                      {stats.customization?.profileSong?.title && (
+                        <Card
+                          p={6}
+                          mb={0}
+                          bg="white"
+                          fontFamily={themeColors.font}
+                          borderWidth="0"
+                        >
+                          <Heading size="sm" mb={4}>
+                            My Song
+                          </Heading>
+                          <HStack spacing={4}>
+                            <Icon as={FaMusic} boxSize={6} />
+                            <VStack align="start" spacing={0}>
+                              <Text fontWeight="medium">
+                                {stats.customization.profileSong.title}
+                              </Text>
+                              <Text color="gray.600">
+                                {stats.customization.profileSong.artist}
+                              </Text>
+                            </VStack>
+                            {stats.customization?.profileSong?.url && (
+                              <IconButton
+                                aria-label="Play song"
+                                icon={<FaPlay />}
+                                onClick={() =>
+                                  window.open(
+                                    stats.customization?.profileSong?.url || "",
+                                    "_blank"
+                                  )
+                                }
+                                ml="auto"
+                              />
+                            )}
+                          </HStack>
+                        </Card>
+                      )}
+                    </Box>
+                  </Collapse>
                 </Box>
-              </Collapse>
-            </Box>
-          )}
+              ) : null;
+            })()}
 
           {/* Score History Header */}
           <Heading

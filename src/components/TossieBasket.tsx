@@ -223,6 +223,14 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
   const [currentTossieType, setCurrentTossieType] = useState<string | null>(
     null
   );
+  const [currentTossieDescription, setCurrentTossieDescription] = useState<
+    string | null
+  >(null);
+  const [currentTossieSender, setCurrentTossieSender] = useState<string | null>(
+    null
+  );
+  const [currentEventName, setCurrentEventName] = useState<string | null>(null);
+  const [currentEventDate, setCurrentEventDate] = useState<string | null>(null);
   const [selectedTossie, setSelectedTossie] = useState<{
     type: string;
     count: number;
@@ -253,6 +261,18 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
       // Save the tossie type for animation
       const tossieType = data.tossie_type || "unknown";
       setCurrentTossieType(tossieType);
+
+      // Get the tossie description
+      const tossieInfo = getTossieInfo(tossieType);
+      setCurrentTossieDescription(tossieInfo.description);
+
+      // Get the sender name
+      const sender = data.fromUserName || data.fromSkaterName || "Anonymous";
+      setCurrentTossieSender(sender);
+
+      // Save event information
+      setCurrentEventName(data.eventName || null);
+      setCurrentEventDate(data.created_at || null);
 
       // Show animation after successful tossie opening
       setShowAnimation(true);
@@ -380,6 +400,10 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
         isActive={showAnimation}
         tossieType={currentTossieType}
         onAnimationComplete={handleAnimationComplete}
+        description={currentTossieDescription || undefined}
+        fromName={currentTossieSender || undefined}
+        eventName={currentEventName || undefined}
+        eventDate={currentEventDate || undefined}
       />
 
       {/* Tossie Details Modal */}
