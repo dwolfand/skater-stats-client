@@ -16,6 +16,7 @@ concurrency:
 
 env:
   VITE_API_URL: https://g42ilwev92.execute-api.us-east-1.amazonaws.com/prod
+  VITE_GOOGLE_MAPS_API_KEY: AIzaSyAZOzzcwhKcfDWP-WpYiyyC5M34DbrZI5k
 
 jobs:
   build:

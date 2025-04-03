@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Button,
@@ -370,6 +370,8 @@ export const Profile: React.FC = () => {
           <ProfileCustomizationSection
             initialCustomization={profile.customization || {}}
             onSave={handleSaveCustomization}
+            clubHistory={profile.clubHistory}
+            currentClub={profile.currentClub}
           />
         )}
 

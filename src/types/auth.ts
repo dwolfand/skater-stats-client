@@ -31,6 +31,25 @@ export interface ImageData {
   };
 }
 
+// Map location types
+export type MapLocationType =
+  | "hometown"
+  | "current"
+  | "training"
+  | "competition"
+  | "visited"
+  | "other";
+
+export interface MapLocation {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  type: MapLocationType;
+  address: string;
+  description?: string;
+}
+
 export interface ProfileCustomization {
   // Theme & Layout
   accentColor?: string;
@@ -55,9 +74,9 @@ export interface ProfileCustomization {
   canBeFeatured?: boolean;
 
   // Media
-  profileImage?: string | ImageData;
-  coverImage?: string | ImageData;
-  galleryImages?: (string | ImageData)[];
+  profileImage?: ImageData;
+  coverImage?: ImageData;
+  galleryImages?: ImageData[];
   featuredVideo?: string;
   profileSong?: {
     title?: string;
@@ -67,6 +86,9 @@ export interface ProfileCustomization {
 
   // Preferences
   unsubscribeFromEmail?: boolean;
+
+  // Map Locations
+  mapLocations?: MapLocation[];
 }
 
 export interface UserProfile {
