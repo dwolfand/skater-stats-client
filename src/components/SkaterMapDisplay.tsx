@@ -465,6 +465,7 @@ const SkaterMapDisplay: React.FC<SkaterMapDisplayProps> = ({
       mb={6}
       bg="white"
       fontFamily={themeColors.fontFamily || undefined}
+      borderWidth="0"
     >
       <VStack spacing={4} align="stretch">
         <Heading
@@ -493,12 +494,7 @@ const SkaterMapDisplay: React.FC<SkaterMapDisplayProps> = ({
         </HStack>
 
         {/* Map */}
-        <Box
-          borderRadius="md"
-          overflow="hidden"
-          border="1px solid"
-          borderColor="gray.200"
-        >
+        <Box borderRadius="md" overflow="hidden">
           <Wrapper
             apiKey={GOOGLE_MAPS_API_KEY}
             libraries={["places"]}
