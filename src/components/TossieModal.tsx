@@ -82,13 +82,16 @@ const TossieReceiptItem: React.FC<{
       </HStack>
 
       {receipt.note && (
-        <Flex ml={10} direction="column" mt={1} w="100%">
+        <Flex ml={{ base: 3, sm: 10 }} direction="column" mt={1} w="100%">
           <Box
             bg="gray.50"
             p={3}
             borderRadius="md"
             borderLeftWidth={4}
             borderLeftColor="blue.400"
+            wordBreak="break-word"
+            overflowWrap="break-word"
+            maxW="100%"
           >
             <Flex justify="space-between" mb={1}>
               <Badge
@@ -98,7 +101,9 @@ const TossieReceiptItem: React.FC<{
                 {receipt.is_public_note ? "Public Note" : "Private Note"}
               </Badge>
             </Flex>
-            <Text fontSize="sm">{receipt.note}</Text>
+            <Text fontSize="sm" wordBreak="break-word">
+              {receipt.note}
+            </Text>
           </Box>
         </Flex>
       )}
@@ -115,7 +120,7 @@ export default function TossieModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent maxW={{ base: "95%", md: "800px" }} overflowX="hidden">
         <ModalHeader>Received Tossies</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -134,6 +139,9 @@ export default function TossieModal({
               maxH="60vh"
               overflowY="auto"
               pr={2}
+              maxW="100%"
+              w="100%"
+              overflowX="hidden"
             >
               {tossies.map((receipt) => (
                 <TossieReceiptItem

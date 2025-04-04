@@ -319,11 +319,13 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
                     p={3}
                     borderRadius="md"
                     borderLeft="4px solid rgba(66, 153, 225, 0.8)"
+                    wordBreak="break-word"
+                    overflowWrap="break-word"
                   >
                     <Badge bg="rgba(66, 153, 225, 0.8)" color="white" mb={2}>
                       Note
                     </Badge>
-                    <Text color="white" fontSize="sm">
+                    <Text color="white" fontSize="sm" wordBreak="break-word">
                       "{note}"
                     </Text>
                   </Box>

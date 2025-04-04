@@ -127,6 +127,8 @@ const TossieReceiptItem: React.FC<{ receipt: TossieReceipt }> = ({
             borderRadius="md"
             borderLeftWidth={4}
             borderLeftColor="blue.400"
+            wordBreak="break-word"
+            overflowWrap="break-word"
           >
             <Flex justify="space-between" mb={1}>
               <Badge
@@ -136,7 +138,9 @@ const TossieReceiptItem: React.FC<{ receipt: TossieReceipt }> = ({
                 {receipt.is_public_note ? "Public Note" : "Private Note"}
               </Badge>
             </Flex>
-            <Text fontSize="sm">{receipt.note}</Text>
+            <Text fontSize="sm" wordBreak="break-word">
+              {receipt.note}
+            </Text>
           </Box>
         </Flex>
       )}
