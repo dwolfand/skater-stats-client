@@ -790,8 +790,8 @@ export default function Skater() {
                   <Alert status="info" mb={4}>
                     <AlertIcon />
                     <Box>
-                      <AlertTitle>Analyzing Data</AlertTitle>
-                      <AlertDescription>
+                      <AlertTitle color="initial">Analyzing Data</AlertTitle>
+                      <AlertDescription color="initial">
                         {LOADING_MESSAGES[loadingMessageIndex]}
                       </AlertDescription>
                     </Box>
@@ -805,9 +805,11 @@ export default function Skater() {
                     alignItems="flex-start"
                     mb={4}
                   >
-                    <AlertTitle mb={2}>AI Analysis</AlertTitle>
-                    <AlertDescription width="100%">
-                      <Box className="markdown-content">
+                    <AlertTitle mb={2} color="initial">
+                      AI Analysis
+                    </AlertTitle>
+                    <AlertDescription width="100%" color="initial">
+                      <Box className="markdown-content" color="initial">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {aiAnalysis.analysis}
                         </ReactMarkdown>
