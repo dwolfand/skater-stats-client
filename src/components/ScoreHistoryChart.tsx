@@ -6,11 +6,12 @@ import dayjs from "../utils/date";
 import { SkaterStats } from "../api/client";
 
 interface ScoreHistoryChartProps {
-  filteredHistory: SkaterStats["history"];
+  filteredHistory: any[];
   themeColors: {
-    bg: string;
-    accent: string;
-    font: string;
+    color?: string;
+    fontFamily?: string;
+    backgroundColor?: string;
+    backgroundImage?: string;
   };
   isMobile: boolean;
 }
@@ -102,7 +103,7 @@ const ScoreHistoryChart: React.FC<ScoreHistoryChartProps> = ({
           type: "x",
         },
         style: {
-          fontFamily: themeColors.font || "inherit",
+          fontFamily: themeColors.fontFamily || "inherit",
         },
       },
       title: {
@@ -160,7 +161,7 @@ const ScoreHistoryChart: React.FC<ScoreHistoryChartProps> = ({
       },
       series: filteredSeries,
     };
-  }, [filteredHistory, themeColors.font, isMobile]);
+  }, [filteredHistory, themeColors.fontFamily, isMobile]);
 
   return (
     <Box mb={6}>
@@ -168,7 +169,7 @@ const ScoreHistoryChart: React.FC<ScoreHistoryChartProps> = ({
         p={6}
         border="none"
         bg="white"
-        fontFamily={themeColors.font}
+        fontFamily={themeColors.fontFamily}
         borderWidth="0"
       >
         <Box h="400px">

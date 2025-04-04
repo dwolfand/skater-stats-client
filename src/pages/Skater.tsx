@@ -600,12 +600,9 @@ export default function Skater() {
   // Apply theme customization
   useEffect(() => {
     if (stats?.customization) {
-      const { backgroundColor, accentColor, fontFamily } = stats.customization;
+      const { accentColor, fontFamily } = stats.customization;
       const root = document.documentElement;
 
-      if (backgroundColor) {
-        root.style.setProperty("--skater-bg-color", backgroundColor);
-      }
       if (accentColor) {
         root.style.setProperty("--skater-accent-color", accentColor);
       }
@@ -615,22 +612,51 @@ export default function Skater() {
 
       // Cleanup when component unmounts
       return () => {
-        root.style.removeProperty("--skater-bg-color");
         root.style.removeProperty("--skater-accent-color");
         root.style.removeProperty("--skater-font-family");
       };
     }
   }, [stats?.customization]);
 
-  // Get theme colors from customization
+  // Function to generate CSS gradient string
+  const generateGradientCSS = (gradient: any) => {
+    if (!gradient?.colors?.length) return undefined;
+
+    const gradientColors = gradient.colors
+      .sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 100))
+      .map(
+        (c: any) =>
+          `${c.color} ${c.position !== undefined ? c.position + "%" : ""}`
+      )
+      .join(", ");
+
+    return `linear-gradient(${
+      gradient.direction || "to bottom"
+    }, ${gradientColors})`;
+  };
+
+  // Get theme colors from customization - create compatible structure for child components
   const themeColors = useMemo(() => {
     const customization = stats?.customization;
     return {
-      bg: customization?.backgroundColor || "",
-      accent: customization?.accentColor || "",
-      font: customization?.fontFamily || "",
+      color: customization?.accentColor || undefined,
+      fontFamily: customization?.fontFamily || undefined,
+      backgroundColor: customization?.backgroundColor || undefined,
+      backgroundImage: customization?.backgroundGradient
+        ? generateGradientCSS(customization.backgroundGradient)
+        : undefined,
     };
   }, [stats?.customization]);
+
+  // Page background style
+  const pageStyle = useMemo(() => {
+    return {
+      backgroundColor: themeColors.backgroundColor || "transparent",
+      backgroundImage: themeColors.backgroundImage || "none",
+      color: themeColors.color,
+      fontFamily: themeColors.fontFamily,
+    };
+  }, [themeColors]);
 
   if (isLoading) {
     return (
@@ -662,16 +688,7 @@ export default function Skater() {
   const filename = stats.name?.replace(/\s+/g, "_") + "_stats";
 
   return (
-    <Box
-      minH="100vh"
-      style={{
-        backgroundColor: themeColors.bg,
-        fontFamily: themeColors.font,
-        color: themeColors.accent,
-      }}
-      mt="-64px"
-      pt="64px"
-    >
+    <Box minH="100vh" style={pageStyle} mt="-64px" pt="64px">
       <Container maxW="container.xl" py={8}>
         <VStack spacing={8} align="stretch">
           {/* Header */}
@@ -709,8 +726,8 @@ export default function Skater() {
                 <VStack align="stretch" spacing={3}>
                   <Heading
                     size="lg"
-                    color={themeColors.accent}
-                    fontFamily={themeColors.font}
+                    color={themeColors.color}
+                    fontFamily={themeColors.fontFamily}
                   >
                     {stats.name}
                   </Heading>
@@ -718,9 +735,9 @@ export default function Skater() {
                     <Link
                       as={RouterLink}
                       to={`/club/${stats.club_id}`}
-                      color={themeColors.accent}
+                      color={themeColors.color}
                       fontSize="md"
-                      fontFamily={themeColors.font}
+                      fontFamily={themeColors.fontFamily}
                     >
                       {stats.club}
                     </Link>
@@ -737,9 +754,13 @@ export default function Skater() {
                       variant="solid"
                       onClick={onTossieModalOpen}
                       isLoading={isTossiesLoading}
-                      bg={themeColors.bg ? "white" : "transparent"}
+                      bg={themeColors.backgroundColor ? "white" : "transparent"}
                       color="gray.800"
-                      _hover={{ bg: themeColors.bg ? "gray.100" : "gray.50" }}
+                      _hover={{
+                        bg: themeColors.backgroundColor
+                          ? "gray.100"
+                          : "gray.50",
+                      }}
                     >
                       {tossies?.length || 0}
                     </Button>
@@ -748,12 +769,16 @@ export default function Skater() {
                       icon={<FiFilter />}
                       onClick={onOptionsToggle}
                       variant="solid"
-                      bg={themeColors.bg ? "white" : "transparent"}
+                      bg={themeColors.backgroundColor ? "white" : "transparent"}
                       color="gray.800"
-                      _hover={{ bg: themeColors.bg ? "gray.100" : "gray.50" }}
+                      _hover={{
+                        bg: themeColors.backgroundColor
+                          ? "gray.100"
+                          : "gray.50",
+                      }}
                     />
                     <Box
-                      bg={themeColors.bg ? "white" : "transparent"}
+                      bg={themeColors.backgroundColor ? "white" : "transparent"}
                       borderRadius="md"
                     >
                       <FavoriteButton
@@ -980,8 +1005,8 @@ export default function Skater() {
                   <HStack mb={4} onClick={() => onToggle()} cursor="pointer">
                     <Heading
                       size="md"
-                      color={themeColors.accent}
-                      fontFamily={themeColors.font}
+                      color={themeColors.color}
+                      fontFamily={themeColors.fontFamily}
                     >
                       Skater Information
                     </Heading>
@@ -991,12 +1016,12 @@ export default function Skater() {
                         isOpen ? (
                           <ChevronUpIcon
                             boxSize={6}
-                            color={themeColors.accent || undefined}
+                            color={themeColors.color || undefined}
                           />
                         ) : (
                           <ChevronDownIcon
                             boxSize={6}
-                            color={themeColors.accent || undefined}
+                            color={themeColors.color || undefined}
                           />
                         )
                       }
@@ -1029,7 +1054,7 @@ export default function Skater() {
                           p={6}
                           mb={6}
                           bg="white"
-                          fontFamily={themeColors.font}
+                          fontFamily={themeColors.fontFamily}
                           borderWidth="0"
                         >
                           <VStack spacing={4} align="stretch">
@@ -1038,7 +1063,7 @@ export default function Skater() {
                                 <Heading
                                   size="sm"
                                   mb={2}
-                                  fontFamily={themeColors.font}
+                                  fontFamily={themeColors.fontFamily}
                                 >
                                   About Me
                                 </Heading>
@@ -1053,7 +1078,7 @@ export default function Skater() {
                                 <Text
                                   fontSize="lg"
                                   fontStyle="italic"
-                                  fontFamily={themeColors.font}
+                                  fontFamily={themeColors.fontFamily}
                                 >
                                   "{stats.customization.favoriteQuote}"
                                 </Text>
@@ -1078,7 +1103,13 @@ export default function Skater() {
                       {(stats.customization?.coach ||
                         stats.customization?.homeRink ||
                         stats.customization?.goals) && (
-                        <Card p={6} mb={6} bg="white" borderWidth="0">
+                        <Card
+                          p={6}
+                          mb={6}
+                          bg="white"
+                          fontFamily={themeColors.fontFamily}
+                          borderWidth="0"
+                        >
                           <VStack spacing={4} align="stretch">
                             {stats.customization?.coach && (
                               <Box>
@@ -1117,7 +1148,7 @@ export default function Skater() {
                             p={6}
                             mb={6}
                             bg="white"
-                            fontFamily={themeColors.font}
+                            fontFamily={themeColors.fontFamily}
                             borderWidth="0"
                           >
                             <Heading size="sm" mb={4}>
@@ -1140,7 +1171,7 @@ export default function Skater() {
                             p={6}
                             mb={6}
                             bg="white"
-                            fontFamily={themeColors.font}
+                            fontFamily={themeColors.fontFamily}
                             borderWidth="0"
                           >
                             <Heading size="sm" mb={4}>
@@ -1210,7 +1241,7 @@ export default function Skater() {
                           p={6}
                           mb={6}
                           bg="white"
-                          fontFamily={themeColors.font}
+                          fontFamily={themeColors.fontFamily}
                           borderWidth="0"
                         >
                           <Heading size="sm" mb={4}>
@@ -1239,7 +1270,7 @@ export default function Skater() {
                             p={6}
                             mb={6}
                             bg="white"
-                            fontFamily={themeColors.font}
+                            fontFamily={themeColors.fontFamily}
                             borderWidth="0"
                           >
                             <Heading size="sm" mb={4}>
@@ -1306,7 +1337,7 @@ export default function Skater() {
                           p={6}
                           mb={0}
                           bg="white"
-                          fontFamily={themeColors.font}
+                          fontFamily={themeColors.fontFamily}
                           borderWidth="0"
                         >
                           <Heading size="sm" mb={4}>
@@ -1348,8 +1379,8 @@ export default function Skater() {
           <Heading
             size="md"
             mb={4}
-            color={themeColors.accent}
-            fontFamily={themeColors.font}
+            color={themeColors.color}
+            fontFamily={themeColors.fontFamily}
           >
             Score History
           </Heading>
@@ -1358,9 +1389,8 @@ export default function Skater() {
           <Card
             p={6}
             mb={6}
-            border="none"
             bg="white"
-            fontFamily={themeColors.font}
+            fontFamily={themeColors.fontFamily}
             borderWidth="0"
           >
             <StatGroup>
@@ -1446,14 +1476,18 @@ export default function Skater() {
             <Heading
               size="md"
               mb={4}
-              color={themeColors.accent}
-              fontFamily={themeColors.font}
+              color={themeColors.color}
+              fontFamily={themeColors.fontFamily}
             >
               All Results{" "}
               {filteredHistory.length !== stats?.history.length &&
                 `(Showing ${filteredHistory.length} of ${stats?.history.length})`}
             </Heading>
-            <Table variant="simple" bg="white" fontFamily={themeColors.font}>
+            <Table
+              variant="simple"
+              bg="white"
+              fontFamily={themeColors.fontFamily}
+            >
               <Thead>
                 <Tr>
                   <Th width="40px" p={{ base: 1, md: 6 }}></Th>

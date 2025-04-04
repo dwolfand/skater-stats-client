@@ -20,10 +20,11 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
 interface SkaterMapDisplayProps {
   locations: MapLocation[];
-  themeColors?: {
-    bg: string;
-    accent: string;
-    font: string;
+  themeColors: {
+    color?: string;
+    fontFamily?: string;
+    backgroundColor?: string;
+    backgroundImage?: string;
   };
 }
 
@@ -357,7 +358,12 @@ const Map: React.FC<{
 
 const SkaterMapDisplay: React.FC<SkaterMapDisplayProps> = ({
   locations,
-  themeColors = { bg: "", accent: "", font: "" },
+  themeColors = {
+    color: "",
+    fontFamily: "",
+    backgroundColor: "",
+    backgroundImage: "",
+  },
 }) => {
   // Only show if we have locations
   if (!locations || locations.length === 0) return null;
@@ -369,7 +375,7 @@ const SkaterMapDisplay: React.FC<SkaterMapDisplayProps> = ({
         p={6}
         mb={6}
         bg="white"
-        fontFamily={themeColors.font}
+        fontFamily={themeColors.fontFamily}
         borderWidth="0"
       >
         <Alert status="warning" borderRadius="md">
@@ -454,9 +460,18 @@ const SkaterMapDisplay: React.FC<SkaterMapDisplayProps> = ({
   };
 
   return (
-    <Card p={6} mb={6} bg="white" fontFamily={themeColors.font} borderWidth="0">
+    <Card
+      p={6}
+      mb={6}
+      bg="white"
+      fontFamily={themeColors.fontFamily || undefined}
+    >
       <VStack spacing={4} align="stretch">
-        <Heading size="sm" mb={2} fontFamily={themeColors.font || undefined}>
+        <Heading
+          size="sm"
+          mb={2}
+          fontFamily={themeColors.fontFamily || undefined}
+        >
           Skating Map
         </Heading>
 

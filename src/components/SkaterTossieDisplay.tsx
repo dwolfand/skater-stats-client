@@ -22,11 +22,13 @@ import {
 import { TossieDetailsModal } from "./TossieDetailsModal";
 
 interface SkaterTossieDisplayProps {
-  tossies: TossieReceipt[] | undefined;
-  isLoading?: boolean;
-  themeColors?: {
-    accent?: string;
-    font?: string;
+  tossies: TossieReceipt[] | null;
+  isLoading: boolean;
+  themeColors: {
+    color?: string;
+    fontFamily?: string;
+    backgroundColor?: string;
+    backgroundImage?: string;
   };
 }
 
@@ -101,10 +103,10 @@ export default function SkaterTossieDisplay({
         p={6}
         border="none"
         bg="white"
-        fontFamily={themeColors.font}
+        fontFamily={themeColors.fontFamily}
         borderWidth="0"
       >
-        <Heading size="sm" mb={4} fontFamily={themeColors.font}>
+        <Heading size="sm" mb={4} fontFamily={themeColors.fontFamily}>
           Tossie Collection
           <Text
             as="span"
