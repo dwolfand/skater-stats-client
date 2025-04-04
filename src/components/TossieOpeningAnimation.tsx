@@ -14,6 +14,7 @@ import {
   Button,
   Flex,
   Heading,
+  Badge,
 } from "@chakra-ui/react";
 import { css, keyframes } from "@emotion/react";
 import { createPortal } from "react-dom";
@@ -30,6 +31,7 @@ interface TossieOpeningAnimationProps {
   description?: string;
   eventName?: string;
   eventDate?: string;
+  note?: string;
 }
 
 // Define keyframes for the fly-in animation
@@ -64,6 +66,7 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
   description,
   eventName,
   eventDate,
+  note,
 }) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [showTossieBag, setShowTossieBag] = useState(false);
@@ -308,35 +311,44 @@ export const TossieOpeningAnimation: React.FC<TossieOpeningAnimationProps> = ({
                   </Text>
                 )}
 
-                <Flex direction="column" alignItems="center" w="100%">
-                  {fromName && (
-                    <Text fontSize="sm" color="white">
-                      {fromName} gave you a tossie
+                {/* Note if available */}
+                {note && (
+                  <Box
+                    width="100%"
+                    bg="rgba(255,255,255,0.1)"
+                    p={3}
+                    borderRadius="md"
+                    borderLeft="4px solid rgba(66, 153, 225, 0.8)"
+                  >
+                    <Badge bg="rgba(66, 153, 225, 0.8)" color="white" mb={2}>
+                      Note
+                    </Badge>
+                    <Text color="white" fontSize="sm">
+                      "{note}"
                     </Text>
-                  )}
+                  </Box>
+                )}
 
-                  {eventName && (
-                    <Text fontSize="sm" color="gray.200">
-                      at {eventName}
-                    </Text>
-                  )}
+                {/* From information */}
+                {fromName && (
+                  <Text fontSize="sm" color="gray.300">
+                    From {fromName}
+                  </Text>
+                )}
 
-                  {eventDate && (
-                    <Text fontSize="xs" color="gray.300" mt={1}>
-                      {dayjs(eventDate).format("MMM D, YYYY h:mm A")}
-                    </Text>
-                  )}
-                </Flex>
+                {/* Event information */}
+                {eventName && (
+                  <Text fontSize="xs" color="gray.400">
+                    {eventName}
+                    {eventDate &&
+                      ` (${dayjs(eventDate).format("MMM D, YYYY")})`}
+                  </Text>
+                )}
 
-                <Button
-                  colorScheme="blue"
-                  size="md"
-                  onClick={handleClick}
-                  mt={2}
-                  width="120px"
-                >
-                  Continue
-                </Button>
+                {/* Tap to close prompt */}
+                <Text fontSize="xs" color="gray.500" mt={3}>
+                  Tap anywhere to continue
+                </Text>
               </VStack>
             )}
           </Flex>

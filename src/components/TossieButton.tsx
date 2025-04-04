@@ -17,6 +17,11 @@ import {
   VStack,
   Flex,
   Box,
+  Textarea,
+  FormControl,
+  FormLabel,
+  Switch,
+  FormHelperText,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { LoginModalContext } from "./LoginModal";
@@ -33,6 +38,8 @@ interface TossieButtonProps {
 }
 
 const TOSSIE_EXPLAINED_KEY = "tossie_explanation_viewed";
+const DEFAULT_TOSSIE_NOTE_KEY = "default_tossie_note";
+const DEFAULT_TOSSIE_NOTE_PUBLIC_KEY = "default_tossie_note_public";
 
 export default function TossieButton({
   eventResultId,
@@ -44,7 +51,11 @@ export default function TossieButton({
   const [isGiven, setIsGiven] = React.useState(initialHasTossie);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [showExplanationModal, setShowExplanationModal] = React.useState(false);
+  const [showNoteModal, setShowNoteModal] = React.useState(false);
   const [dontShowAgain, setDontShowAgain] = React.useState(false);
+  const [note, setNote] = React.useState("");
+  const [isPublicNote, setIsPublicNote] = React.useState(false);
+  const [saveAsDefault, setSaveAsDefault] = React.useState(false);
   const { isAuthenticated } = useAuth();
   const { openLoginModal } = React.useContext(LoginModalContext);
   const toast = useToast();
@@ -53,6 +64,18 @@ export default function TossieButton({
   const [hasSeenExplanation, setHasSeenExplanation] = React.useState(() => {
     return localStorage.getItem(TOSSIE_EXPLAINED_KEY) === "true";
   });
+
+  // Load default note from localStorage on component mount
+  React.useEffect(() => {
+    const defaultNote = localStorage.getItem(DEFAULT_TOSSIE_NOTE_KEY);
+    const defaultIsPublic =
+      localStorage.getItem(DEFAULT_TOSSIE_NOTE_PUBLIC_KEY) === "true";
+
+    if (defaultNote) {
+      setNote(defaultNote);
+      setIsPublicNote(defaultIsPublic);
+    }
+  }, []);
 
   // Hide button if event date is null or if event is more than 90 days old
   if (!eventDate) {
@@ -69,6 +92,16 @@ export default function TossieButton({
   const markTossieExplanationSeen = () => {
     localStorage.setItem(TOSSIE_EXPLAINED_KEY, "true");
     setHasSeenExplanation(true);
+  };
+
+  const saveDefaultNote = () => {
+    if (saveAsDefault && note.trim()) {
+      localStorage.setItem(DEFAULT_TOSSIE_NOTE_KEY, note);
+      localStorage.setItem(
+        DEFAULT_TOSSIE_NOTE_PUBLIC_KEY,
+        isPublicNote.toString()
+      );
+    }
   };
 
   const handleClick = async (e: React.MouseEvent) => {
@@ -88,7 +121,18 @@ export default function TossieButton({
       return;
     }
 
-    await submitTossieForSkater();
+    // Load default note from localStorage before showing the modal
+    const defaultNote = localStorage.getItem(DEFAULT_TOSSIE_NOTE_KEY);
+    const defaultIsPublic =
+      localStorage.getItem(DEFAULT_TOSSIE_NOTE_PUBLIC_KEY) === "true";
+
+    if (defaultNote) {
+      setNote(defaultNote);
+      setIsPublicNote(defaultIsPublic);
+    }
+
+    // Show note modal instead of immediately submitting
+    setShowNoteModal(true);
   };
 
   const submitTossieForSkater = async () => {
@@ -101,10 +145,19 @@ export default function TossieButton({
 
     try {
       setIsSubmitting(true);
+
+      // Save default note if option is checked
+      if (saveAsDefault) {
+        saveDefaultNote();
+      }
+
       await submitTossie({
         eventResultId,
         sixEventResultId,
+        note: note.trim() || undefined,
+        isPublicNote: note.trim() ? isPublicNote : undefined,
       });
+
       setIsGiven(true);
       toast({
         title: "Tossie given!",
@@ -113,6 +166,9 @@ export default function TossieButton({
         duration: 3000,
         isClosable: true,
       });
+
+      // Close the note modal
+      setShowNoteModal(false);
     } catch (error: any) {
       console.error("Error submitting tossie:", error);
       const errorMessage =
@@ -127,6 +183,7 @@ export default function TossieButton({
       // If the error is that they already gave a tossie, update the state
       if (error.response?.status === 409) {
         setIsGiven(true);
+        setShowNoteModal(false);
       }
     } finally {
       setIsSubmitting(false);
@@ -144,7 +201,7 @@ export default function TossieButton({
   };
 
   const handleGiveTossie = () => {
-    // Close the modal
+    // Close the explanation modal
     setShowExplanationModal(false);
 
     // Save preference if checked
@@ -152,8 +209,22 @@ export default function TossieButton({
       markTossieExplanationSeen();
     }
 
-    // Now give the tossie
-    submitTossieForSkater();
+    // Load default note from localStorage before showing the modal
+    const defaultNote = localStorage.getItem(DEFAULT_TOSSIE_NOTE_KEY);
+    const defaultIsPublic =
+      localStorage.getItem(DEFAULT_TOSSIE_NOTE_PUBLIC_KEY) === "true";
+
+    if (defaultNote) {
+      setNote(defaultNote);
+      setIsPublicNote(defaultIsPublic);
+    }
+
+    // Now show the note modal
+    setShowNoteModal(true);
+  };
+
+  const handleNoteModalClose = () => {
+    setShowNoteModal(false);
   };
 
   return (
@@ -214,6 +285,75 @@ export default function TossieButton({
           <ModalFooter>
             <Button colorScheme="blue" onClick={handleGiveTossie}>
               Give a Tossie!
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Tossie Note Modal */}
+      <Modal isOpen={showNoteModal} onClose={handleNoteModalClose} size="md">
+        <ModalOverlay />
+        <ModalContent maxH={{ base: "85vh", md: "auto" }} overflow="hidden">
+          <ModalHeader>Add a Note with Your Tossie</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody overflowY="auto">
+            <VStack spacing={4} align="stretch">
+              <Text>
+                Add a personal note to your tossie for {skaterName}. This is
+                optional but adds a special touch!
+              </Text>
+              <FormControl>
+                <FormLabel>Your Note</FormLabel>
+                <Textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder={`Example: Amazing performance, ${skaterName}!`}
+                  resize="vertical"
+                  rows={3}
+                />
+              </FormControl>
+
+              <FormControl display="flex" alignItems="center">
+                <FormLabel htmlFor="public-note" mb="0">
+                  Make note public
+                </FormLabel>
+                <Switch
+                  id="public-note"
+                  isChecked={isPublicNote}
+                  onChange={(e) => setIsPublicNote(e.target.checked)}
+                />
+                <FormHelperText ml={2}>
+                  {isPublicNote
+                    ? "Everyone can see your note"
+                    : "Only the skater can see your note"}
+                </FormHelperText>
+              </FormControl>
+
+              <FormControl display="flex" alignItems="center">
+                <FormLabel htmlFor="save-default" mb="0">
+                  Save as default note
+                </FormLabel>
+                <Switch
+                  id="save-default"
+                  isChecked={saveAsDefault}
+                  onChange={(e) => setSaveAsDefault(e.target.checked)}
+                />
+                <FormHelperText ml={2}>
+                  Pre-fill this note for future tossies
+                </FormHelperText>
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="outline" mr={3} onClick={handleNoteModalClose}>
+              Cancel
+            </Button>
+            <Button
+              colorScheme="blue"
+              onClick={submitTossieForSkater}
+              isLoading={isSubmitting}
+            >
+              {note.trim() ? "Give a Tossie with Note!" : "Give a Tossie!"}
             </Button>
           </ModalFooter>
         </ModalContent>

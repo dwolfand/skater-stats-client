@@ -143,6 +143,8 @@ export interface TossieReceipt {
   resultType: "event" | "six_event";
   is_opened: boolean;
   tossie_type?: string;
+  note?: string;
+  is_public_note?: boolean;
 }
 
 export interface AdminTossieReceipt extends TossieReceipt {

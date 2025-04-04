@@ -585,6 +585,8 @@ export const getClubStats = async (
 export interface TossieRequest {
   eventResultId?: number;
   sixEventResultId?: number;
+  note?: string;
+  isPublicNote?: boolean;
 }
 
 export interface TossieReceipt {
@@ -604,6 +606,8 @@ export interface TossieReceipt {
   resultType: "event" | "six_event";
   is_opened: boolean;
   tossie_type?: string;
+  note?: string;
+  is_public_note?: boolean;
 }
 
 export const submitTossie = async (data: TossieRequest) => {

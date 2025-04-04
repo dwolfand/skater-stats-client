@@ -15,6 +15,8 @@ import {
   Box,
   Center,
   Spinner,
+  Flex,
+  Badge,
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import dayjs from "../utils/date";
@@ -45,38 +47,62 @@ const TossieReceiptItem: React.FC<{
     : receipt.fromUserPicture;
 
   return (
-    <HStack spacing={3} py={2} align="start">
-      <Avatar size="sm" src={profileImage} name={receipt.fromUserName} />
-      <Box flex={1}>
-        <HStack spacing={2} flexWrap="wrap">
-          {receipt.fromSkaterId ? (
+    <VStack spacing={1} py={2} align="start">
+      <HStack spacing={3} w="100%" align="start">
+        <Avatar size="sm" src={profileImage} name={receipt.fromUserName} />
+        <Box flex={1}>
+          <HStack spacing={2} flexWrap="wrap">
+            {receipt.fromSkaterId ? (
+              <Link
+                as={RouterLink}
+                to={`/skater/id/${receipt.fromSkaterId}`}
+                color="blue.500"
+                fontWeight="medium"
+                onClick={onClose}
+              >
+                {fromName}
+              </Link>
+            ) : (
+              <Text fontWeight="medium">{fromName}</Text>
+            )}
+            <Text>gave a tossie at</Text>
             <Link
               as={RouterLink}
-              to={`/skater/id/${receipt.fromSkaterId}`}
+              to={eventUrl}
               color="blue.500"
-              fontWeight="medium"
               onClick={onClose}
             >
-              {fromName}
+              {receipt.eventName}
             </Link>
-          ) : (
-            <Text fontWeight="medium">{fromName}</Text>
-          )}
-          <Text>gave a tossie at</Text>
-          <Link
-            as={RouterLink}
-            to={eventUrl}
-            color="blue.500"
-            onClick={onClose}
+          </HStack>
+          <Text fontSize="sm" color="gray.500">
+            {dayjs(receipt.created_at).format("MMM D, YYYY h:mm A")}
+          </Text>
+        </Box>
+      </HStack>
+
+      {receipt.note && (
+        <Flex ml={10} direction="column" mt={1} w="100%">
+          <Box
+            bg="gray.50"
+            p={3}
+            borderRadius="md"
+            borderLeftWidth={4}
+            borderLeftColor="blue.400"
           >
-            {receipt.eventName}
-          </Link>
-        </HStack>
-        <Text fontSize="sm" color="gray.500">
-          {dayjs(receipt.created_at).format("MMM D, YYYY h:mm A")}
-        </Text>
-      </Box>
-    </HStack>
+            <Flex justify="space-between" mb={1}>
+              <Badge
+                colorScheme={receipt.is_public_note ? "green" : "purple"}
+                fontSize="xs"
+              >
+                {receipt.is_public_note ? "Public Note" : "Private Note"}
+              </Badge>
+            </Flex>
+            <Text fontSize="sm">{receipt.note}</Text>
+          </Box>
+        </Flex>
+      )}
+    </VStack>
   );
 };
 

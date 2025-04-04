@@ -18,6 +18,7 @@ import {
   Center,
   Divider,
   Icon,
+  Flex,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -86,36 +87,60 @@ const TossieReceiptItem: React.FC<{ receipt: TossieReceipt }> = ({
       : `/competition/${receipt.eventYear}/${receipt.ijsId}/event/${receipt.results_url}`;
 
   return (
-    <HStack spacing={3} py={2} align="start">
-      <Avatar
-        size="sm"
-        src={receipt.fromUserPicture}
-        name={receipt.fromUserName}
-      />
-      <Box flex={1}>
-        <HStack spacing={2} flexWrap="wrap">
-          {receipt.fromSkaterId ? (
-            <Link
-              as={RouterLink}
-              to={`/skater/id/${receipt.fromSkaterId}`}
-              color="blue.500"
-              fontWeight="medium"
-            >
-              {fromName}
+    <VStack spacing={1} py={2} align="start">
+      <HStack spacing={3} w="100%" align="start">
+        <Avatar
+          size="sm"
+          src={receipt.fromUserPicture}
+          name={receipt.fromUserName}
+        />
+        <Box flex={1}>
+          <HStack spacing={2} flexWrap="wrap">
+            {receipt.fromSkaterId ? (
+              <Link
+                as={RouterLink}
+                to={`/skater/id/${receipt.fromSkaterId}`}
+                color="blue.500"
+                fontWeight="medium"
+              >
+                {fromName}
+              </Link>
+            ) : (
+              <Text fontWeight="medium">{fromName}</Text>
+            )}
+            <Text>gave you a tossie</Text>
+            <Link as={RouterLink} to={eventUrl} color="blue.500">
+              {receipt.eventName}
             </Link>
-          ) : (
-            <Text fontWeight="medium">{fromName}</Text>
-          )}
-          <Text>gave you a tossie</Text>
-          <Link as={RouterLink} to={eventUrl} color="blue.500">
-            {receipt.eventName}
-          </Link>
-        </HStack>
-        <Text fontSize="sm" color="gray.500">
-          {new Date(receipt.created_at).toLocaleString()}
-        </Text>
-      </Box>
-    </HStack>
+          </HStack>
+          <Text fontSize="sm" color="gray.500">
+            {new Date(receipt.created_at).toLocaleString()}
+          </Text>
+        </Box>
+      </HStack>
+
+      {receipt.note && (
+        <Flex ml={10} direction="column" mt={1} w="100%">
+          <Box
+            bg="gray.50"
+            p={3}
+            borderRadius="md"
+            borderLeftWidth={4}
+            borderLeftColor="blue.400"
+          >
+            <Flex justify="space-between" mb={1}>
+              <Badge
+                colorScheme={receipt.is_public_note ? "green" : "purple"}
+                fontSize="xs"
+              >
+                {receipt.is_public_note ? "Public Note" : "Private Note"}
+              </Badge>
+            </Flex>
+            <Text fontSize="sm">{receipt.note}</Text>
+          </Box>
+        </Flex>
+      )}
+    </VStack>
   );
 };
 

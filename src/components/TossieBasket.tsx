@@ -231,6 +231,9 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
   );
   const [currentEventName, setCurrentEventName] = useState<string | null>(null);
   const [currentEventDate, setCurrentEventDate] = useState<string | null>(null);
+  const [currentTossieNote, setCurrentTossieNote] = useState<string | null>(
+    null
+  );
   const [selectedTossie, setSelectedTossie] = useState<{
     type: string;
     count: number;
@@ -273,6 +276,9 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
       // Save event information
       setCurrentEventName(data.eventName || null);
       setCurrentEventDate(data.created_at || null);
+
+      // Save note if available
+      setCurrentTossieNote(data.note || null);
 
       // Show animation after successful tossie opening
       setShowAnimation(true);
@@ -404,6 +410,7 @@ export const TossieBasket: React.FC<TossieBasketProps> = ({
         fromName={currentTossieSender || undefined}
         eventName={currentEventName || undefined}
         eventDate={currentEventDate || undefined}
+        note={currentTossieNote || undefined}
       />
 
       {/* Tossie Details Modal */}
