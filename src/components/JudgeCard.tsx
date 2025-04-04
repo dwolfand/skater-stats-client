@@ -11,9 +11,14 @@ import {
   GridItem,
   Divider,
   VStack,
+  IconButton,
+  Tooltip,
+  HStack,
 } from "@chakra-ui/react";
 import { getSymbolInfo } from "../utils/ijsSymbols";
 import HoverTooltip from "./shared/HoverTooltip";
+import { useState } from "react";
+import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 
 type JudgeDetails = {
   baseElementsScore: number;
@@ -128,6 +133,11 @@ export default function JudgeCard({ details }: JudgeCardProps) {
   const hasElements = details.elements.length > 0;
   const hasElementScore = details.totalElementScore > 0;
   const hasInfoContent = details.elements.some((element) => element.info);
+  const [showJudgesScores, setShowJudgesScores] = useState(true);
+
+  const toggleJudgesScores = () => {
+    setShowJudgesScores(!showJudgesScores);
+  };
 
   return (
     <Box p={4} bg="gray.50" borderRadius="md" fontSize="sm">
@@ -178,9 +188,38 @@ export default function JudgeCard({ details }: JudgeCardProps) {
       {/* Elements Table */}
       {hasElements && (
         <>
-          <Text fontWeight="bold" mb={2} color="gray.700">
-            Elements
-          </Text>
+          <HStack mb={2} spacing={2} align="center">
+            <Text fontWeight="bold" color="gray.700">
+              Elements
+            </Text>
+            {details.elements[0]?.judgesGoe.length > 0 && (
+              <Tooltip
+                label={
+                  showJudgesScores ? "Hide judges scores" : "Show judges scores"
+                }
+                placement="top"
+              >
+                <IconButton
+                  aria-label={
+                    showJudgesScores
+                      ? "Hide judges scores"
+                      : "Show judges scores"
+                  }
+                  icon={
+                    showJudgesScores ? (
+                      <FaAngleDoubleLeft />
+                    ) : (
+                      <FaAngleDoubleRight />
+                    )
+                  }
+                  size="xs"
+                  colorScheme="gray"
+                  variant="outline"
+                  onClick={toggleJudgesScores}
+                />
+              </Tooltip>
+            )}
+          </HStack>
           <Box overflowX="auto">
             <Table size="sm" mb={4} variant="simple" colorScheme="gray">
               <Thead>
@@ -195,13 +234,14 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                   <Th isNumeric color="gray.700">
                     GOE
                   </Th>
-                  {[...Array(details.elements[0]?.judgesGoe.length || 0)].map(
-                    (_, i) => (
-                      <Th key={i} color="gray.700">
-                        J{i + 1}
-                      </Th>
-                    )
-                  )}
+                  {showJudgesScores &&
+                    [...Array(details.elements[0]?.judgesGoe.length || 0)].map(
+                      (_, i) => (
+                        <Th key={i} color="gray.700">
+                          J{i + 1}
+                        </Th>
+                      )
+                    )}
                   <Th isNumeric color="gray.700">
                     Score
                   </Th>
@@ -242,21 +282,22 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                       {element.goe > 0 ? "+" : ""}
                       {element.goe.toFixed(2)}
                     </Td>
-                    {element.judgesGoe.map((goe, j) => (
-                      <Td
-                        key={j}
-                        color={
-                          goe < 0
-                            ? "red.500"
-                            : goe > 0
-                            ? "green.500"
-                            : "gray.900"
-                        }
-                      >
-                        {goe > 0 ? "+" : ""}
-                        {goe}
-                      </Td>
-                    ))}
+                    {showJudgesScores &&
+                      element.judgesGoe.map((goe, j) => (
+                        <Td
+                          key={j}
+                          color={
+                            goe < 0
+                              ? "red.500"
+                              : goe > 0
+                              ? "green.500"
+                              : "gray.900"
+                          }
+                        >
+                          {goe > 0 ? "+" : ""}
+                          {goe}
+                        </Td>
+                      ))}
                     <Td isNumeric fontWeight="medium" color="gray.900">
                       {element.value.toFixed(2)}
                     </Td>
@@ -271,22 +312,52 @@ export default function JudgeCard({ details }: JudgeCardProps) {
       {/* Components Table */}
       {details.components.length > 0 && (
         <>
-          <Text fontWeight="bold" mb={2} color="gray.700">
-            Program Components
-          </Text>
+          <HStack mb={2} spacing={2} align="center">
+            <Text fontWeight="bold" color="gray.700">
+              Program Components
+            </Text>
+            {details.components[0]?.judgesScores.length > 0 && (
+              <Tooltip
+                label={
+                  showJudgesScores ? "Hide judges scores" : "Show judges scores"
+                }
+                placement="top"
+              >
+                <IconButton
+                  aria-label={
+                    showJudgesScores
+                      ? "Hide judges scores"
+                      : "Show judges scores"
+                  }
+                  icon={
+                    showJudgesScores ? (
+                      <FaAngleDoubleLeft />
+                    ) : (
+                      <FaAngleDoubleRight />
+                    )
+                  }
+                  size="xs"
+                  colorScheme="gray"
+                  variant="outline"
+                  onClick={toggleJudgesScores}
+                />
+              </Tooltip>
+            )}
+          </HStack>
           <Box overflowX="auto">
             <Table size="sm" mb={4} variant="simple" colorScheme="gray">
               <Thead>
                 <Tr bg="gray.100">
                   <Th color="gray.700">Component</Th>
                   <Th color="gray.700">Factor</Th>
-                  {[
-                    ...Array(details.components[0]?.judgesScores.length || 0),
-                  ].map((_, i) => (
-                    <Th key={i} color="gray.700">
-                      J{i + 1}
-                    </Th>
-                  ))}
+                  {showJudgesScores &&
+                    [
+                      ...Array(details.components[0]?.judgesScores.length || 0),
+                    ].map((_, i) => (
+                      <Th key={i} color="gray.700">
+                        J{i + 1}
+                      </Th>
+                    ))}
                   <Th isNumeric color="gray.700">
                     Score
                   </Th>
@@ -297,11 +368,12 @@ export default function JudgeCard({ details }: JudgeCardProps) {
                   <Tr key={index}>
                     <Td color="gray.900">{component.name}</Td>
                     <Td color="gray.900">{component.factor.toFixed(2)}</Td>
-                    {component.judgesScores.map((score, j) => (
-                      <Td key={j} color="gray.900">
-                        {score.toFixed(2)}
-                      </Td>
-                    ))}
+                    {showJudgesScores &&
+                      component.judgesScores.map((score, j) => (
+                        <Td key={j} color="gray.900">
+                          {score.toFixed(2)}
+                        </Td>
+                      ))}
                     <Td isNumeric fontWeight="medium" color="gray.900">
                       {component.value.toFixed(2)}
                     </Td>
