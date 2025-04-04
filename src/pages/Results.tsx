@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import {
@@ -22,6 +22,11 @@ import {
   Center,
   useToast,
   Icon,
+  Tooltip,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { ChevronDownIcon, ChevronUpIcon, RepeatIcon } from "@chakra-ui/icons";
@@ -30,9 +35,11 @@ import { getEventResults, EventResults, ScoreHistory } from "../api/client";
 import JudgeCard from "../components/JudgeCard";
 import FavoriteButton from "../components/FavoriteButton";
 import TossieButton from "../components/TossieButton";
+import CalendarButton from "../components/CalendarButton";
 import { formatEventTime, convertToIANATimezone } from "../utils/timeFormat";
 import dayjs, { DATE_FORMATS } from "../utils/date";
-import { FiExternalLink } from "react-icons/fi";
+import { FiExternalLink, FiCalendar } from "react-icons/fi";
+import { FaCalendarPlus, FaApple, FaAndroid, FaGoogle } from "react-icons/fa";
 import { trackPageView } from "../utils/analytics";
 
 // Add WakeLock types
@@ -395,11 +402,33 @@ export default function Results() {
               )}
             </VStack>
           </VStack>
-          <FavoriteButton
-            type="event"
-            name={data.eventName}
-            params={{ year: year!, ijsId: ijsId!, eventId: eventId! }}
-          />
+          <VStack spacing={{ base: 2, md: 4 }} align="center">
+            {data.date && data.time && (
+              <CalendarButton
+                eventName={data.eventName}
+                competitionTitle={data.competitionTitle}
+                date={data.date}
+                time={data.time}
+                timezone={data.timezone || undefined}
+                eventUrl={`https://skater-stats.com/competition/${year}/${ijsId}/event/${eventId}`}
+                officialUrl={
+                  data?.results?.[0]?.resultsUrl
+                    ? `https://ijs.usfigureskating.org/leaderboard/${
+                        data.results[0].competitionType === "ijs_nonqual"
+                          ? "nonqual_results"
+                          : "results"
+                      }/${year}/${ijsId}/${data.results[0].resultsUrl}`
+                    : undefined
+                }
+                competitionType={data?.results?.[0]?.competitionType}
+              />
+            )}
+            <FavoriteButton
+              type="event"
+              name={data.eventName}
+              params={{ year: year!, ijsId: ijsId!, eventId: eventId! }}
+            />
+          </VStack>
         </HStack>
         <HStack spacing={4}>
           <Badge colorScheme={segmentStatus === "Final" ? "green" : "orange"}>
