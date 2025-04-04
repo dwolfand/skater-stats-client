@@ -18,8 +18,13 @@ import {
   AlertDescription,
   Tooltip,
   Flex,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from "@chakra-ui/react";
-import { FaTrash, FaPlus, FaLock } from "react-icons/fa";
+import { FaTrash, FaPlus, FaLock, FaTrophy } from "react-icons/fa";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { MapLocation, MapLocationType } from "../types/auth";
 
@@ -35,6 +40,8 @@ interface ProfileMapSectionProps {
     type: string;
     description?: string;
   }>;
+  autoSave?: boolean;
+  onSave?: (locations: MapLocation[]) => Promise<void>;
 }
 
 // Get Google Maps API key from environment variables
@@ -403,6 +410,8 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
   locations = [],
   onChange,
   competitionLocations = [],
+  autoSave = false,
+  onSave,
 }) => {
   const [newLocation, setNewLocation] = useState<Partial<MapLocation>>({
     type: "other",
@@ -537,7 +546,42 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
       description: newLocation.description || "",
     };
 
-    onChange([...locations, newLocationFull]);
+    const updatedLocations = [...locations, newLocationFull];
+    onChange(updatedLocations);
+
+    // Auto save if enabled
+    if (autoSave && onSave) {
+      toast({
+        title: "Saving your map...",
+        status: "info",
+        duration: 2000,
+      });
+
+      onSave(updatedLocations)
+        .then(() => {
+          toast({
+            title: "Map location added and saved!",
+            status: "success",
+            duration: 3000,
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Location added but couldn't save automatically",
+            description:
+              "Your changes will be saved when you click Save Changes",
+            status: "warning",
+            duration: 5000,
+          });
+        });
+    } else {
+      toast({
+        title: "Location added!",
+        description: "Don't forget to save your changes",
+        status: "success",
+        duration: 3000,
+      });
+    }
 
     // Reset form
     setNewLocation({ type: "other" });
@@ -549,7 +593,42 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
   const removeLocation = (id: string) => {
     // Only remove if it's not a competition location (readOnly is not set)
     if (!allLocations.find((loc) => loc.id === id)?.readOnly) {
-      onChange(locations.filter((loc) => loc.id !== id));
+      const updatedLocations = locations.filter((loc) => loc.id !== id);
+      onChange(updatedLocations);
+
+      // Auto save if enabled
+      if (autoSave && onSave) {
+        toast({
+          title: "Saving your map...",
+          status: "info",
+          duration: 2000,
+        });
+
+        onSave(updatedLocations)
+          .then(() => {
+            toast({
+              title: "Location removed and changes saved!",
+              status: "success",
+              duration: 3000,
+            });
+          })
+          .catch(() => {
+            toast({
+              title: "Location removed but couldn't save automatically",
+              description:
+                "Your changes will be saved when you click Save Changes",
+              status: "warning",
+              duration: 5000,
+            });
+          });
+      } else {
+        toast({
+          title: "Location removed",
+          description: "Don't forget to save your changes",
+          status: "success",
+          duration: 3000,
+        });
+      }
     }
   };
 
@@ -785,7 +864,8 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
             Your Locations:
           </Text>
           <VStack spacing={2} align="stretch">
-            {allLocations.map((location) => (
+            {/* User's editable locations */}
+            {locations.map((location) => (
               <Box
                 key={location.id}
                 p={3}
@@ -812,32 +892,15 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
                     <Box flex="1">
                       <VStack align="start" spacing={1} mb={1}>
                         <Text fontWeight="bold">{location.name}</Text>
-                        <Flex
-                          width="100%"
-                          direction={{ base: "column", md: "row" }}
-                          gap={2}
-                          align={{ base: "start", md: "center" }}
+                        <Badge
+                          colorScheme={
+                            LOCATION_TYPES.find(
+                              (t) => t.value === location.type
+                            )?.badgeColor || "gray"
+                          }
                         >
-                          <Badge
-                            colorScheme={
-                              LOCATION_TYPES.find(
-                                (t) => t.value === location.type
-                              )?.badgeColor || "gray"
-                            }
-                          >
-                            {getTypeLabel(location.type)}
-                          </Badge>
-                          {location.readOnly && (
-                            <Tooltip label="This location is automatically added from your competition history and cannot be removed">
-                              <Badge colorScheme="blue" variant="outline">
-                                <HStack spacing={1}>
-                                  <FaLock size="0.6em" />
-                                  <Text>Competition History</Text>
-                                </HStack>
-                              </Badge>
-                            </Tooltip>
-                          )}
-                        </Flex>
+                          {getTypeLabel(location.type)}
+                        </Badge>
                       </VStack>
                       <Text fontSize="sm" color="gray.600" noOfLines={1}>
                         {location.address}
@@ -862,6 +925,77 @@ export const ProfileMapSection: React.FC<ProfileMapSectionProps> = ({
                 </Flex>
               </Box>
             ))}
+
+            {/* Competition locations in a collapsible section */}
+            {competitionMapLocations.length > 0 && (
+              <Box borderWidth="1px" borderRadius="md" borderColor="gray.200">
+                <Accordion allowToggle>
+                  <AccordionItem border="none">
+                    <h2>
+                      <AccordionButton py={3}>
+                        <HStack flex="1" spacing={2}>
+                          <FaTrophy />
+                          <Text fontWeight="medium">
+                            Competition History (
+                            {competitionMapLocations.length})
+                          </Text>
+                        </HStack>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel pb={4}>
+                      <VStack spacing={2} align="stretch">
+                        {competitionMapLocations.map((location) => (
+                          <Box
+                            key={location.id}
+                            p={3}
+                            borderWidth="1px"
+                            borderRadius="md"
+                            borderColor="gray.200"
+                          >
+                            <HStack spacing={3}>
+                              <Box
+                                bg={getColorForType(location.type)}
+                                w="36px"
+                                h="36px"
+                                borderRadius="full"
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                color="white"
+                                fontSize="20px"
+                              >
+                                {getEmojiForType(location.type)}
+                              </Box>
+                              <Box flex="1">
+                                <VStack align="start" spacing={1} mb={1}>
+                                  <Text fontWeight="bold">{location.name}</Text>
+                                  <Badge colorScheme="orange">
+                                    {getTypeLabel(location.type)}
+                                  </Badge>
+                                </VStack>
+                                <Text
+                                  fontSize="sm"
+                                  color="gray.600"
+                                  noOfLines={1}
+                                >
+                                  {location.address}
+                                </Text>
+                                {location.description && (
+                                  <Text fontSize="sm" fontStyle="italic" mt={1}>
+                                    "{location.description}"
+                                  </Text>
+                                )}
+                              </Box>
+                            </HStack>
+                          </Box>
+                        ))}
+                      </VStack>
+                    </AccordionPanel>
+                  </AccordionItem>
+                </Accordion>
+              </Box>
+            )}
           </VStack>
         </Box>
       )}

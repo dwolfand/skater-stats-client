@@ -181,6 +181,50 @@ const ClubCustomizationModal: React.FC<ClubCustomizationModalProps> = ({
         title: "Image uploaded successfully",
         status: "success",
       });
+
+      // Auto-save after successful upload
+      try {
+        toast({
+          title: "Saving club information...",
+          status: "info",
+          duration: 2000,
+        });
+
+        // Create the customization data with the new image
+        const customizationData: ClubStats["customization"] = {
+          location: location || undefined,
+          website: website || undefined,
+          description: description || undefined,
+          socialLinks: {
+            instagram: instagram || undefined,
+            facebook: facebook || undefined,
+          },
+          profileImage: {
+            url: fileUrl,
+            thumbnails: thumbnailUrls,
+          },
+        };
+
+        // Call the API to update
+        await updateClubCustomization(clubId, customizationData);
+
+        // Invalidate club data cache to refresh the UI
+        queryClient.invalidateQueries({ queryKey: ["club", clubId] });
+
+        toast({
+          title: "Club logo updated and saved!",
+          status: "success",
+          duration: 3000,
+        });
+      } catch (error) {
+        toast({
+          title: "Logo uploaded but couldn't auto-save",
+          description: "Click 'Save Changes' to apply your updates",
+          status: "warning",
+          duration: 5000,
+        });
+        console.error("Error auto-saving club customization:", error);
+      }
     } catch (error) {
       toast({
         title: "Failed to upload image",
@@ -197,9 +241,50 @@ const ClubCustomizationModal: React.FC<ClubCustomizationModalProps> = ({
     updateMutation.mutate();
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = async () => {
     setImageUrl("");
     setThumbnails(undefined);
+
+    // Auto-save after removing the image
+    try {
+      toast({
+        title: "Saving club information...",
+        status: "info",
+        duration: 2000,
+      });
+
+      // Create the customization data without the image
+      const customizationData: ClubStats["customization"] = {
+        location: location || undefined,
+        website: website || undefined,
+        description: description || undefined,
+        socialLinks: {
+          instagram: instagram || undefined,
+          facebook: facebook || undefined,
+        },
+        profileImage: undefined,
+      };
+
+      // Call the API to update
+      await updateClubCustomization(clubId, customizationData);
+
+      // Invalidate club data cache to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ["club", clubId] });
+
+      toast({
+        title: "Club logo removed and changes saved!",
+        status: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Logo removed but couldn't auto-save",
+        description: "Click 'Save Changes' to apply your updates",
+        status: "warning",
+        duration: 5000,
+      });
+      console.error("Error auto-saving club customization:", error);
+    }
   };
 
   return (

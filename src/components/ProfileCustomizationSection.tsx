@@ -196,6 +196,8 @@ export const ProfileCustomizationSection: React.FC<
         thumbnails: thumbnailUrls,
       };
 
+      let updatedCustomization = { ...customization };
+
       if (type === "gallery") {
         // When updating gallery images, make a fresh copy of the array
         const galleryImages = [...(customization.galleryImages || [])];
@@ -212,21 +214,49 @@ export const ProfileCustomizationSection: React.FC<
           galleryImages.push(imageData);
         }
 
-        setCustomization({
+        updatedCustomization = {
           ...customization,
           galleryImages,
-        });
+        };
+
+        setCustomization(updatedCustomization);
       } else {
-        setCustomization({
+        updatedCustomization = {
           ...customization,
           [type === "profile" ? "profileImage" : "coverImage"]: imageData,
-        });
+        };
+
+        setCustomization(updatedCustomization);
       }
 
       toast({
         title: "Image uploaded successfully",
         status: "success",
       });
+
+      // Auto-save after successful upload
+      try {
+        toast({
+          title: "Saving your profile...",
+          status: "info",
+          duration: 2000,
+        });
+
+        await onSave(updatedCustomization);
+
+        toast({
+          title: "Profile saved successfully!",
+          status: "success",
+          duration: 3000,
+        });
+      } catch (error) {
+        toast({
+          title: "Image uploaded but couldn't auto-save",
+          description: "Your changes will be saved when you click Save Changes",
+          status: "warning",
+          duration: 5000,
+        });
+      }
     } catch (error) {
       toast({
         title: "Failed to upload image",
@@ -690,12 +720,38 @@ export const ProfileCustomizationSection: React.FC<
                         leftIcon={<FaTrash />}
                         variant="ghost"
                         colorScheme="red"
-                        onClick={() =>
-                          setCustomization({
+                        onClick={async () => {
+                          const updatedCustomization = {
                             ...customization,
                             profileImage: undefined,
-                          })
-                        }
+                          };
+                          setCustomization(updatedCustomization);
+
+                          // Auto-save after removal
+                          try {
+                            toast({
+                              title: "Saving your profile...",
+                              status: "info",
+                              duration: 2000,
+                            });
+
+                            await onSave(updatedCustomization);
+
+                            toast({
+                              title: "Profile photo removed and saved!",
+                              status: "success",
+                              duration: 3000,
+                            });
+                          } catch (error) {
+                            toast({
+                              title: "Photo removed but couldn't auto-save",
+                              description:
+                                "Your changes will be saved when you click Save Changes",
+                              status: "warning",
+                              duration: 5000,
+                            });
+                          }
+                        }}
                       >
                         Remove
                       </Button>
@@ -769,12 +825,39 @@ export const ProfileCustomizationSection: React.FC<
                         leftIcon={<FaTrash />}
                         variant="ghost"
                         colorScheme="red"
-                        onClick={() =>
-                          setCustomization({
+                        onClick={async () => {
+                          const updatedCustomization = {
                             ...customization,
                             coverImage: undefined,
-                          })
-                        }
+                          };
+                          setCustomization(updatedCustomization);
+
+                          // Auto-save after removal
+                          try {
+                            toast({
+                              title: "Saving your profile...",
+                              status: "info",
+                              duration: 2000,
+                            });
+
+                            await onSave(updatedCustomization);
+
+                            toast({
+                              title: "Cover image removed and saved!",
+                              status: "success",
+                              duration: 3000,
+                            });
+                          } catch (error) {
+                            toast({
+                              title:
+                                "Cover image removed but couldn't auto-save",
+                              description:
+                                "Your changes will be saved when you click Save Changes",
+                              status: "warning",
+                              duration: 5000,
+                            });
+                          }
+                        }}
                       >
                         Remove
                       </Button>
@@ -860,15 +943,41 @@ export const ProfileCustomizationSection: React.FC<
                           top={2}
                           right={2}
                           size="sm"
-                          onClick={() => {
+                          onClick={async () => {
                             const newImages = [
                               ...(customization.galleryImages || []),
                             ];
                             newImages.splice(index, 1);
-                            setCustomization({
+                            const updatedCustomization = {
                               ...customization,
                               galleryImages: newImages,
-                            });
+                            };
+                            setCustomization(updatedCustomization);
+
+                            // Auto-save after removal
+                            try {
+                              toast({
+                                title: "Saving your profile...",
+                                status: "info",
+                                duration: 2000,
+                              });
+
+                              await onSave(updatedCustomization);
+
+                              toast({
+                                title: "Gallery image removed and saved!",
+                                status: "success",
+                                duration: 3000,
+                              });
+                            } catch (error) {
+                              toast({
+                                title: "Image removed but couldn't auto-save",
+                                description:
+                                  "Your changes will be saved when you click Save Changes",
+                                status: "warning",
+                                duration: 5000,
+                              });
+                            }
                           }}
                         />
                       </Box>
@@ -999,13 +1108,22 @@ export const ProfileCustomizationSection: React.FC<
                 </Text>
                 <ProfileMapSection
                   locations={customization.mapLocations || []}
-                  onChange={(locations: MapLocation[]) =>
+                  onChange={(locations: MapLocation[]) => {
                     setCustomization({
                       ...customization,
                       mapLocations: locations,
-                    })
-                  }
+                    });
+                  }}
                   competitionLocations={competitionLocations}
+                  autoSave={true}
+                  onSave={async (updatedLocations: MapLocation[]) => {
+                    // Create a customization object with the updated locations
+                    const updatedCustomization = {
+                      ...customization,
+                      mapLocations: updatedLocations,
+                    };
+                    return onSave(updatedCustomization);
+                  }}
                 />
               </VStack>
             </AccordionPanel>
