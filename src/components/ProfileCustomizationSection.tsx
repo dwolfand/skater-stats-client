@@ -465,8 +465,8 @@ export const ProfileCustomizationSection: React.FC<
                                         color={colorItem.color}
                                         onChange={(color) => {
                                           const newColors = [
-                                            ...customization.backgroundGradient!
-                                              .colors,
+                                            ...(customization.backgroundGradient
+                                              ?.colors || []),
                                           ];
                                           newColors[index] = {
                                             ...newColors[index],
@@ -475,7 +475,8 @@ export const ProfileCustomizationSection: React.FC<
                                           setCustomization({
                                             ...customization,
                                             backgroundGradient: {
-                                              ...customization.backgroundGradient!,
+                                              ...(customization.backgroundGradient ||
+                                                {}),
                                               colors: newColors,
                                             },
                                           });
@@ -499,8 +500,8 @@ export const ProfileCustomizationSection: React.FC<
                                   (index === 0
                                     ? 0
                                     : index ===
-                                      customization.backgroundGradient.colors
-                                        .length -
+                                      (customization.backgroundGradient?.colors
+                                        .length || 0) -
                                         1
                                     ? 100
                                     : 50)
@@ -511,7 +512,8 @@ export const ProfileCustomizationSection: React.FC<
                                     Math.max(0, parseInt(e.target.value) || 0)
                                   );
                                   const newColors = [
-                                    ...customization.backgroundGradient!.colors,
+                                    ...(customization.backgroundGradient
+                                      ?.colors || []),
                                   ];
                                   newColors[index] = {
                                     ...newColors[index],
@@ -520,7 +522,8 @@ export const ProfileCustomizationSection: React.FC<
                                   setCustomization({
                                     ...customization,
                                     backgroundGradient: {
-                                      ...customization.backgroundGradient!,
+                                      ...(customization.backgroundGradient ||
+                                        {}),
                                       colors: newColors,
                                     },
                                   });
@@ -535,24 +538,25 @@ export const ProfileCustomizationSection: React.FC<
                               variant="ghost"
                               colorScheme="red"
                               isDisabled={
-                                customization.backgroundGradient.colors
-                                  .length <= 2
+                                (customization.backgroundGradient?.colors
+                                  ?.length || 0) <= 2
                               }
                               onClick={() => {
                                 if (
-                                  customization.backgroundGradient!.colors
-                                    .length <= 2
+                                  (customization.backgroundGradient?.colors
+                                    ?.length || 0) <= 2
                                 )
                                   return;
 
                                 const newColors = [
-                                  ...customization.backgroundGradient!.colors,
+                                  ...(customization.backgroundGradient
+                                    ?.colors || []),
                                 ];
                                 newColors.splice(index, 1);
                                 setCustomization({
                                   ...customization,
                                   backgroundGradient: {
-                                    ...customization.backgroundGradient!,
+                                    ...(customization.backgroundGradient || {}),
                                     colors: newColors,
                                   },
                                 });
@@ -566,37 +570,44 @@ export const ProfileCustomizationSection: React.FC<
                         size="sm"
                         leftIcon={<AddIcon />}
                         onClick={() => {
-                          const existingColors =
-                            customization.backgroundGradient!.colors;
-                          const lastPosition =
-                            existingColors[existingColors.length - 1]
-                              .position ?? 100;
+                          // Safely access colors with fallback to empty array
+                          const gradient = customization.backgroundGradient || {
+                            colors: [],
+                          };
+                          const existingColors = gradient.colors;
+
+                          // Default values if array is empty
+                          const lastIndex = existingColors.length - 1;
+                          const lastColor =
+                            lastIndex >= 0
+                              ? existingColors[lastIndex]
+                              : { color: "#FFFFFF", position: 100 };
+                          const secondLastIndex = lastIndex - 1;
+                          const secondLastColor =
+                            secondLastIndex >= 0
+                              ? existingColors[secondLastIndex]
+                              : { color: "#DDDDDD", position: 0 };
+
+                          const lastPosition = lastColor.position ?? 100;
                           const secondLastPosition =
-                            existingColors.length > 1
-                              ? existingColors[existingColors.length - 2]
-                                  .position ?? 50
-                              : 0;
+                            secondLastColor.position ?? 0;
 
                           // Calculate position for new color between the last two colors
                           const newPosition =
                             secondLastPosition +
                             (lastPosition - secondLastPosition) / 2;
 
-                          // Calculate a color midway between the last two colors
-                          const lastColor =
-                            existingColors[existingColors.length - 1].color;
-
                           setCustomization({
                             ...customization,
                             backgroundGradient: {
-                              ...customization.backgroundGradient!,
+                              ...(customization.backgroundGradient || {}),
                               colors: [
-                                ...existingColors.slice(0, -1),
+                                ...existingColors.slice(0, lastIndex),
                                 {
                                   color: "#AAAAAA",
                                   position: Math.round(newPosition),
                                 },
-                                existingColors[existingColors.length - 1],
+                                lastColor,
                               ],
                             },
                           });
@@ -609,18 +620,28 @@ export const ProfileCustomizationSection: React.FC<
                         <FormLabel fontSize="sm">Direction</FormLabel>
                         <Select
                           value={
-                            customization.backgroundGradient.direction ||
+                            customization.backgroundGradient?.direction ||
                             "to bottom"
                           }
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            // Create a properly typed backgroundGradient object with required properties
+                            const updatedGradient = {
+                              // Preserve existing properties if any
+                              ...(customization.backgroundGradient || {}),
+                              // Always provide colors as an array
+                              colors: [
+                                ...(customization.backgroundGradient?.colors ||
+                                  []),
+                              ],
+                              // Update the direction
+                              direction: e.target.value,
+                            };
+
                             setCustomization({
                               ...customization,
-                              backgroundGradient: {
-                                ...customization.backgroundGradient!,
-                                direction: e.target.value,
-                              },
-                            })
-                          }
+                              backgroundGradient: updatedGradient,
+                            });
+                          }}
                         >
                           <option value="to bottom">Top to Bottom</option>
                           <option value="to right">Left to Right</option>
@@ -654,9 +675,9 @@ export const ProfileCustomizationSection: React.FC<
                         borderWidth="1px"
                         borderColor="gray.200"
                         backgroundImage={`linear-gradient(${
-                          customization.backgroundGradient.direction ||
+                          customization.backgroundGradient?.direction ||
                           "to bottom"
-                        }, ${customization.backgroundGradient.colors
+                        }, ${(customization.backgroundGradient?.colors || [])
                           .sort(
                             (a, b) => (a.position ?? 0) - (b.position ?? 100)
                           )
