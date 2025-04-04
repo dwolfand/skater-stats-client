@@ -1245,40 +1245,58 @@ export default function Skater() {
                             <Heading size="sm" mb={4}>
                               Connect With Me
                             </Heading>
-                            <HStack spacing={4}>
+                            <VStack spacing={3} align="start">
                               {stats.customization.socialLinks.instagram && (
                                 <Link
                                   href={`https://instagram.com/${stats.customization.socialLinks.instagram}`}
                                   isExternal
+                                  display="flex"
+                                  alignItems="center"
                                 >
-                                  <Icon as={FaInstagram} boxSize={6} />
+                                  <Icon as={FaInstagram} boxSize={6} mr={2} />
+                                  <Text>
+                                    @{stats.customization.socialLinks.instagram}
+                                  </Text>
                                 </Link>
                               )}
                               {stats.customization.socialLinks.twitter && (
                                 <Link
                                   href={`https://twitter.com/${stats.customization.socialLinks.twitter}`}
                                   isExternal
+                                  display="flex"
+                                  alignItems="center"
                                 >
-                                  <Icon as={FaTwitter} boxSize={6} />
+                                  <Icon as={FaTwitter} boxSize={6} mr={2} />
+                                  <Text>
+                                    @{stats.customization.socialLinks.twitter}
+                                  </Text>
                                 </Link>
                               )}
                               {stats.customization.socialLinks.tiktok && (
                                 <Link
                                   href={`https://tiktok.com/@${stats.customization.socialLinks.tiktok}`}
                                   isExternal
+                                  display="flex"
+                                  alignItems="center"
                                 >
-                                  <Icon as={FaTiktok} boxSize={6} />
+                                  <Icon as={FaTiktok} boxSize={6} mr={2} />
+                                  <Text>
+                                    @{stats.customization.socialLinks.tiktok}
+                                  </Text>
                                 </Link>
                               )}
                               {stats.customization.socialLinks.youtube && (
                                 <Link
                                   href={stats.customization.socialLinks.youtube}
                                   isExternal
+                                  display="flex"
+                                  alignItems="center"
                                 >
-                                  <Icon as={FaYoutube} boxSize={6} />
+                                  <Icon as={FaYoutube} boxSize={6} mr={2} />
+                                  <Text>YouTube</Text>
                                 </Link>
                               )}
-                            </HStack>
+                            </VStack>
                           </Card>
                         )}
 
