@@ -94,6 +94,105 @@ const FONT_OPTIONS = [
   { label: "Roboto", value: "'Roboto', sans-serif" },
 ];
 
+// Color position input component to isolate each color stop's state
+const ColorStopControl = ({
+  colorItem,
+  index,
+  totalColors,
+  onColorChange,
+  onPositionChange,
+  onRemove,
+}: {
+  colorItem: { color: string; position?: number };
+  index: number;
+  totalColors: number;
+  onColorChange: (color: string) => void;
+  onPositionChange: (position: number) => void;
+  onRemove: () => void;
+}) => {
+  // Initial value based on position in the gradient
+  const defaultPosition =
+    index === 0 ? 0 : index === totalColors - 1 ? 100 : 50;
+
+  // Local state for the position input
+  const [localPosition, setLocalPosition] = useState<string>(
+    (colorItem.position ?? defaultPosition).toString()
+  );
+
+  // Update local state when props change
+  useEffect(() => {
+    const position = colorItem.position ?? defaultPosition;
+    setLocalPosition(position.toString());
+  }, [colorItem.position, index, totalColors, defaultPosition]);
+
+  return (
+    <HStack spacing={3} alignItems="flex-end">
+      <Box>
+        <FormLabel fontSize="xs">Color {index + 1}</FormLabel>
+        <Popover placement="right">
+          <PopoverTrigger>
+            <Button
+              h="40px"
+              w="40px"
+              p={0}
+              backgroundColor={colorItem.color}
+              border="1px solid"
+              borderColor="gray.200"
+              _hover={{ borderColor: "gray.300" }}
+            />
+          </PopoverTrigger>
+          <Portal>
+            <PopoverContent w="auto" border="none">
+              <PopoverBody p={0}>
+                <HexColorPicker
+                  color={colorItem.color}
+                  onChange={onColorChange}
+                />
+              </PopoverBody>
+            </PopoverContent>
+          </Portal>
+        </Popover>
+      </Box>
+
+      <Box flex="1">
+        <FormLabel fontSize="xs">Position %</FormLabel>
+        <Input
+          size="sm"
+          type="number"
+          min="0"
+          max="100"
+          value={localPosition}
+          onChange={(e) => {
+            // Only update local state while typing
+            setLocalPosition(e.target.value);
+          }}
+          onBlur={() => {
+            // Validate and update parent component on blur
+            const numValue = parseInt(localPosition);
+            if (!isNaN(numValue)) {
+              const validPosition = Math.min(100, Math.max(0, numValue));
+              onPositionChange(validPosition);
+
+              // Make sure local state matches validated value
+              setLocalPosition(validPosition.toString());
+            }
+          }}
+        />
+      </Box>
+
+      <IconButton
+        aria-label="Remove color"
+        icon={<FaTrash />}
+        size="sm"
+        variant="ghost"
+        colorScheme="red"
+        isDisabled={totalColors <= 2}
+        onClick={onRemove}
+      />
+    </HStack>
+  );
+};
+
 export const ProfileCustomizationSection: React.FC<
   ProfileCustomizationSectionProps
 > = ({
@@ -441,128 +540,63 @@ export const ProfileCustomizationSection: React.FC<
                       <FormLabel fontSize="sm">Gradient Colors</FormLabel>
                       {customization.backgroundGradient.colors.map(
                         (colorItem, index) => (
-                          <HStack key={index} spacing={3} alignItems="flex-end">
-                            <Box>
-                              <FormLabel fontSize="xs">
-                                Color {index + 1}
-                              </FormLabel>
-                              <Popover placement="right">
-                                <PopoverTrigger>
-                                  <Button
-                                    h="40px"
-                                    w="40px"
-                                    p={0}
-                                    backgroundColor={colorItem.color}
-                                    border="1px solid"
-                                    borderColor="gray.200"
-                                    _hover={{ borderColor: "gray.300" }}
-                                  />
-                                </PopoverTrigger>
-                                <Portal>
-                                  <PopoverContent w="auto" border="none">
-                                    <PopoverBody p={0}>
-                                      <HexColorPicker
-                                        color={colorItem.color}
-                                        onChange={(color) => {
-                                          const newColors = [
-                                            ...(customization.backgroundGradient
-                                              ?.colors || []),
-                                          ];
-                                          newColors[index] = {
-                                            ...newColors[index],
-                                            color,
-                                          };
-                                          setCustomization({
-                                            ...customization,
-                                            backgroundGradient: {
-                                              ...(customization.backgroundGradient ||
-                                                {}),
-                                              colors: newColors,
-                                            },
-                                          });
-                                        }}
-                                      />
-                                    </PopoverBody>
-                                  </PopoverContent>
-                                </Portal>
-                              </Popover>
-                            </Box>
-
-                            <Box flex="1">
-                              <FormLabel fontSize="xs">Position %</FormLabel>
-                              <Input
-                                size="sm"
-                                type="number"
-                                min="0"
-                                max="100"
-                                value={
-                                  colorItem.position ??
-                                  (index === 0
-                                    ? 0
-                                    : index ===
-                                      (customization.backgroundGradient?.colors
-                                        .length || 0) -
-                                        1
-                                    ? 100
-                                    : 50)
-                                }
-                                onChange={(e) => {
-                                  const position = Math.min(
-                                    100,
-                                    Math.max(0, parseInt(e.target.value) || 0)
-                                  );
-                                  const newColors = [
-                                    ...(customization.backgroundGradient
-                                      ?.colors || []),
-                                  ];
-                                  newColors[index] = {
-                                    ...newColors[index],
-                                    position,
-                                  };
-                                  setCustomization({
-                                    ...customization,
-                                    backgroundGradient: {
-                                      ...(customization.backgroundGradient ||
-                                        {}),
-                                      colors: newColors,
-                                    },
-                                  });
-                                }}
-                              />
-                            </Box>
-
-                            <IconButton
-                              aria-label="Remove color"
-                              icon={<FaTrash />}
-                              size="sm"
-                              variant="ghost"
-                              colorScheme="red"
-                              isDisabled={
-                                (customization.backgroundGradient?.colors
-                                  ?.length || 0) <= 2
-                              }
-                              onClick={() => {
-                                if (
-                                  (customization.backgroundGradient?.colors
-                                    ?.length || 0) <= 2
-                                )
-                                  return;
-
-                                const newColors = [
-                                  ...(customization.backgroundGradient
-                                    ?.colors || []),
-                                ];
-                                newColors.splice(index, 1);
-                                setCustomization({
-                                  ...customization,
-                                  backgroundGradient: {
-                                    ...(customization.backgroundGradient || {}),
-                                    colors: newColors,
-                                  },
-                                });
-                              }}
-                            />
-                          </HStack>
+                          <ColorStopControl
+                            key={index}
+                            colorItem={colorItem}
+                            index={index}
+                            totalColors={
+                              customization.backgroundGradient?.colors
+                                ?.length || 0
+                            }
+                            onColorChange={(color) => {
+                              const colors = [
+                                ...(customization.backgroundGradient?.colors ||
+                                  []),
+                              ];
+                              colors[index] = {
+                                ...colors[index],
+                                color,
+                              };
+                              setCustomization({
+                                ...customization,
+                                backgroundGradient: {
+                                  ...(customization.backgroundGradient || {}),
+                                  colors,
+                                },
+                              });
+                            }}
+                            onPositionChange={(position) => {
+                              const colors = [
+                                ...(customization.backgroundGradient?.colors ||
+                                  []),
+                              ];
+                              colors[index] = {
+                                ...colors[index],
+                                position,
+                              };
+                              setCustomization({
+                                ...customization,
+                                backgroundGradient: {
+                                  ...(customization.backgroundGradient || {}),
+                                  colors,
+                                },
+                              });
+                            }}
+                            onRemove={() => {
+                              const colors = [
+                                ...(customization.backgroundGradient?.colors ||
+                                  []),
+                              ];
+                              colors.splice(index, 1);
+                              setCustomization({
+                                ...customization,
+                                backgroundGradient: {
+                                  ...(customization.backgroundGradient || {}),
+                                  colors,
+                                },
+                              });
+                            }}
+                          />
                         )
                       )}
 
