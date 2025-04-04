@@ -53,6 +53,7 @@ import {
   flagRecentlyUploaded,
 } from "../utils/images";
 import ProfileMapSection from "./ProfileMapSection";
+import { AddIcon } from "@chakra-ui/icons";
 
 interface UploadingImageState {
   type: "profile" | "cover" | "gallery";
@@ -336,50 +337,339 @@ export const ProfileCustomizationSection: React.FC<
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel>Background Color</FormLabel>
-                  <HStack>
-                    <Popover placement="right">
-                      <PopoverTrigger>
-                        <Button
-                          h="40px"
-                          w="40px"
-                          p={0}
-                          backgroundColor={
-                            customization.backgroundColor || "#FFFFFF"
-                          }
-                          border="1px solid"
-                          borderColor="gray.200"
-                          _hover={{ borderColor: "gray.300" }}
-                        />
-                      </PopoverTrigger>
-                      <Portal>
-                        <PopoverContent w="auto" border="none">
-                          <PopoverBody p={0}>
-                            <HexColorPicker
-                              color={customization.backgroundColor || "#FFFFFF"}
-                              onChange={(color) =>
-                                setCustomization({
-                                  ...customization,
-                                  backgroundColor: color,
-                                })
-                              }
-                            />
-                          </PopoverBody>
-                        </PopoverContent>
-                      </Portal>
-                    </Popover>
+                  <FormLabel>Background</FormLabel>
+                  <HStack mb={2}>
                     <Button
                       size="sm"
-                      onClick={() =>
-                        setCustomization({
-                          ...customization,
-                          backgroundColor: undefined,
-                        })
+                      colorScheme={
+                        !customization.backgroundGradient ? "blue" : "gray"
                       }
+                      onClick={() => {
+                        // Switch to solid background mode
+                        if (customization.backgroundGradient) {
+                          setCustomization({
+                            ...customization,
+                            backgroundGradient: undefined,
+                          });
+                        }
+                      }}
                     >
-                      Reset
+                      Solid Color
+                    </Button>
+                    <Button
+                      size="sm"
+                      colorScheme={
+                        customization.backgroundGradient ? "blue" : "gray"
+                      }
+                      onClick={() => {
+                        // Switch to gradient mode if not already
+                        if (!customization.backgroundGradient) {
+                          setCustomization({
+                            ...customization,
+                            backgroundGradient: {
+                              colors: [
+                                {
+                                  color:
+                                    customization.backgroundColor || "#FFFFFF",
+                                  position: 0,
+                                },
+                                { color: "#E0E0E0", position: 100 },
+                              ],
+                              direction: "to bottom",
+                            },
+                          });
+                        }
+                      }}
+                    >
+                      Gradient
                     </Button>
                   </HStack>
+
+                  {/* Solid Background Color Picker */}
+                  {!customization.backgroundGradient && (
+                    <HStack>
+                      <Popover placement="right">
+                        <PopoverTrigger>
+                          <Button
+                            h="40px"
+                            w="40px"
+                            p={0}
+                            backgroundColor={
+                              customization.backgroundColor || "#FFFFFF"
+                            }
+                            border="1px solid"
+                            borderColor="gray.200"
+                            _hover={{ borderColor: "gray.300" }}
+                          />
+                        </PopoverTrigger>
+                        <Portal>
+                          <PopoverContent w="auto" border="none">
+                            <PopoverBody p={0}>
+                              <HexColorPicker
+                                color={
+                                  customization.backgroundColor || "#FFFFFF"
+                                }
+                                onChange={(color) =>
+                                  setCustomization({
+                                    ...customization,
+                                    backgroundColor: color,
+                                  })
+                                }
+                              />
+                            </PopoverBody>
+                          </PopoverContent>
+                        </Portal>
+                      </Popover>
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          setCustomization({
+                            ...customization,
+                            backgroundColor: undefined,
+                          })
+                        }
+                      >
+                        Reset
+                      </Button>
+                    </HStack>
+                  )}
+
+                  {/* Gradient Background Controls */}
+                  {customization.backgroundGradient && (
+                    <VStack spacing={3} align="stretch">
+                      {/* Colors */}
+                      <FormLabel fontSize="sm">Gradient Colors</FormLabel>
+                      {customization.backgroundGradient.colors.map(
+                        (colorItem, index) => (
+                          <HStack key={index} spacing={3} alignItems="flex-end">
+                            <Box>
+                              <FormLabel fontSize="xs">
+                                Color {index + 1}
+                              </FormLabel>
+                              <Popover placement="right">
+                                <PopoverTrigger>
+                                  <Button
+                                    h="40px"
+                                    w="40px"
+                                    p={0}
+                                    backgroundColor={colorItem.color}
+                                    border="1px solid"
+                                    borderColor="gray.200"
+                                    _hover={{ borderColor: "gray.300" }}
+                                  />
+                                </PopoverTrigger>
+                                <Portal>
+                                  <PopoverContent w="auto" border="none">
+                                    <PopoverBody p={0}>
+                                      <HexColorPicker
+                                        color={colorItem.color}
+                                        onChange={(color) => {
+                                          const newColors = [
+                                            ...customization.backgroundGradient!
+                                              .colors,
+                                          ];
+                                          newColors[index] = {
+                                            ...newColors[index],
+                                            color,
+                                          };
+                                          setCustomization({
+                                            ...customization,
+                                            backgroundGradient: {
+                                              ...customization.backgroundGradient!,
+                                              colors: newColors,
+                                            },
+                                          });
+                                        }}
+                                      />
+                                    </PopoverBody>
+                                  </PopoverContent>
+                                </Portal>
+                              </Popover>
+                            </Box>
+
+                            <Box flex="1">
+                              <FormLabel fontSize="xs">Position %</FormLabel>
+                              <Input
+                                size="sm"
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={
+                                  colorItem.position ??
+                                  (index === 0
+                                    ? 0
+                                    : index ===
+                                      customization.backgroundGradient.colors
+                                        .length -
+                                        1
+                                    ? 100
+                                    : 50)
+                                }
+                                onChange={(e) => {
+                                  const position = Math.min(
+                                    100,
+                                    Math.max(0, parseInt(e.target.value) || 0)
+                                  );
+                                  const newColors = [
+                                    ...customization.backgroundGradient!.colors,
+                                  ];
+                                  newColors[index] = {
+                                    ...newColors[index],
+                                    position,
+                                  };
+                                  setCustomization({
+                                    ...customization,
+                                    backgroundGradient: {
+                                      ...customization.backgroundGradient!,
+                                      colors: newColors,
+                                    },
+                                  });
+                                }}
+                              />
+                            </Box>
+
+                            <IconButton
+                              aria-label="Remove color"
+                              icon={<FaTrash />}
+                              size="sm"
+                              variant="ghost"
+                              colorScheme="red"
+                              isDisabled={
+                                customization.backgroundGradient.colors
+                                  .length <= 2
+                              }
+                              onClick={() => {
+                                if (
+                                  customization.backgroundGradient!.colors
+                                    .length <= 2
+                                )
+                                  return;
+
+                                const newColors = [
+                                  ...customization.backgroundGradient!.colors,
+                                ];
+                                newColors.splice(index, 1);
+                                setCustomization({
+                                  ...customization,
+                                  backgroundGradient: {
+                                    ...customization.backgroundGradient!,
+                                    colors: newColors,
+                                  },
+                                });
+                              }}
+                            />
+                          </HStack>
+                        )
+                      )}
+
+                      <Button
+                        size="sm"
+                        leftIcon={<AddIcon />}
+                        onClick={() => {
+                          const existingColors =
+                            customization.backgroundGradient!.colors;
+                          const lastPosition =
+                            existingColors[existingColors.length - 1]
+                              .position ?? 100;
+                          const secondLastPosition =
+                            existingColors.length > 1
+                              ? existingColors[existingColors.length - 2]
+                                  .position ?? 50
+                              : 0;
+
+                          // Calculate position for new color between the last two colors
+                          const newPosition =
+                            secondLastPosition +
+                            (lastPosition - secondLastPosition) / 2;
+
+                          // Calculate a color midway between the last two colors
+                          const lastColor =
+                            existingColors[existingColors.length - 1].color;
+
+                          setCustomization({
+                            ...customization,
+                            backgroundGradient: {
+                              ...customization.backgroundGradient!,
+                              colors: [
+                                ...existingColors.slice(0, -1),
+                                {
+                                  color: "#AAAAAA",
+                                  position: Math.round(newPosition),
+                                },
+                                existingColors[existingColors.length - 1],
+                              ],
+                            },
+                          });
+                        }}
+                      >
+                        Add Color Stop
+                      </Button>
+
+                      <FormControl>
+                        <FormLabel fontSize="sm">Direction</FormLabel>
+                        <Select
+                          value={
+                            customization.backgroundGradient.direction ||
+                            "to bottom"
+                          }
+                          onChange={(e) =>
+                            setCustomization({
+                              ...customization,
+                              backgroundGradient: {
+                                ...customization.backgroundGradient!,
+                                direction: e.target.value,
+                              },
+                            })
+                          }
+                        >
+                          <option value="to bottom">Top to Bottom</option>
+                          <option value="to right">Left to Right</option>
+                          <option value="to bottom right">Diagonal (↘)</option>
+                          <option value="to bottom left">Diagonal (↙)</option>
+                          <option value="to top">Bottom to Top</option>
+                          <option value="to left">Right to Left</option>
+                          <option value="to top right">Diagonal (↗)</option>
+                          <option value="to top left">Diagonal (↖)</option>
+                        </Select>
+                      </FormControl>
+
+                      <Button
+                        size="sm"
+                        colorScheme="red"
+                        variant="outline"
+                        onClick={() =>
+                          setCustomization({
+                            ...customization,
+                            backgroundGradient: undefined,
+                          })
+                        }
+                      >
+                        Remove Gradient
+                      </Button>
+
+                      {/* Gradient Preview */}
+                      <Box
+                        h="60px"
+                        borderRadius="md"
+                        borderWidth="1px"
+                        borderColor="gray.200"
+                        backgroundImage={`linear-gradient(${
+                          customization.backgroundGradient.direction ||
+                          "to bottom"
+                        }, ${customization.backgroundGradient.colors
+                          .sort(
+                            (a, b) => (a.position ?? 0) - (b.position ?? 100)
+                          )
+                          .map(
+                            (c) =>
+                              `${c.color} ${
+                                c.position !== undefined ? c.position + "%" : ""
+                              }`
+                          )
+                          .join(", ")})`}
+                      />
+                    </VStack>
+                  )}
                 </FormControl>
 
                 <FormControl>

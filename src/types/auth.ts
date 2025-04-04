@@ -56,6 +56,10 @@ export interface ProfileCustomization {
   // Theme & Layout
   accentColor?: string;
   backgroundColor?: string;
+  backgroundGradient?: {
+    colors: { color: string; position?: number }[];
+    direction?: string;
+  };
   fontFamily?: string;
 
   // Personal Info
