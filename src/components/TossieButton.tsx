@@ -104,8 +104,33 @@ export default function TossieButton({
     }
   };
 
+  const handleGivenTossieClick = (e: React.MouseEvent) => {
+    // Still need to stop propagation to prevent opening the results
+    e.stopPropagation();
+
+    toast({
+      title: "Tossie already given",
+      description: `You've already given a tossie to ${skaterName} for this event.`,
+      status: "info",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // If the tossie is already given, show a toast instead of opening the modal
+    if (isGiven) {
+      toast({
+        title: "Tossie already given",
+        description: `You've already given a tossie to ${skaterName} for this event.`,
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
 
     if (!isAuthenticated) {
       trackTossieLoginPrompt(skaterName);
@@ -240,7 +265,7 @@ export default function TossieButton({
             />
           }
           variant="ghost"
-          onClick={handleClick}
+          onClick={isGiven ? handleGivenTossieClick : handleClick}
           isLoading={isSubmitting}
           _hover={{ bg: "transparent" }}
         />
