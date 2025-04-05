@@ -22,8 +22,12 @@ import {
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getAdminInfo, updateLinkRequestStatus } from "../api/auth";
-import { UserStatus } from "../types/auth";
+import {
+  getAdminInfo,
+  updateLinkRequestStatus,
+  AdminInfo as AdminInfoType,
+} from "../api/auth";
+import { UserStatus, AdminTossieReceipt } from "../types/auth";
 import dayjs from "../utils/date";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 
@@ -110,63 +114,108 @@ export const AdminInfo: React.FC = () => {
         </HStack>
         <Collapse in={showTossies} animateOpacity>
           <VStack spacing={4} align="stretch">
-            {adminInfo?.recentTossies?.map((tossie) => (
-              <Box
-                key={tossie.id}
-                p={4}
-                borderWidth="1px"
-                borderRadius="md"
-                bg="white"
-              >
-                <HStack spacing={3} align="start">
-                  <Avatar
-                    size="sm"
-                    src={tossie.fromUserPicture}
-                    name={tossie.fromUserName}
-                  />
-                  <Box flex={1}>
-                    <HStack spacing={2} flexWrap="wrap">
-                      {tossie.fromSkaterId ? (
+            {adminInfo?.recentTossies?.map((tossie) => {
+              // Safely check property existence
+              const hasNoteData = "note" in tossie && tossie.note;
+              const isOpened =
+                "is_opened" in tossie ? tossie.is_opened : undefined;
+              const tossieType =
+                "tossie_type" in tossie ? tossie.tossie_type : undefined;
+              const isPublicNote =
+                "is_public_note" in tossie ? tossie.is_public_note : false;
+
+              return (
+                <Box
+                  key={tossie.id}
+                  p={4}
+                  borderWidth="1px"
+                  borderRadius="md"
+                  bg="white"
+                >
+                  <HStack spacing={3} align="start">
+                    <Avatar
+                      size="sm"
+                      src={tossie.fromUserPicture}
+                      name={tossie.fromUserName}
+                    />
+                    <Box flex={1}>
+                      <HStack spacing={2} flexWrap="wrap">
+                        {tossie.fromSkaterId ? (
+                          <Link
+                            as={RouterLink}
+                            to={`/skater/id/${tossie.fromSkaterId}`}
+                            color="blue.500"
+                            fontWeight="medium"
+                          >
+                            {tossie.fromSkaterName || tossie.fromUserName}
+                          </Link>
+                        ) : (
+                          <Text fontWeight="medium">{tossie.fromUserName}</Text>
+                        )}
+                        <Text>gave a tossie to</Text>
                         <Link
                           as={RouterLink}
-                          to={`/skater/id/${tossie.fromSkaterId}`}
+                          to={`/skater/id/${tossie.toSkaterId}`}
                           color="blue.500"
                           fontWeight="medium"
                         >
-                          {tossie.fromSkaterName || tossie.fromUserName}
+                          {tossie.toSkaterName}
                         </Link>
-                      ) : (
-                        <Text fontWeight="medium">{tossie.fromUserName}</Text>
+                        <Text>at</Text>
+                        <Link
+                          as={RouterLink}
+                          to={
+                            tossie.resultType === "six_event"
+                              ? `/competition/${tossie.eventYear}/${tossie.ijsId}/six-event/${tossie.results_url}`
+                              : `/competition/${tossie.eventYear}/${tossie.ijsId}/event/${tossie.results_url}`
+                          }
+                          color="blue.500"
+                        >
+                          {tossie.eventName}
+                        </Link>
+                      </HStack>
+                      <Text fontSize="sm" color="gray.500">
+                        {dayjs(tossie.created_at).format("MMM D, YYYY h:mm A")}
+                      </Text>
+
+                      {/* Display tossie status and type if available */}
+                      {isOpened !== undefined && (
+                        <HStack mt={1} spacing={2}>
+                          <Badge
+                            colorScheme={isOpened ? "green" : "yellow"}
+                            size="sm"
+                          >
+                            {isOpened ? "Opened" : "Unopened"}
+                          </Badge>
+                          {tossieType && (
+                            <Badge colorScheme="purple" size="sm">
+                              {tossieType}
+                            </Badge>
+                          )}
+                        </HStack>
                       )}
-                      <Text>gave a tossie to</Text>
-                      <Link
-                        as={RouterLink}
-                        to={`/skater/id/${tossie.toSkaterId}`}
-                        color="blue.500"
-                        fontWeight="medium"
-                      >
-                        {tossie.toSkaterName}
-                      </Link>
-                      <Text>at</Text>
-                      <Link
-                        as={RouterLink}
-                        to={
-                          tossie.resultType === "six_event"
-                            ? `/competition/${tossie.eventYear}/${tossie.ijsId}/six-event/${tossie.results_url}`
-                            : `/competition/${tossie.eventYear}/${tossie.ijsId}/event/${tossie.results_url}`
-                        }
-                        color="blue.500"
-                      >
-                        {tossie.eventName}
-                      </Link>
-                    </HStack>
-                    <Text fontSize="sm" color="gray.500">
-                      {dayjs(tossie.created_at).format("MMM D, YYYY h:mm A")}
-                    </Text>
-                  </Box>
-                </HStack>
-              </Box>
-            ))}
+
+                      {/* Display note if available */}
+                      {hasNoteData && (
+                        <Box mt={2} p={2} bg="gray.50" borderRadius="md">
+                          <HStack>
+                            <Badge
+                              colorScheme={isPublicNote ? "blue" : "red"}
+                              size="sm"
+                            >
+                              {isPublicNote ? "Public" : "Private"} Note
+                            </Badge>
+                          </HStack>
+                          <Text mt={1} fontSize="sm">
+                            "{tossie.note}"
+                          </Text>
+                        </Box>
+                      )}
+                    </Box>
+                  </HStack>
+                </Box>
+              );
+            })}
           </VStack>
         </Collapse>
       </Box>
