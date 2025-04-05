@@ -1396,19 +1396,6 @@ export default function Skater() {
             <StatGroup>
               <Stat>
                 <StatLabel>
-                  Events
-                  {filteredHistory.length !== stats.history.length &&
-                    ` (Filtered)`}
-                </StatLabel>
-                <StatNumber>{filteredHistory.length}</StatNumber>
-                {filteredHistory.length !== stats.history.length && (
-                  <Text fontSize="sm" color="gray.600">
-                    of {stats.totalEvents} total
-                  </Text>
-                )}
-              </Stat>
-              <Stat>
-                <StatLabel>
                   Competitions
                   {filteredHistory.length !== stats.history.length &&
                     ` (Filtered)`}
@@ -1419,6 +1406,19 @@ export default function Skater() {
                 {filteredHistory.length !== stats.history.length && (
                   <Text fontSize="sm" color="gray.600">
                     of {stats.totalCompetitions} total
+                  </Text>
+                )}
+              </Stat>
+              <Stat>
+                <StatLabel>
+                  Events
+                  {filteredHistory.length !== stats.history.length &&
+                    ` (Filtered)`}
+                </StatLabel>
+                <StatNumber>{filteredHistory.length}</StatNumber>
+                {filteredHistory.length !== stats.history.length && (
+                  <Text fontSize="sm" color="gray.600">
+                    of {stats.totalEvents} total
                   </Text>
                 )}
               </Stat>
