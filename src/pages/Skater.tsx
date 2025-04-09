@@ -1036,14 +1036,27 @@ export default function Skater() {
                   <Collapse in={isOpen} animateOpacity>
                     <Box>
                       {/* Cover Image */}
-                      {stats.customization.coverImage && (
+                      {stats.customization?.coverImage && (
                         <Box
+                          as="button"
+                          onClick={() => {
+                            const imageUrl = getImageUrl(
+                              stats.customization!.coverImage
+                            );
+                            if (imageUrl) setSelectedImage(imageUrl);
+                          }}
+                          cursor="pointer"
                           h="200px"
                           mb={6}
-                          bgImage={`url(${stats.customization.coverImage})`}
+                          width="100%"
+                          bgImage={`url(${getImageUrl(
+                            stats.customization!.coverImage
+                          )})`}
                           bgSize="cover"
                           bgPosition="center"
                           borderRadius="lg"
+                          transition="transform 0.2s"
+                          _hover={{ transform: "scale(1.01)" }}
                         />
                       )}
 
