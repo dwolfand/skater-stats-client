@@ -92,6 +92,7 @@ export interface ProfileCustomization {
 
   // Preferences
   unsubscribeFromEmail?: boolean;
+  unsubscribeFromTossieEmails?: boolean;
 
   // Map Locations
   mapLocations?: MapLocation[];

@@ -508,6 +508,81 @@ export const Profile: React.FC = () => {
               Opt out of feature announcements and event notification emails.
               You'll still receive important account-related emails.
             </Text>
+
+            <Divider my={2} />
+
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Text>Unsubscribe from tossie notifications</Text>
+              <Box
+                as="label"
+                display="inline-flex"
+                alignItems="center"
+                cursor="pointer"
+              >
+                <input
+                  type="checkbox"
+                  defaultChecked={
+                    profile?.customization?.unsubscribeFromTossieEmails === true
+                  }
+                  onChange={async (e) => {
+                    try {
+                      await saveProfileCustomization({
+                        ...profile?.customization,
+                        unsubscribeFromTossieEmails: e.target.checked,
+                      });
+                      await refreshProfile();
+                    } catch (error) {
+                      console.error(
+                        "Failed to update tossie email preferences",
+                        error
+                      );
+                    }
+                  }}
+                  style={{
+                    position: "absolute",
+                    opacity: 0,
+                    width: 0,
+                    height: 0,
+                  }}
+                />
+                <Box
+                  width="40px"
+                  height="20px"
+                  bg={
+                    profile?.customization?.unsubscribeFromTossieEmails === true
+                      ? "blue.500"
+                      : "gray.300"
+                  }
+                  borderRadius="full"
+                  position="relative"
+                  transition="background-color 0.2s"
+                >
+                  <Box
+                    position="absolute"
+                    top="2px"
+                    left={
+                      profile?.customization?.unsubscribeFromTossieEmails ===
+                      true
+                        ? "22px"
+                        : "2px"
+                    }
+                    width="16px"
+                    height="16px"
+                    bg="white"
+                    borderRadius="full"
+                    transition="left 0.2s"
+                  />
+                </Box>
+              </Box>
+            </Box>
+            <Text fontSize="sm" color="gray.500">
+              Opt out of email notifications when you receive tossies. You'll
+              still see tossies when you log in.
+            </Text>
           </VStack>
         </Card>
 
