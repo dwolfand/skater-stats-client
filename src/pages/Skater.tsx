@@ -418,9 +418,6 @@ export default function Skater() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
 
-  // Get your Google Maps API key from environment or config
-  // const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "";
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -523,6 +520,10 @@ export default function Skater() {
     if (!stats?.history)
       return { eventType: "", score: null, event: null, date: null };
 
+    // Check if all events are 6.0 events
+    const isAllSixEvents =
+      stats.history.length > 0 && stats.history.every((h) => h.isSixEvent);
+
     // Count occurrences of each event type
     const eventTypeCounts = stats.history.reduce<Record<string, number>>(
       (acc, curr) => {
@@ -546,19 +547,26 @@ export default function Skater() {
       .map(getEffectiveScore)
       .filter((score): score is number => score != null);
 
-    // Find the highest score and its corresponding event
-    const maxScore = scores.length > 0 ? Math.max(...scores) : null;
+    // Find the highest/lowest score and its corresponding event
+    const bestScore =
+      scores.length > 0
+        ? isAllSixEvents
+          ? Math.min(...scores)
+          : Math.max(...scores)
+        : null;
+
     const bestEvent = stats.history.find(
       (h) =>
         h.eventType === mostFrequentEventType &&
-        getEffectiveScore(h) === maxScore
+        getEffectiveScore(h) === bestScore
     );
 
     return {
       eventType: mostFrequentEventType,
-      score: maxScore,
+      score: bestScore,
       event: bestEvent?.event,
       date: bestEvent?.date,
+      isAllSixEvents,
     };
   }, [stats?.history]);
 
@@ -1443,9 +1451,19 @@ export default function Skater() {
                 </StatLabel>
                 <StatNumber>
                   {(() => {
+                    // Check if all filtered events are 6.0 events
+                    const isFilteredAllSixEvents =
+                      filteredHistory.length > 0 &&
+                      filteredHistory.every((h) => h.isSixEvent);
+
                     const scores = filteredHistory.map(getEffectiveScore);
                     const filteredBest =
-                      scores.length > 0 ? Math.max(...scores) : 0;
+                      scores.length > 0
+                        ? isFilteredAllSixEvents
+                          ? Math.min(...scores)
+                          : Math.max(...scores)
+                        : 0;
+
                     return filteredBest > 0 ? filteredBest.toFixed(2) : "N/A";
                   })()}
                 </StatNumber>
@@ -1456,10 +1474,20 @@ export default function Skater() {
                     </Text>
                   )}
                 {(() => {
+                  const isFilteredAllSixEvents =
+                    filteredHistory.length > 0 &&
+                    filteredHistory.every((h) => h.isSixEvent);
+
                   const scores = filteredHistory.map(getEffectiveScore);
-                  const maxScore = Math.max(...scores);
+                  const bestScore =
+                    scores.length > 0
+                      ? isFilteredAllSixEvents
+                        ? Math.min(...scores)
+                        : Math.max(...scores)
+                      : null;
+
                   const bestResult = filteredHistory.find(
-                    (h) => getEffectiveScore(h) === maxScore
+                    (h) => getEffectiveScore(h) === bestScore
                   );
                   if (bestResult) {
                     return (
