@@ -545,7 +545,9 @@ export default function Skater() {
     const scores = stats.history
       .filter((h) => h.eventType === mostFrequentEventType)
       .map(getEffectiveScore)
-      .filter((score): score is number => score != null);
+      .filter(
+        (score): score is number => score != null && !isNaN(score) && score > 0
+      );
 
     // Find the highest/lowest score and its corresponding event
     const bestScore =
@@ -1456,7 +1458,12 @@ export default function Skater() {
                       filteredHistory.length > 0 &&
                       filteredHistory.every((h) => h.isSixEvent);
 
-                    const scores = filteredHistory.map(getEffectiveScore);
+                    const scores = filteredHistory
+                      .map(getEffectiveScore)
+                      .filter(
+                        (score) => score != null && !isNaN(score) && score > 0
+                      );
+
                     const filteredBest =
                       scores.length > 0
                         ? isFilteredAllSixEvents
@@ -1478,7 +1485,12 @@ export default function Skater() {
                     filteredHistory.length > 0 &&
                     filteredHistory.every((h) => h.isSixEvent);
 
-                  const scores = filteredHistory.map(getEffectiveScore);
+                  const scores = filteredHistory
+                    .map(getEffectiveScore)
+                    .filter(
+                      (score) => score != null && !isNaN(score) && score > 0
+                    );
+
                   const bestScore =
                     scores.length > 0
                       ? isFilteredAllSixEvents
