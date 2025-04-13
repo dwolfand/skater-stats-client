@@ -62,6 +62,7 @@ import SixJudgeCard from "../components/SixJudgeCard";
 import { useEffect, useState, useMemo } from "react";
 import FavoriteButton from "../components/FavoriteButton";
 import DownloadButton from "../components/DownloadButton";
+import ShareButton from "../components/ShareButton";
 import { trackPageView } from "../utils/analytics";
 import TossieModal from "../components/TossieModal";
 import SkaterTossieDisplay from "../components/SkaterTossieDisplay";
@@ -778,6 +779,19 @@ export default function Skater() {
                       aria-label="Filter options"
                       icon={<FiFilter />}
                       onClick={onOptionsToggle}
+                      variant="solid"
+                      bg={themeColors.backgroundColor ? "white" : "transparent"}
+                      color="gray.800"
+                      _hover={{
+                        bg: themeColors.backgroundColor
+                          ? "gray.100"
+                          : "gray.50",
+                      }}
+                    />
+                    <ShareButton
+                      title={`${stats.name} - Skater Stats`}
+                      text={`Check out ${stats.name}'s skater profile on Skater Stats!`}
+                      url={window.location.href}
                       variant="solid"
                       bg={themeColors.backgroundColor ? "white" : "transparent"}
                       color="gray.800"
