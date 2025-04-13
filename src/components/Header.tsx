@@ -22,7 +22,7 @@ import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
 import { Search2Icon, CloseIcon, Icon, ArrowBackIcon } from "@chakra-ui/icons";
 import { FiUser } from "react-icons/fi";
 import FavoritesMenu from "./FavoritesMenu";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchEvents } from "../api/client";
 import type { SearchResult } from "../api/client";
@@ -39,12 +39,22 @@ const SearchInput = ({
   onClose?: () => void;
 }) => {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const navigate = useNavigate();
 
+  // Debounce query changes to avoid excessive API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
   const { data: results, isLoading } = useQuery({
-    queryKey: ["headerSearch", query],
-    queryFn: () => searchEvents(query),
-    enabled: query.length > 2,
+    queryKey: ["headerSearch", debouncedQuery],
+    queryFn: () => searchEvents(debouncedQuery),
+    enabled: debouncedQuery.length > 2,
   });
 
   const handleResultClick = (result: SearchResult) => {

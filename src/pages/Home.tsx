@@ -80,7 +80,7 @@ export default function Home() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
-    }, 300); // 300ms debounce delay
+    }, 700); // 700ms debounce delay
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
