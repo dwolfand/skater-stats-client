@@ -178,12 +178,17 @@ export default function Home() {
               </>
             ) : result.type === "skater" ? (
               <>
-                {result.competition && (
+                {result.club && (
+                  <Text color="gray.600" fontSize="sm">
+                    {result.club}
+                  </Text>
+                )}
+                {!result.club && result.competition && (
                   <Text color="gray.600" fontSize="sm">
                     {result.competition}
                   </Text>
                 )}
-                {result.date && (
+                {!result.club && !result.competition && result.date && (
                   <Text color="gray.500" fontSize="sm">
                     {dayjs.utc(result.date).format(DATE_FORMATS.DISPLAY)}
                   </Text>

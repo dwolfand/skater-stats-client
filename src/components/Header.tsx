@@ -147,6 +147,11 @@ const SearchInput = ({
                           {dayjs(result.startDate).format("MMM D, YYYY")}
                         </Text>
                       )}
+                      {result.type === "skater" && result.club && (
+                        <Text fontSize="sm" color="gray.600">
+                          {result.club}
+                        </Text>
+                      )}
                     </VStack>
                     <Badge
                       colorScheme={
