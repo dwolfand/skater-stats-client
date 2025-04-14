@@ -74,7 +74,7 @@ import ScoreHistoryChart from "../components/ScoreHistoryChart";
 import SkaterMapDisplay from "../components/SkaterMapDisplay";
 import { MapLocationType } from "../types/auth";
 import StatsBar from "../components/StatsBar";
-import { SkaterHistoryEntry } from "../types/skater";
+import { SkaterHistoryEntry, JudgeDetails } from "../types/skater";
 
 interface ExpandableRowProps {
   result: SkaterHistoryEntry;
@@ -137,18 +137,13 @@ function findTopScoringElement(history: SkaterHistoryEntry[]): {
 
     // Check each element
     for (const element of entry.judgeDetails.elements) {
-      // Support both property name conventions (value and score)
-      const elementScore =
-        element.value !== undefined ? element.value : element.score;
+      // Get the element score value (was using value or score before)
+      const elementScore = element.value;
       if (elementScore !== undefined && elementScore > maxScore) {
         maxScore = elementScore;
         topElement = {
-          // Support both property name conventions (elementCode and name)
-          elementName:
-            element.elementCode ||
-            element.name ||
-            element.plannedElement ||
-            "Unknown Element",
+          // Use elementCode property consistently
+          elementName: element.elementCode || "Unknown Element",
           executedElement: element.executedElement,
           score: elementScore,
           competitionName: entry.competition,
@@ -181,20 +176,15 @@ function findHighestMeanGOEElement(history: SkaterHistoryEntry[]): {
     for (const element of entry.judgeDetails.elements) {
       // Check if GOE exists and is valid
       if (element.goe !== undefined && element.goe > maxMeanGOE) {
-        // Support both property name conventions for judges scores
+        // Use judgesGoe property consistently
         const hasJudgesScores =
-          (element.judgesGoe && element.judgesGoe.length > 0) ||
-          (element.judges && element.judges.length > 0);
+          element.judgesGoe && element.judgesGoe.length > 0;
 
         if (hasJudgesScores) {
           maxMeanGOE = element.goe;
           topElement = {
-            // Support both property name conventions (elementCode and name)
-            elementName:
-              element.elementCode ||
-              element.name ||
-              element.plannedElement ||
-              "Unknown Element",
+            // Use elementCode property consistently
+            elementName: element.elementCode || "Unknown Element",
             executedElement: element.executedElement,
             meanGOE: element.goe,
             competitionName: entry.competition,
@@ -404,7 +394,9 @@ function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
                 tieBreaker={result.tieBreaker}
               />
             ) : (
-              result.judgeDetails && <JudgeCard details={result.judgeDetails} />
+              result.judgeDetails && (
+                <JudgeCard details={result.judgeDetails as JudgeDetails} />
+              )
             )}
           </Td>
         </Tr>
@@ -446,6 +438,15 @@ const getEmbedUrl = (url: string) => {
   // Return original URL if no patterns match
   return url;
 };
+
+// Create a specific interface for PersonalBest to fix type issues
+interface PersonalBest {
+  eventType: string;
+  score: number | null;
+  event: string | null | undefined;
+  date: string | null | undefined;
+  isAllSixEvents?: boolean;
+}
 
 export default function Skater() {
   const { name, skaterId } = useParams<{ name?: string; skaterId?: string }>();
@@ -563,7 +564,12 @@ export default function Skater() {
   // Memoize personal best calculation
   const personalBest = useMemo(() => {
     if (!stats?.history)
-      return { eventType: "", score: null, event: null, date: null };
+      return {
+        eventType: "",
+        score: null,
+        event: null,
+        date: null,
+      } as PersonalBest;
 
     // Check if all events are 6.0 events
     const isAllSixEvents =
@@ -611,10 +617,10 @@ export default function Skater() {
     return {
       eventType: mostFrequentEventType,
       score: bestScore,
-      event: bestEvent?.event,
-      date: bestEvent?.date,
+      event: bestEvent?.event || null,
+      date: bestEvent?.date || null,
       isAllSixEvents,
-    };
+    } as PersonalBest;
   }, [stats?.history]);
 
   // Memoize top scoring element calculation

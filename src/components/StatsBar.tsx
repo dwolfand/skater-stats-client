@@ -20,8 +20,8 @@ interface StatsBarProps {
   personalBest: {
     eventType: string;
     score: number | null;
-    event: string | null;
-    date: string | null;
+    event: string | null | undefined;
+    date: string | null | undefined;
     isAllSixEvents?: boolean;
   };
   topScoringElement: {
