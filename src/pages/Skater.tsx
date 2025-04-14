@@ -12,10 +12,6 @@ import {
   Container,
   Heading,
   Text,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatGroup,
   Table,
   Thead,
   Tbody,
@@ -50,12 +46,7 @@ import {
   ModalCloseButton,
   Center,
 } from "@chakra-ui/react";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CloseIcon,
-  AddIcon,
-} from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@chakra-ui/icons";
 import { FiFilter } from "react-icons/fi";
 import JudgeCard from "../components/JudgeCard";
 import SixJudgeCard from "../components/SixJudgeCard";
@@ -78,13 +69,12 @@ import { Icon } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "../styles/markdown.css";
-import { ImageData } from "../types/auth";
 import { getImageUrl, getThumbnailUrl } from "../utils/images";
 import ScoreHistoryChart from "../components/ScoreHistoryChart";
 import SkaterMapDisplay from "../components/SkaterMapDisplay";
 import { MapLocationType } from "../types/auth";
-
-type SkaterHistoryEntry = SkaterStats["history"][0];
+import StatsBar from "../components/StatsBar";
+import { SkaterHistoryEntry } from "../types/skater";
 
 interface ExpandableRowProps {
   result: SkaterHistoryEntry;
@@ -109,47 +99,6 @@ function getOrdinalSuffix(placement: string): string {
   }
 }
 
-function getMostFrequentEventTypeAndBest(history: SkaterHistoryEntry[]) {
-  // Count occurrences of each event type
-  const eventTypeCounts = history.reduce<Record<string, number>>(
-    (acc: Record<string, number>, curr: SkaterHistoryEntry) => {
-      acc[curr.eventType] = (acc[curr.eventType] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
-
-  // Find the event type with most occurrences
-  const mostFrequentEventType = Object.entries(eventTypeCounts).reduce<
-    [string, number]
-  >(
-    (max, [eventType, count]) => (count > max[1] ? [eventType, count] : max),
-    ["", 0]
-  )[0];
-
-  // Get all scores for the most frequent event type
-  const scores = history
-    .filter(
-      (h: SkaterHistoryEntry) =>
-        h.eventType === mostFrequentEventType && h.score != null
-    )
-    .map((h: SkaterHistoryEntry) => h.score);
-
-  // Find the highest score and its corresponding event
-  const maxScore = scores.length > 0 ? Math.max(...scores) : null;
-  const bestEvent = history.find(
-    (h: SkaterHistoryEntry) =>
-      h.eventType === mostFrequentEventType && h.score === maxScore
-  );
-
-  return {
-    eventType: mostFrequentEventType,
-    score: maxScore,
-    event: bestEvent?.event,
-    date: bestEvent?.date,
-  };
-}
-
 // Helper function to get the effective score
 function getEffectiveScore(result: SkaterHistoryEntry): number {
   if (result.isSixEvent) {
@@ -168,6 +117,101 @@ function getEffectiveScore(result: SkaterHistoryEntry): number {
   return result.segmentScore && result.segmentScore > 0
     ? result.segmentScore
     : result.score;
+}
+
+// Function to find top scoring element across all judge details
+function findTopScoringElement(history: SkaterHistoryEntry[]): {
+  elementName: string;
+  executedElement?: string;
+  score: number;
+  competitionName: string;
+  date: string;
+} | null {
+  let topElement = null;
+  let maxScore = -1;
+
+  // Go through all history entries
+  for (const entry of history) {
+    // Skip 6.0 events or entries without judge details
+    if (entry.isSixEvent || !entry.judgeDetails?.elements?.length) continue;
+
+    // Check each element
+    for (const element of entry.judgeDetails.elements) {
+      // Support both property name conventions (value and score)
+      const elementScore =
+        element.value !== undefined ? element.value : element.score;
+      if (elementScore !== undefined && elementScore > maxScore) {
+        maxScore = elementScore;
+        topElement = {
+          // Support both property name conventions (elementCode and name)
+          elementName:
+            element.elementCode ||
+            element.name ||
+            element.plannedElement ||
+            "Unknown Element",
+          executedElement: element.executedElement,
+          score: elementScore,
+          competitionName: entry.competition,
+          date: entry.date,
+        };
+      }
+    }
+  }
+
+  return topElement;
+}
+
+// Function to find element with highest mean GOE
+function findHighestMeanGOEElement(history: SkaterHistoryEntry[]): {
+  elementName: string;
+  executedElement?: string;
+  meanGOE: number;
+  competitionName: string;
+  date: string;
+} | null {
+  let topElement = null;
+  let maxMeanGOE = -100; // GOE can be negative
+
+  // Go through all history entries
+  for (const entry of history) {
+    // Skip 6.0 events or entries without judge details
+    if (entry.isSixEvent || !entry.judgeDetails?.elements?.length) continue;
+
+    // Check each element
+    for (const element of entry.judgeDetails.elements) {
+      // Check if GOE exists and is valid
+      if (element.goe !== undefined && element.goe > maxMeanGOE) {
+        // Support both property name conventions for judges scores
+        const hasJudgesScores =
+          (element.judgesGoe && element.judgesGoe.length > 0) ||
+          (element.judges && element.judges.length > 0);
+
+        if (hasJudgesScores) {
+          maxMeanGOE = element.goe;
+          topElement = {
+            // Support both property name conventions (elementCode and name)
+            elementName:
+              element.elementCode ||
+              element.name ||
+              element.plannedElement ||
+              "Unknown Element",
+            executedElement: element.executedElement,
+            meanGOE: element.goe,
+            competitionName: entry.competition,
+            date: entry.date,
+          };
+        }
+      }
+    }
+  }
+
+  return topElement;
+}
+
+// Helper function to truncate element code with ellipsis if it's too long
+function truncateElementName(name: string, maxLength: number = 7): string {
+  if (!name || name.length <= maxLength) return name;
+  return name.substring(0, maxLength) + "...";
 }
 
 function ExpandableRow({ result, showScoringSystem }: ExpandableRowProps) {
@@ -572,6 +616,30 @@ export default function Skater() {
       isAllSixEvents,
     };
   }, [stats?.history]);
+
+  // Memoize top scoring element calculation
+  const topScoringElement = useMemo(() => {
+    if (!stats?.history) return null;
+    return findTopScoringElement(stats.history);
+  }, [stats?.history]);
+
+  // Memoize highest mean GOE element calculation
+  const highestMeanGOEElement = useMemo(() => {
+    if (!stats?.history) return null;
+    return findHighestMeanGOEElement(stats.history);
+  }, [stats?.history]);
+
+  // Memoize filtered top scoring element calculation
+  const filteredTopScoringElement = useMemo(() => {
+    if (!filteredHistory.length) return null;
+    return findTopScoringElement(filteredHistory);
+  }, [filteredHistory]);
+
+  // Memoize filtered highest mean GOE element calculation
+  const filteredHighestMeanGOEElement = useMemo(() => {
+    if (!filteredHistory.length) return null;
+    return findHighestMeanGOEElement(filteredHistory);
+  }, [filteredHistory]);
 
   const {
     data: aiAnalysis,
@@ -1423,111 +1491,20 @@ export default function Skater() {
           </Heading>
 
           {/* Key Statistics */}
-          <Card
-            p={6}
-            mb={6}
-            bg="white"
-            fontFamily={themeColors.fontFamily}
-            borderWidth="0"
-          >
-            <StatGroup>
-              <Stat>
-                <StatLabel>
-                  Competitions
-                  {filteredHistory.length !== stats.history.length &&
-                    ` (Filtered)`}
-                </StatLabel>
-                <StatNumber>
-                  {new Set(filteredHistory.map((h) => h.competition)).size}
-                </StatNumber>
-                {filteredHistory.length !== stats.history.length && (
-                  <Text fontSize="sm" color="gray.600">
-                    of {stats.totalCompetitions} total
-                  </Text>
-                )}
-              </Stat>
-              <Stat>
-                <StatLabel>
-                  Events
-                  {filteredHistory.length !== stats.history.length &&
-                    ` (Filtered)`}
-                </StatLabel>
-                <StatNumber>{filteredHistory.length}</StatNumber>
-                {filteredHistory.length !== stats.history.length && (
-                  <Text fontSize="sm" color="gray.600">
-                    of {stats.totalEvents} total
-                  </Text>
-                )}
-              </Stat>
-              <Stat>
-                <StatLabel>
-                  Personal Best
-                  {filteredHistory.length !== stats.history.length &&
-                    ` (Filtered)`}
-                </StatLabel>
-                <StatNumber>
-                  {(() => {
-                    // Check if all filtered events are 6.0 events
-                    const isFilteredAllSixEvents =
-                      filteredHistory.length > 0 &&
-                      filteredHistory.every((h) => h.isSixEvent);
-
-                    const scores = filteredHistory
-                      .map(getEffectiveScore)
-                      .filter(
-                        (score) => score != null && !isNaN(score) && score > 0
-                      );
-
-                    const filteredBest =
-                      scores.length > 0
-                        ? isFilteredAllSixEvents
-                          ? Math.min(...scores)
-                          : Math.max(...scores)
-                        : 0;
-
-                    return filteredBest > 0 ? filteredBest.toFixed(2) : "N/A";
-                  })()}
-                </StatNumber>
-                {filteredHistory.length !== stats.history.length &&
-                  personalBest.score && (
-                    <Text fontSize="sm" color="gray.600">
-                      Overall: {Number(personalBest.score).toFixed(2)}
-                    </Text>
-                  )}
-                {(() => {
-                  const isFilteredAllSixEvents =
-                    filteredHistory.length > 0 &&
-                    filteredHistory.every((h) => h.isSixEvent);
-
-                  const scores = filteredHistory
-                    .map(getEffectiveScore)
-                    .filter(
-                      (score) => score != null && !isNaN(score) && score > 0
-                    );
-
-                  const bestScore =
-                    scores.length > 0
-                      ? isFilteredAllSixEvents
-                        ? Math.min(...scores)
-                        : Math.max(...scores)
-                      : null;
-
-                  const bestResult = filteredHistory.find(
-                    (h) => getEffectiveScore(h) === bestScore
-                  );
-                  if (bestResult) {
-                    return (
-                      <Text fontSize="sm" color="gray.600">
-                        {bestResult.eventType} (
-                        {dayjs(bestResult.date).format("MMM D, YYYY")})
-                      </Text>
-                    );
-                  }
-                  return null;
-                })()}
-              </Stat>
-            </StatGroup>
-          </Card>
+          <StatsBar
+            filteredHistory={filteredHistory}
+            fullHistory={stats.history}
+            totalCompetitions={stats.totalCompetitions}
+            totalEvents={stats.totalEvents}
+            personalBest={personalBest}
+            topScoringElement={topScoringElement}
+            highestMeanGOEElement={highestMeanGOEElement}
+            filteredTopScoringElement={filteredTopScoringElement}
+            filteredHighestMeanGOEElement={filteredHighestMeanGOEElement}
+            getEffectiveScore={getEffectiveScore}
+            truncateElementName={truncateElementName}
+            themeColors={themeColors}
+          />
 
           {/* Score History Chart */}
           {filteredHistory.length > 0 && (
