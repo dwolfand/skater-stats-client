@@ -47,7 +47,8 @@ import {
   Center,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@chakra-ui/icons";
-import { FiFilter } from "react-icons/fi";
+import { FiFilter as FiFilterOutline } from "react-icons/fi";
+import { AiFillFilter } from "react-icons/ai";
 import JudgeCard from "../components/JudgeCard";
 import SixJudgeCard from "../components/SixJudgeCard";
 import { useEffect, useState, useMemo } from "react";
@@ -75,6 +76,7 @@ import SkaterMapDisplay from "../components/SkaterMapDisplay";
 import { MapLocationType } from "../types/auth";
 import StatsBar from "../components/StatsBar";
 import { SkaterHistoryEntry, JudgeDetails } from "../types/skater";
+import SkaterFilterPanel from "../components/SkaterFilterPanel";
 
 interface ExpandableRowProps {
   result: SkaterHistoryEntry;
@@ -849,19 +851,6 @@ export default function Skater() {
                     >
                       {tossies?.length || 0}
                     </Button>
-                    <IconButton
-                      aria-label="Filter options"
-                      icon={<FiFilter />}
-                      onClick={onOptionsToggle}
-                      variant="solid"
-                      bg={themeColors.backgroundColor ? "white" : "transparent"}
-                      color="gray.800"
-                      _hover={{
-                        bg: themeColors.backgroundColor
-                          ? "gray.100"
-                          : "gray.50",
-                      }}
-                    />
                     <ShareButton
                       title={`${stats.name} - Skater Stats`}
                       text={`Check out ${stats.name}'s skater profile on Skater Stats!`}
@@ -893,183 +882,6 @@ export default function Skater() {
                 </VStack>
               </HStack>
             </VStack>
-            <Collapse in={isOptionsOpen} animateOpacity>
-              <Box mb={4} mt={4}>
-                <ButtonGroup mb={4} spacing={2}>
-                  <Button
-                    colorScheme="blue"
-                    isLoading={isLoadingAnalysis}
-                    onClick={() => refetchAnalysis()}
-                    leftIcon={
-                      isLoadingAnalysis ? <Spinner size="sm" /> : undefined
-                    }
-                    isDisabled={!!aiAnalysis}
-                  >
-                    {aiAnalysis ? "Analysis Complete" : "Get AI Analysis"}
-                  </Button>
-                  <DownloadButton data={stats} filename={filename} />
-                </ButtonGroup>
-                {isLoadingAnalysis && (
-                  <Alert status="info" mb={4}>
-                    <AlertIcon />
-                    <Box>
-                      <AlertTitle color="initial">Analyzing Data</AlertTitle>
-                      <AlertDescription color="initial">
-                        {LOADING_MESSAGES[loadingMessageIndex]}
-                      </AlertDescription>
-                    </Box>
-                  </Alert>
-                )}
-                {aiAnalysis && (
-                  <Alert
-                    status="info"
-                    variant="left-accent"
-                    flexDirection="column"
-                    alignItems="flex-start"
-                    mb={4}
-                  >
-                    <AlertTitle mb={2} color="initial">
-                      AI Analysis
-                    </AlertTitle>
-                    <AlertDescription width="100%" color="initial">
-                      <Box className="markdown-content" color="initial">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {aiAnalysis.analysis}
-                        </ReactMarkdown>
-                      </Box>
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {isAnalysisError && (
-                  <Alert status="error" mb={4}>
-                    <AlertIcon />
-                    <AlertDescription>
-                      Failed to get AI analysis. Please try again.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Filter Controls */}
-                <Box>
-                  <Flex gap={4} direction={{ base: "column", md: "row" }}>
-                    <Box flex={1}>
-                      <Select
-                        placeholder="Event Types"
-                        value=""
-                        variant="filled"
-                        focusBorderColor="blue.500"
-                        bg="white"
-                        color="gray.800"
-                        _placeholder={{ color: "gray.500" }}
-                        boxShadow="md"
-                        _hover={{ bg: "white" }}
-                        _focus={{ bg: "white" }}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === "") {
-                            setSelectedEventTypes([]);
-                          } else if (!selectedEventTypes.includes(value)) {
-                            setSelectedEventTypes([
-                              ...selectedEventTypes,
-                              value,
-                            ]);
-                          }
-                        }}
-                        mb={2}
-                      >
-                        {uniqueValues.eventTypes.map((type) => (
-                          <option key={type} value={type}>
-                            {type}
-                          </option>
-                        ))}
-                      </Select>
-                      <Flex gap={2} flexWrap="wrap">
-                        {selectedEventTypes.map((type) => (
-                          <Badge
-                            key={type}
-                            colorScheme="brand"
-                            display="flex"
-                            alignItems="center"
-                            gap={1}
-                            p={1}
-                          >
-                            {type}
-                            <IconButton
-                              aria-label="Remove filter"
-                              icon={<CloseIcon boxSize={2} />}
-                              size="xs"
-                              variant="ghost"
-                              onClick={() =>
-                                setSelectedEventTypes(
-                                  selectedEventTypes.filter((t) => t !== type)
-                                )
-                              }
-                            />
-                          </Badge>
-                        ))}
-                      </Flex>
-                    </Box>
-                    <Box flex={1}>
-                      <Select
-                        placeholder="Event Levels"
-                        value=""
-                        variant="filled"
-                        focusBorderColor="blue.500"
-                        bg="white"
-                        color="gray.800"
-                        _placeholder={{ color: "gray.500" }}
-                        boxShadow="md"
-                        _hover={{ bg: "white" }}
-                        _focus={{ bg: "white" }}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === "") {
-                            setSelectedEventLevels([]);
-                          } else if (!selectedEventLevels.includes(value)) {
-                            setSelectedEventLevels([
-                              ...selectedEventLevels,
-                              value,
-                            ]);
-                          }
-                        }}
-                        mb={2}
-                      >
-                        {uniqueValues.eventLevels.map((level) => (
-                          <option key={level} value={level}>
-                            {level}
-                          </option>
-                        ))}
-                      </Select>
-                      <Flex gap={2} flexWrap="wrap">
-                        {selectedEventLevels.map((level) => (
-                          <Badge
-                            key={level}
-                            colorScheme="brand"
-                            display="flex"
-                            alignItems="center"
-                            gap={1}
-                            p={1}
-                          >
-                            {level}
-                            <IconButton
-                              aria-label="Remove filter"
-                              icon={<CloseIcon boxSize={2} />}
-                              size="xs"
-                              variant="ghost"
-                              onClick={() =>
-                                setSelectedEventLevels(
-                                  selectedEventLevels.filter((l) => l !== level)
-                                )
-                              }
-                            />
-                          </Badge>
-                        ))}
-                      </Flex>
-                    </Box>
-                  </Flex>
-                </Box>
-              </Box>
-            </Collapse>
           </Box>
 
           {/* Customization */}
@@ -1487,30 +1299,65 @@ export default function Skater() {
             })()}
 
           {/* Score History Header */}
-          <Heading
-            size="md"
-            mb={4}
-            color={themeColors.color}
-            fontFamily={themeColors.fontFamily}
-          >
-            Score History
-          </Heading>
+          <Flex alignItems="center" mb={0}>
+            <Heading
+              size="md"
+              color={themeColors.color}
+              fontFamily={themeColors.fontFamily}
+              mr={2}
+            >
+              Score History
+            </Heading>
+            <IconButton
+              aria-label="Filter options"
+              icon={isOptionsOpen ? <AiFillFilter /> : <FiFilterOutline />}
+              onClick={onOptionsToggle}
+              variant="solid"
+              bg={themeColors.backgroundColor ? "white" : "transparent"}
+              color="gray.800"
+              _hover={{
+                bg: themeColors.backgroundColor ? "gray.100" : "gray.50",
+              }}
+              size="sm"
+            />
+          </Flex>
+
+          {/* Filter Options */}
+          <Collapse in={isOptionsOpen} animateOpacity>
+            <SkaterFilterPanel
+              isLoadingAnalysis={isLoadingAnalysis}
+              loadingMessageIndex={loadingMessageIndex}
+              loadingMessages={LOADING_MESSAGES}
+              aiAnalysis={aiAnalysis}
+              isAnalysisError={isAnalysisError}
+              refetchAnalysis={refetchAnalysis}
+              uniqueValues={uniqueValues}
+              selectedEventTypes={selectedEventTypes}
+              setSelectedEventTypes={setSelectedEventTypes}
+              selectedEventLevels={selectedEventLevels}
+              setSelectedEventLevels={setSelectedEventLevels}
+              stats={stats}
+              filename={filename}
+            />
+          </Collapse>
 
           {/* Key Statistics */}
-          <StatsBar
-            filteredHistory={filteredHistory}
-            fullHistory={stats.history}
-            totalCompetitions={stats.totalCompetitions}
-            totalEvents={stats.totalEvents}
-            personalBest={personalBest}
-            topScoringElement={topScoringElement}
-            highestMeanGOEElement={highestMeanGOEElement}
-            filteredTopScoringElement={filteredTopScoringElement}
-            filteredHighestMeanGOEElement={filteredHighestMeanGOEElement}
-            getEffectiveScore={getEffectiveScore}
-            truncateElementName={truncateElementName}
-            themeColors={themeColors}
-          />
+          <Box mt={0}>
+            <StatsBar
+              filteredHistory={filteredHistory}
+              fullHistory={stats.history}
+              totalCompetitions={stats.totalCompetitions}
+              totalEvents={stats.totalEvents}
+              personalBest={personalBest}
+              topScoringElement={topScoringElement}
+              highestMeanGOEElement={highestMeanGOEElement}
+              filteredTopScoringElement={filteredTopScoringElement}
+              filteredHighestMeanGOEElement={filteredHighestMeanGOEElement}
+              getEffectiveScore={getEffectiveScore}
+              truncateElementName={truncateElementName}
+              themeColors={themeColors}
+            />
+          </Box>
 
           {/* Score History Chart */}
           {filteredHistory.length > 0 && (
